@@ -7,7 +7,7 @@ import { TestingModule } from './modules/testing/testing.module'; // ← Пра�
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost/nest'),
+    MongooseModule.forRoot('mongodb://localhost/nest-api'),
     BloggersPlatformModule,
     TestingModule,
   ],
