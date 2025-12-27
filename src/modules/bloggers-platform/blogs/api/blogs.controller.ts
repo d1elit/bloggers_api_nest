@@ -8,12 +8,14 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { BlogsService } from '../aplication/blogs.service';
 
 import { CreteBlogInputDto } from './input-dto/crete-blog.input-dto';
 import { BlogsQueryRepository } from '../infrastructure/query/blogs.query-repository';
 import { UpdateBlogInputDto } from './input-dto/update-blog.input-dto';
+import { GetBlogsQueryParams } from './input-dto/get-blogs-query-params.input-dto';
 
 @Controller('blogs')
 export class BlogsController {
@@ -42,5 +44,10 @@ export class BlogsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(@Param('id') id: string) {
     return await this.blogsService.delete(id);
+  }
+  @Get()
+  async getBlogList(@Query() query: GetBlogsQueryParams) {
+    console.log('query:', query);
+    return this.blogsQueryRepository.getAll(query);
   }
 }
