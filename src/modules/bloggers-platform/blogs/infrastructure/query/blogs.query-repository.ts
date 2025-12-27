@@ -10,9 +10,13 @@ export class BlogsQueryRepository {
     private blogModel: BlogModelType,
   ) {}
   async getByIdOrNotFoundFail(id: string) {
-    const blog = await this.blogModel.findOne({ _id: id });
+    const blog = await this.blogModel.findOne({
+      _id: id,
+      deletedAt: null,
+    });
+
     if (!blog) {
-      throw new NotFoundException('Invalid blog');
+      throw new NotFoundException('blog not found');
     }
 
     return BlogViewDto.mapToView(blog);

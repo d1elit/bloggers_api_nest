@@ -19,6 +19,9 @@ export class BlogEntity {
   @Prop({ required: true })
   isMembership!: boolean;
 
+  @Prop({ type: Date, nullable: true })
+  deletedAt: Date | null;
+
   static createInstance(
     this: BlogModelType,
     dto: CreateBlogDomainDto,
@@ -29,6 +32,7 @@ export class BlogEntity {
     blog.websiteUrl = dto.websiteUrl;
     blog.createdAt = new Date().toISOString();
     blog.isMembership = false;
+    blog.deletedAt = null;
     return blog as BlogDocument;
   }
 
@@ -36,6 +40,12 @@ export class BlogEntity {
     this.name = dto.name;
     this.description = dto.description;
     this.websiteUrl = dto.websiteUrl;
+  }
+  makeDeleted() {
+    if (this.deletedAt !== null) {
+      throw new Error('Entity already deleted');
+    }
+    this.deletedAt = new Date();
   }
 }
 
