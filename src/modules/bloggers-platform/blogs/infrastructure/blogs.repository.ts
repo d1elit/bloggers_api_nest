@@ -1,15 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import {
-  BlogDocument,
-  BlogEntity,
-  type BlogModelType,
-} from '../domain/blog.entity';
+import { BlogDocument, Blog, type BlogModelType } from '../domain/blog-entity';
 import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class BlogsRepository {
   constructor(
-    @InjectModel(BlogEntity.name)
+    @InjectModel(Blog.name)
     private blogModel: BlogModelType,
   ) {}
   async save(blog: BlogDocument) {

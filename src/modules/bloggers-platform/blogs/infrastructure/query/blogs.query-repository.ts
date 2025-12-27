@@ -1,5 +1,5 @@
 import { InjectModel } from '@nestjs/mongoose';
-import { BlogEntity, type BlogModelType } from '../../domain/blog.entity';
+import { Blog, type BlogModelType } from '../../domain/blog-entity';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BlogViewDto } from '../../api/view-dto/blogs.view-dto';
 import { GetBlogsQueryParams } from '../../api/input-dto/get-blogs-query-params.input-dto';
@@ -7,7 +7,7 @@ import { PaginatedViewDto } from '../../../../../core/dto/base.paginated.view-dt
 @Injectable()
 export class BlogsQueryRepository {
   constructor(
-    @InjectModel(BlogEntity.name)
+    @InjectModel(Blog.name)
     private blogModel: BlogModelType,
   ) {}
   async getByIdOrNotFoundFail(id: string) {

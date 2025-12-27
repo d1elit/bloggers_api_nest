@@ -3,7 +3,7 @@ import { HydratedDocument, Model } from 'mongoose';
 import { CreateBlogDomainDto } from './dto/create-blog.domain.dto';
 
 @Schema({ collection: 'blogs' })
-export class BlogEntity {
+export class Blog {
   @Prop({ required: true })
   name!: string;
 
@@ -49,8 +49,8 @@ export class BlogEntity {
   }
 }
 
-export const BlogSchema = SchemaFactory.createForClass(BlogEntity);
-BlogSchema.loadClass(BlogEntity);
+export const BlogSchema = SchemaFactory.createForClass(Blog);
+BlogSchema.loadClass(Blog);
 
-export type BlogDocument = HydratedDocument<BlogEntity>;
-export type BlogModelType = Model<BlogDocument> & typeof BlogEntity;
+export type BlogDocument = HydratedDocument<Blog>;
+export type BlogModelType = Model<BlogDocument> & typeof Blog;
