@@ -4,7 +4,8 @@ import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { BloggersPlatformModule } from './modules/bloggers-platform/bloggers-platform.module';
 import { TestingModule } from './modules/testing/testing.module';
-import { CoreModule } from './core/core.module'; // ← Правильный путь
+import { CoreModule } from './core/core.module';
+import { UserAccountsModule } from './modules/user-accounts/user-accounts.module'; // ← Правильный путь
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { CoreModule } from './core/core.module'; // ← Правильный п�
     BloggersPlatformModule,
     TestingModule,
     CoreModule,
+    UserAccountsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
