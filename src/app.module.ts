@@ -5,7 +5,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { BloggersPlatformModule } from './modules/bloggers-platform/bloggers-platform.module';
 import { TestingModule } from './modules/testing/testing.module';
 import { CoreModule } from './core/core.module';
-import { UserAccountsModule } from './modules/user-accounts/user-accounts.module'; // ← Правильный путь
+import { UserAccountsModule } from './modules/user-accounts/user-accounts.module';
+import { APP_FILTER } from '@nestjs/core';
+import { AllHttpExceptionsFilter } from './core/exceptions/filters/base-exception.filter';
+import { DomainHttpExceptionsFilter } from './core/exceptions/filters/domain-exception.filter'; // ← Правильный путь
 
 @Module({
   imports: [
@@ -16,6 +19,16 @@ import { UserAccountsModule } from './modules/user-accounts/user-accounts.module
     UserAccountsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: AllHttpExceptionsFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: DomainHttpExceptionsFilter,
+    },
+  ],
 })
 export class AppModule {}

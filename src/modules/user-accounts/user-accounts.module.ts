@@ -11,6 +11,7 @@ import { AuthQueryRepository } from './infrastructure/query/auth.query-repositor
 import { SecurityDevicesController } from './api/security-devices.controller';
 import { UsersExternalQueryRepository } from './infrastructure/external-query/users.external-query-repository';
 import { UsersExternalService } from './application/users.external-service';
+import { CryptoService } from './application/crypto.service';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { UsersExternalService } from './application/users.external-service';
     AuthQueryRepository,
     UsersExternalQueryRepository,
     UsersExternalService,
+    CryptoService,
   ],
   exports: [UsersExternalQueryRepository, UsersExternalService],
 })
