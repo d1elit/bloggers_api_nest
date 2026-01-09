@@ -7,11 +7,13 @@ import {
   Post,
   Res,
   Headers,
+  Get,
 } from '@nestjs/common';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { AuthService } from '../application/auth.service';
 import { type LoginInput } from './input-dto/login.input.dto';
 import type { Response } from 'express';
+import { EmailResendingInputDto } from './input-dto/email-resending.input-dto';
 
 @Controller('auth')
 export class AuthController {
@@ -53,4 +55,16 @@ export class AuthController {
   async registrationConfirmation(@Body() body: { code: string }) {
     await this.authService.registrationConfirmation(body.code);
   }
+
+  @Post('/registration-email-resending')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async emailResending(@Body() body: EmailResendingInputDto) {
+    await this.authService.emailResending(body.email);
+  }
+
+  // @Get('/me')
+  // @HttpCode(HttpStatus.OK)
+  // async getAuthMe() {
+  //
+  // }
 }
