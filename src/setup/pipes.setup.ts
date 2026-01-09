@@ -51,7 +51,7 @@ export function pipesSetup(app: INestApplication) {
 
       whitelist: true,
       //Выдавать первую ошибку для каждого поля
-      stopAtFirstError: true,
+      // stopAtFirstError: true,
       exceptionFactory: (errors) => {
         const formattedErrors = errorFormatter(errors);
 

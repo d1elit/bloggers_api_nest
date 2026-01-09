@@ -46,20 +46,22 @@ export class UsersController {
 
   @Post()
   async createUser(@Body() body: CreateUserInputDto): Promise<UserViewDto> {
+    console.log('Received body:', body); // ← Добавьте это
+    console.log('Body validation:', body instanceof CreateUserInputDto);
     const userId = await this.usersService.createUser(body);
 
     return this.usersQueryRepository.getByIdOrNotFoundFail(userId);
   }
 
-  @Put(':id')
-  async updateUser(
-    @Param('id') id: string,
-    @Body() body: UpdateUserInputDto,
-  ): Promise<UserViewDto> {
-    const userId = await this.usersService.updateUser(id, body);
-
-    return this.usersQueryRepository.getByIdOrNotFoundFail(userId);
-  }
+  // @Put(':id')
+  // async updateUser(
+  //   @Param('id') id: string,
+  //   @Body() body: UpdateUserInputDto,
+  // ): Promise<UserViewDto> {
+  //   const userId = await this.usersService.updateUser(id, body);
+  //
+  //   return this.usersQueryRepository.getByIdOrNotFoundFail(userId);
+  // }
 
   @ApiParam({ name: 'id' }) //для сваггера
   @Delete(':id')
