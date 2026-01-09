@@ -16,7 +16,6 @@ import { UsersService } from './users.service';
 import { CreateUserInputDto } from '../api/input-dto/users.input-dto';
 import { NodemailerService } from './nodemailer.service';
 import { emailExamples } from './email-examples';
-import { UsersQueryRepository } from '../infrastructure/query/users.query-repository';
 import { refreshTokenPayload } from '../api/input-dto/refresh-token-payload';
 
 @Injectable()
@@ -34,7 +33,7 @@ export class AuthService {
     private nodemailerService: NodemailerService,
   ) {}
 
-  async auth({ loginDto, ip, deviceName }: authInput) {
+  async login({ loginDto, ip, deviceName }: authInput) {
     const user = await this.checkUserCredentials(loginDto);
     if (!user) {
       throw new DomainException({

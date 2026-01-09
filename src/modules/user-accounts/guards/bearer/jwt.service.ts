@@ -13,7 +13,7 @@ export class JwtService {
       { userId },
       this.configService.get('ACCESS_TOKEN_SECRET')!,
       {
-        expiresIn: `${this.configService.get('ACCESS_TOKEN_EXPIRE_IN')!}s`,
+        expiresIn: `${this.configService.get('ACCESS_TOKEN_EXPIRE_IN')!}`,
       },
     );
   }
@@ -23,7 +23,7 @@ export class JwtService {
       { deviceId, userId },
       this.configService.get('REFRESH_TOKEN_SECRET')!,
       {
-        expiresIn: `${this.configService.get('REFRESH_TOKEN_EXPIRE_IN')!}s`,
+        expiresIn: `${this.configService.get('REFRESH_TOKEN_EXPIRE_IN')!}`,
       },
     );
   }
