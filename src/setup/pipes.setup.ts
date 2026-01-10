@@ -3,18 +3,21 @@ import {
   ValidationError,
   ValidationPipe,
 } from '@nestjs/common';
-import { DomainExceptionCode } from '../core/exceptions/domain-exception-codes';
 import {
   DomainException,
   Extension,
 } from '../core/exceptions/domain-exceptions';
+import { ObjectIdValidationTransformationPipe } from '../core/pipes/object-id-validation-transformation-pipe.service';
+import { DomainExceptionCode } from '../core/exceptions/domain-exception-codes';
 
+//функция использует рекурсию для обхода объекта children при вложенных полях при валидации
+//поставьте логи и разберитесь как она работает
+//TODO: tests
 export const errorFormatter = (
   errors: ValidationError[],
   errorMessage?: any,
 ): Extension[] => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const errorsForResponse: any = errorMessage || [];
+  const errorsForResponse = errorMessage || [];
 
   for (const error of errors) {
     if (!error.constraints && error.children?.length) {
@@ -23,7 +26,6 @@ export const errorFormatter = (
       const constrainKeys = Object.keys(error.constraints);
 
       for (const key of constrainKeys) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         errorsForResponse.push({
           message: error.constraints[key]
             ? `${error.constraints[key]}; Received value: ${error?.value}`
@@ -34,25 +36,27 @@ export const errorFormatter = (
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return errorsForResponse;
 };
 
 export function pipesSetup(app: INestApplication) {
   //Глобальный пайп для валидации и трансформации входящих данных.
-  //На следующем занятии рассмотрим подробнее
-
   app.useGlobalPipes(
+    new ObjectIdValidationTransformationPipe(),
     new ValidationPipe({
       //class-transformer создает экземпляр dto
       //соответственно применятся значения по-умолчанию
       //и методы классов dto
       transform: true,
 
-      whitelist: true,
+      // whitelist: true,
       //Выдавать первую ошибку для каждого поля
-      // stopAtFirstError: true,
+      stopAtFirstError: true,
+      //Для преобразования ошибок класс валидатора в необходимый вид
       exceptionFactory: (errors) => {
+        console.log('==========================================');
+        console.log('🔍 VALIDATION ERROR DETAILS:');
+        console.log('Raw errors:', JSON.stringify(errors, null, 2));
         const formattedErrors = errorFormatter(errors);
 
         throw new DomainException({

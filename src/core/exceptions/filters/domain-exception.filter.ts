@@ -1,5 +1,3 @@
-//https://docs.nestjs.com/exception-filters#exception-filters-1
-//Ошибки класса DomainException (instanceof DomainException)
 import {
   ArgumentsHost,
   Catch,
@@ -7,24 +5,27 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { DomainException } from '../domain-exceptions';
+import { Request, Response } from 'express';
 import { DomainExceptionCode } from '../domain-exception-codes';
 import { ErrorResponseBody } from './error-response-body.type';
-import { Response, Request } from 'express';
+
+//https://docs.nestjs.com/exception-filters#exception-filters-1
+//Ошибки класса DomainException (instanceof DomainException)
 @Catch(DomainException)
 export class DomainHttpExceptionsFilter implements ExceptionFilter {
   catch(exception: DomainException, host: ArgumentsHost): void {
+    console.log('DOMAIN EXCEPTION WORK');
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
     const status = this.mapToHttpStatus(exception.code);
     const responseBody = this.buildResponseBody(exception, request.url);
-    console.log(status);
+
     response.status(status).json(responseBody);
   }
 
   private mapToHttpStatus(code: DomainExceptionCode): number {
-    // console.log(code);
     switch (code) {
       case DomainExceptionCode.BadRequest:
       case DomainExceptionCode.ValidationError:
@@ -49,7 +50,6 @@ export class DomainHttpExceptionsFilter implements ExceptionFilter {
     exception: DomainException,
     requestUrl: string,
   ): ErrorResponseBody {
-    // console.log(DomainException);
     return {
       timestamp: new Date().toISOString(),
       path: requestUrl,

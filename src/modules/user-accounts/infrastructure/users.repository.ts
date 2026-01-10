@@ -25,7 +25,15 @@ export class UsersRepository {
 
     if (!user) {
       //TODO: replace with domain exception
-      throw new NotFoundException('user not found');
+      throw new DomainException({
+        code: DomainExceptionCode.NotFound,
+        extensions: [
+          {
+            field: 'user',
+            message: 'User not found',
+          },
+        ],
+      });
     }
 
     return user;
@@ -50,7 +58,12 @@ export class UsersRepository {
     if (!resultUser) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
-        message: 'User not found',
+        extensions: [
+          {
+            field: 'user',
+            message: 'User not found',
+          },
+        ],
       });
     }
     return resultUser;
@@ -63,7 +76,12 @@ export class UsersRepository {
     if (!resultUser) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
-        message: 'User not found',
+        extensions: [
+          {
+            field: 'user',
+            message: 'User not found',
+          },
+        ],
       });
     }
     return resultUser;

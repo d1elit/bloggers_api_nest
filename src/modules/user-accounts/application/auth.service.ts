@@ -2,8 +2,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
 import { User, UserDocument, type UserModelType } from '../domain/user.entity';
 import { UsersRepository } from '../infrastructure/users.repository';
-import { authInput } from '../api/input-dto/auth.input-dto';
-import { LoginInput } from '../api/input-dto/login.input.dto';
+import { authInput } from '../api/input-dto/auth/auth.input-dto';
+import { LoginInput } from '../api/input-dto/auth/login.input.dto';
 import { CryptoService } from './crypto.service';
 import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
@@ -13,10 +13,10 @@ import { jwtDecode } from 'jwt-decode';
 import { Session, type SessionModelType } from '../domain/session.entity';
 import { SessionsRepository } from '../infrastructure/sessions.repository';
 import { UsersService } from './users.service';
-import { CreateUserInputDto } from '../api/input-dto/users.input-dto';
+import { CreateUserInputDto } from '../api/input-dto/users/users.input-dto';
 import { NodemailerService } from './nodemailer.service';
 import { emailExamples } from './email-examples';
-import { refreshTokenPayload } from '../api/input-dto/refresh-token-payload';
+import { refreshTokenPayload } from '../api/input-dto/auth/refresh-token-payload';
 
 @Injectable()
 export class AuthService {
@@ -37,8 +37,13 @@ export class AuthService {
     const user = await this.checkUserCredentials(loginDto);
     if (!user) {
       throw new DomainException({
-        code: DomainExceptionCode.Forbidden,
-        message: 'Wrong login or password',
+        code: DomainExceptionCode.BadRequest,
+        extensions: [
+          {
+            field: 'login',
+            message: 'Wrong login or password',
+          },
+        ],
       });
     }
 
@@ -76,7 +81,12 @@ export class AuthService {
     if (!user || !isPasswordVerified) {
       throw new DomainException({
         code: DomainExceptionCode.Forbidden,
-        message: 'Wrong login or password',
+        extensions: [
+          {
+            field: 'login',
+            message: 'Wrong login or password',
+          },
+        ],
       });
     }
     return user;
@@ -87,7 +97,12 @@ export class AuthService {
     if (!user) {
       throw new DomainException({
         code: DomainExceptionCode.Forbidden,
-        message: 'Wrong login or password',
+        extensions: [
+          {
+            field: 'login',
+            message: 'Wrong login or password',
+          },
+        ],
       });
     }
     return user;
@@ -95,6 +110,7 @@ export class AuthService {
 
   async register(userDto: CreateUserInputDto) {
     const confirmationCode = crypto.randomUUID();
+    console.log(userDto);
     await this.usersService.createUser(userDto, confirmationCode);
     this.nodemailerService
       .sendEmail(
@@ -111,7 +127,12 @@ export class AuthService {
     if (!validation.isValid) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
-        message: 'Wrong code',
+        extensions: [
+          {
+            field: 'code',
+            message: 'Wrong code',
+          },
+        ],
       });
     }
     user.confirmEmail();
@@ -123,13 +144,23 @@ export class AuthService {
     if (!user)
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
-        message: 'Email not exist',
+        extensions: [
+          {
+            field: 'email',
+            message: 'Email not exist',
+          },
+        ],
       });
 
     if (user.isEmailConfirmed())
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
-        message: 'Email already confirmed',
+        extensions: [
+          {
+            field: 'email',
+            message: 'Email already confirmed',
+          },
+        ],
       });
 
     const confirmationCode = crypto.randomUUID();
@@ -171,7 +202,12 @@ export class AuthService {
     if (!validation.isValid) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
-        message: 'Wrong code',
+        extensions: [
+          {
+            field: 'code',
+            message: 'Wrong code',
+          },
+        ],
       });
     }
     let newPassword = await this.cryptoService.createPasswordHash(password);
@@ -202,7 +238,12 @@ export class AuthService {
     if (!session)
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
-        message: 'Not Found',
+        extensions: [
+          {
+            field: 'session',
+            message: 'Not Found',
+          },
+        ],
       });
   }
 

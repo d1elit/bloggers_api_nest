@@ -1,17 +1,19 @@
-//https://docs.nestjs.com/exception-filters#exception-filters-1
-//Все ошибки
 import {
   ArgumentsHost,
   Catch,
   ExceptionFilter,
   HttpStatus,
 } from '@nestjs/common';
-import { DomainExceptionCode } from '../domain-exception-codes';
+import { Request, Response } from 'express';
 import { ErrorResponseBody } from './error-response-body.type';
-import { Response, Request } from 'express';
+import { DomainExceptionCode } from '../domain-exception-codes';
+
+//https://docs.nestjs.com/exception-filters#exception-filters-1
+//Все ошибки
 @Catch()
 export class AllHttpExceptionsFilter implements ExceptionFilter {
   catch(exception: any, host: ArgumentsHost): void {
+    console.log('ALL EXCEPTION WORK');
     //ctx нужен, чтобы получить request и response (express). Это из документации, делаем по аналогии
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -22,7 +24,6 @@ export class AllHttpExceptionsFilter implements ExceptionFilter {
     const status = HttpStatus.INTERNAL_SERVER_ERROR;
     const responseBody = this.buildResponseBody(request.url, message);
 
-    //как и в express отправляем ответ клиенту
     response.status(status).json(responseBody);
   }
 

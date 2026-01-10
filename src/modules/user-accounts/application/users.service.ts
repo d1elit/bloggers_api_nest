@@ -21,7 +21,7 @@ export class UsersService {
     confirmationCode?: string,
   ): Promise<string> {
     await this.ensureIsUserUnique(dto.login, dto.email);
-
+    console.log(dto);
     const passwordHash = await this.cryptoService.createPasswordHash(
       dto.password,
     );
@@ -51,12 +51,24 @@ export class UsersService {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
         message: 'LoginInput or email already exist',
+        extensions: [
+          {
+            field: 'Email',
+            message: 'Email already exists',
+          },
+        ],
       });
     }
     if (resLogin) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
         message: 'LoginInput or email already exist',
+        extensions: [
+          {
+            field: 'login',
+            message: 'Login already exists',
+          },
+        ],
       });
     }
   }

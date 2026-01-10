@@ -13,12 +13,15 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { AuthService } from '../application/auth.service';
-import { type LoginInput } from './input-dto/login.input.dto';
+import { type LoginInput } from './input-dto/auth/login.input.dto';
 import express from 'express';
-import { EmailResendingInputDto } from './input-dto/email-resending.input-dto';
+import { EmailResendingInputDto } from './input-dto/auth/email-resending.input-dto';
 import { RefreshTokenGuard } from '../guards/bearer/refresh-token.guard';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { UsersQueryRepository } from '../infrastructure/query/users.query-repository';
+import { NewPasswordInputDto } from './input-dto/auth/new-password.input-dto';
+import { PasswordRecoveryInputDto } from './input-dto/auth/password-recovery.input-dto';
+import { CreateUserInputDto } from './input-dto/users/users.input-dto';
 
 @Controller('auth')
 export class AuthController {
@@ -29,7 +32,8 @@ export class AuthController {
 
   @Post('/registration')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async register(@Body() dto: CreateUserDto) {
+  async register(@Body() dto: CreateUserInputDto) {
+    console.log(dto);
     return await this.authService.register(dto);
   }
 
@@ -83,4 +87,39 @@ export class AuthController {
       userId: me.id,
     };
   }
+
+  @Post('password-recovery')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async passwordRecovery(@Body() body: PasswordRecoveryInputDto) {
+    return await this.authService.passwordRecovery(body.email);
+  }
+
+  @Post('new-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async newPassword(@Body() body: NewPasswordInputDto) {
+    const code = body.recoveryCode;
+    const password = body.newPassword;
+    return await this.authService.passwordRecoveryConfirmation({
+      code,
+      password,
+    });
+  }
+  // @UseGuards(RefreshTokenGuard)
+  // @Post('/refresh-token')
+  // @HttpCode(HttpStatus.OK)
+  // async refreshToken(@Req() req: Request, @Res() res: Response) {
+  //   const { userId, deviceId } = req.user!;
+  //   const token = req.cookies.refreshToken;
+  //   const [accessToken, refreshToken] = await this.authService.refreshToken(
+  //     token,
+  //     userId,
+  //     deviceId as string,
+  //   );
+  //   res.cookie('refreshToken', refreshToken, {
+  //     httpOnly: true,
+  //     secure: true,
+  //     sameSite: 'strict', // РЕКОМЕНДУЕТСЯ
+  //   });
+  //   return accessToken;
+  // }
 }

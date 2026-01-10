@@ -25,10 +25,10 @@ import { CoreConfig } from './core/core.config'; // ← Правильный п�
   controllers: [AppController],
   providers: [
     AppService,
-    // {
-    //   provide: APP_FILTER,
-    //   useClass: AllHttpExceptionsFilter,
-    // },
+    {
+      provide: APP_FILTER,
+      useClass: AllHttpExceptionsFilter,
+    },
     {
       provide: APP_FILTER,
       useClass: DomainHttpExceptionsFilter,
