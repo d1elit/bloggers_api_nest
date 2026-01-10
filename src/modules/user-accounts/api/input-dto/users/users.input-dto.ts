@@ -7,7 +7,6 @@ export class CreateUserInputDto {
   login: string;
   @IsStringWithTrim(6, 20)
   password: string;
-  @IsStringWithTrim(5, 25)
   @IsEmail()
   email: string;
 }

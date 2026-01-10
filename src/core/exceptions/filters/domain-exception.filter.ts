@@ -20,7 +20,7 @@ export class DomainHttpExceptionsFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
 
     const status = this.mapToHttpStatus(exception.code);
-    const responseBody = this.buildResponseBody(exception, request.url);
+    const responseBody = this.buildResponseBody(exception);
 
     response.status(status).json(responseBody);
   }
@@ -46,16 +46,35 @@ export class DomainHttpExceptionsFilter implements ExceptionFilter {
     }
   }
 
-  private buildResponseBody(
-    exception: DomainException,
-    requestUrl: string,
-  ): ErrorResponseBody {
+  // private buildResponseBody(
+  //   exception: DomainException,
+  //   requestUrl: string,
+  // ): ErrorResponseBody {
+  //   return {
+  //     timestamp: new Date().toISOString(),
+  //     path: requestUrl,
+  //     message: exception.message,
+  //     code: exception.code,
+  //     extensions: exception.extensions,
+  //   };
+  // }
+  private buildResponseBody(exception: DomainException): ErrorResponseBody {
+    // Если есть extensions (поля с ошибками), возвращаем в формате errorsMessages
+    console.log(exception);
+    if (exception.extensions && exception.extensions.length > 0) {
+      return {
+        errorsMessages: exception.extensions,
+      };
+    }
+
+    // Если нет конкретных полей, возвращаем общую ошибку
     return {
-      timestamp: new Date().toISOString(),
-      path: requestUrl,
-      message: exception.message,
-      code: exception.code,
-      extensions: exception.extensions,
+      errorsMessages: [
+        {
+          message: exception.message,
+          field: 'general', // или можно оставить пустым
+        },
+      ],
     };
   }
 }

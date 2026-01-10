@@ -5,7 +5,10 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { ErrorResponseBody } from './error-response-body.type';
+import {
+  DetailedErrorResponseBody,
+  ErrorResponseBody,
+} from './error-response-body.type';
 import { DomainExceptionCode } from '../domain-exception-codes';
 
 //https://docs.nestjs.com/exception-filters#exception-filters-1
@@ -30,14 +33,14 @@ export class AllHttpExceptionsFilter implements ExceptionFilter {
   private buildResponseBody(
     requestUrl: string,
     message: string,
-  ): ErrorResponseBody {
+  ): DetailedErrorResponseBody {
     //TODO: Replace with getter from configService. will be in the following lessons
     const isProduction = process.env.NODE_ENV === 'production';
 
     if (isProduction) {
       return {
         timestamp: new Date().toISOString(),
-        path: null,
+        path: 'null',
         message: 'Some error occurred',
         extensions: [],
         code: DomainExceptionCode.InternalServerError,

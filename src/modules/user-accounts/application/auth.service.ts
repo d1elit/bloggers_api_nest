@@ -37,7 +37,7 @@ export class AuthService {
     const user = await this.checkUserCredentials(loginDto);
     if (!user) {
       throw new DomainException({
-        code: DomainExceptionCode.BadRequest,
+        code: DomainExceptionCode.Unauthorized,
         extensions: [
           {
             field: 'login',
@@ -80,7 +80,7 @@ export class AuthService {
 
     if (!user || !isPasswordVerified) {
       throw new DomainException({
-        code: DomainExceptionCode.Forbidden,
+        code: DomainExceptionCode.Unauthorized,
         extensions: [
           {
             field: 'login',
@@ -96,7 +96,7 @@ export class AuthService {
     const user = await this.usersRepository.findByLoginOrEmail(login);
     if (!user) {
       throw new DomainException({
-        code: DomainExceptionCode.Forbidden,
+        code: DomainExceptionCode.Unauthorized,
         extensions: [
           {
             field: 'login',

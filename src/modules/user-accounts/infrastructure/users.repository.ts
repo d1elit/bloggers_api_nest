@@ -57,11 +57,11 @@ export class UsersRepository {
     });
     if (!resultUser) {
       throw new DomainException({
-        code: DomainExceptionCode.NotFound,
+        code: DomainExceptionCode.BadRequest,
         extensions: [
           {
-            field: 'user',
-            message: 'User not found',
+            field: 'code',
+            message: 'Code not exist',
           },
         ],
       });

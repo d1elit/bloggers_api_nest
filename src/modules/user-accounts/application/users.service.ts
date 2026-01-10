@@ -53,7 +53,7 @@ export class UsersService {
         message: 'LoginInput or email already exist',
         extensions: [
           {
-            field: 'Email',
+            field: 'email',
             message: 'Email already exists',
           },
         ],
