@@ -12,7 +12,7 @@ import { SecurityDevicesController } from './api/security-devices.controller';
 import { UsersExternalQueryRepository } from './infrastructure/external-query/users.external-query-repository';
 import { UsersExternalService } from './application/users.external-service';
 import { CryptoService } from './application/crypto.service';
-import { JwtService } from './guards/bearer/jwt.service';
+import { JwtService } from './application/jwt.service';
 import { Session, SessionSchema } from './domain/session.entity';
 import { AuthService } from './application/auth.service';
 import { SessionsRepository } from './infrastructure/sessions.repository';

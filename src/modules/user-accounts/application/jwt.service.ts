@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import jwt from 'jsonwebtoken';
-import { DomainException } from '../../../../core/exceptions/domain-exceptions';
-import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
-import { refreshTokenPyaloadDto } from '../dto/refresh-token-pyaload.dto';
+import { DomainException } from '../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
+import { refreshTokenPyaloadDto } from '../guards/dto/refresh-token-pyaload.dto';
 
 @Injectable()
 export class JwtService {

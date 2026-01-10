@@ -8,7 +8,7 @@ import { CryptoService } from './crypto.service';
 import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
 import * as crypto from 'node:crypto';
-import { JwtService } from '../guards/bearer/jwt.service';
+import { JwtService } from './jwt.service';
 import { jwtDecode } from 'jwt-decode';
 import { Session, type SessionModelType } from '../domain/session.entity';
 import { SessionsRepository } from '../infrastructure/sessions.repository';
