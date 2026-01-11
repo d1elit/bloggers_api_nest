@@ -7,7 +7,6 @@ import {
   HttpStatus,
   Param,
   Post,
-  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -17,7 +16,6 @@ import { UsersService } from '../application/users.service';
 import { CreateUserInputDto } from './input-dto/users/users.input-dto';
 import { PaginatedViewDto } from '../../../core/dto/base.paginated.view-dto';
 import { ApiParam } from '@nestjs/swagger';
-import { UpdateUserInputDto } from './input-dto/users/update-user.input-dto';
 import { GetUsersQueryParams } from './input-dto/users/get-users-query-params.input-dto';
 import { BasicAuthGuard } from '../guards/basic/basic-auth.guard';
 
@@ -52,16 +50,6 @@ export class UsersController {
 
     return this.usersQueryRepository.getByIdOrNotFoundFail(userId);
   }
-
-  // @Put(':id')
-  // async updateUser(
-  //   @Param('id') id: string,
-  //   @Body() body: UpdateUserInputDto,
-  // ): Promise<UserViewDto> {
-  //   const userId = await this.usersService.updateUser(id, body);
-  //
-  //   return this.usersQueryRepository.getByIdOrNotFoundFail(userId);
-  // }
 
   @ApiParam({ name: 'id' }) //для сваггера
   @Delete(':id')

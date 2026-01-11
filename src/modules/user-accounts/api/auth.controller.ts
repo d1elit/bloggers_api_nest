@@ -11,13 +11,12 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
-import { CreateUserDto } from '../dto/create-user.dto';
 import { AuthService } from '../application/auth.service';
 import { type LoginInput } from './input-dto/auth/login.input.dto';
 import express from 'express';
 import { EmailResendingInputDto } from './input-dto/auth/email-resending.input-dto';
 import { RefreshTokenGuard } from '../guards/bearer/refresh-token.guard';
-import type { Request, Response } from 'express';
+import type { Request } from 'express';
 import { UsersQueryRepository } from '../infrastructure/query/users.query-repository';
 import { NewPasswordInputDto } from './input-dto/auth/new-password.input-dto';
 import { PasswordRecoveryInputDto } from './input-dto/auth/password-recovery.input-dto';

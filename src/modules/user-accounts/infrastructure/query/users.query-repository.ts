@@ -1,8 +1,4 @@
-import {
-  User,
-  UserDocument,
-  type UserModelType,
-} from '../../domain/user.entity';
+import { User, type UserModelType } from '../../domain/user.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserViewDto } from '../../api/view-dto/users.view-dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
