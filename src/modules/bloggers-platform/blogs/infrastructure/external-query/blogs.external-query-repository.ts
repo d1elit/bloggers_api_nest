@@ -12,6 +12,12 @@ export class BlogsExternalQueryRepository {
     private blogModel: BlogModelType,
   ) {}
   async getByIdOrNotFoundFail(id: string) {
+    if (!id) {
+      throw new DomainException({
+        code: DomainExceptionCode.NotFound,
+        message: 'Blog not found',
+      });
+    }
     const blog = await this.blogModel.findOne({
       _id: id,
       deletedAt: null,

@@ -21,6 +21,11 @@ import {
   GetBlogByIdQueryHandler,
 } from './blogs/aplication/queries/get-blog-by-id.query-handler';
 import { GetBlogsQueryHandler } from './blogs/aplication/queries/get-blogs.query-handler';
+import { CreatePostUseCase } from './posts/aplication/usecases/create-post.usecase';
+import { UpdatePostUseCase } from './posts/aplication/usecases/update-post.usecase';
+import { DeletePostUseCase } from './posts/aplication/usecases/delete-post.usecase';
+import { GetPostByIdQueryHandler } from './posts/aplication/queries/get-post-by-id.query-handler';
+import { GetPostsQueryHandler } from './posts/aplication/queries/get-posts.query-handler';
 
 @Module({
   imports: [
@@ -36,7 +41,6 @@ import { GetBlogsQueryHandler } from './blogs/aplication/queries/get-blogs.query
     BlogsRepository,
     BlogsQueryRepository,
     BlogsExternalQueryRepository,
-    PostsService,
     PostsRepository,
     PostsQueryRepository,
     PostsExternalQueryRepository,
@@ -45,6 +49,12 @@ import { GetBlogsQueryHandler } from './blogs/aplication/queries/get-blogs.query
     DeleteBlogUseCase,
     GetBlogByIdQueryHandler,
     GetBlogsQueryHandler,
+    CreatePostUseCase,
+    UpdatePostUseCase,
+    DeletePostUseCase,
+    GetPostByIdQueryHandler,
+    GetPostsQueryHandler,
+    PostsService,
   ],
   exports: [],
 })
