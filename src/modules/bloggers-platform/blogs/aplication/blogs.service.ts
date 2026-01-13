@@ -3,6 +3,7 @@ import { BlogsRepository } from '../infrastructure/blogs.repository';
 import { InjectModel } from '@nestjs/mongoose';
 import { Blog, type BlogModelType } from '../domain/blog-entity';
 import { CreateBlogDto, UpdateBlogDto } from '../dto/create-blog.dto';
+import { CreteBlogInputDto } from '../api/input-dto/crete-blog.input-dto';
 
 @Injectable()
 export class BlogsService {
@@ -11,7 +12,7 @@ export class BlogsService {
     @InjectModel(Blog.name)
     private blogModel: BlogModelType,
   ) {}
-  async create(dto: CreateBlogDto): Promise<string> {
+  async create(dto: CreteBlogInputDto): Promise<string> {
     const blog = this.blogModel.createInstance(dto);
     await this.blogsRepository.save(blog);
     return blog._id.toString();

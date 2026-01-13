@@ -12,9 +12,19 @@ import { BlogsExternalQueryRepository } from './blogs/infrastructure/external-qu
 import { PostsController } from './posts/api/posts.controller';
 import { PostsQueryRepository } from './posts/infrastructure/query/posts.query-repository';
 import { PostsExternalQueryRepository } from './posts/infrastructure/external-query/posts.external-query-repository';
+import { CreateBlogUseCase } from './blogs/aplication/usecases/create-blog.usecase';
+import { CqrsModule } from '@nestjs/cqrs';
+import { UpdateBlogUseCase } from './blogs/aplication/usecases/update-blog.usecase';
+import { DeleteBlogUseCase } from './blogs/aplication/usecases/delete-blog.usecase';
+import {
+  GetBlogByIdQuery,
+  GetBlogByIdQueryHandler,
+} from './blogs/aplication/queries/get-blog-by-id.query-handler';
+import { GetBlogsQueryHandler } from './blogs/aplication/queries/get-blogs.query-handler';
 
 @Module({
   imports: [
+    CqrsModule,
     MongooseModule.forFeature([
       { name: Blog.name, schema: BlogSchema },
       { name: Post.name, schema: PostSchema },
@@ -30,6 +40,11 @@ import { PostsExternalQueryRepository } from './posts/infrastructure/external-qu
     PostsRepository,
     PostsQueryRepository,
     PostsExternalQueryRepository,
+    CreateBlogUseCase,
+    UpdateBlogUseCase,
+    DeleteBlogUseCase,
+    GetBlogByIdQueryHandler,
+    GetBlogsQueryHandler,
   ],
   exports: [],
 })

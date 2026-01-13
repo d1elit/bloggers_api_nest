@@ -6,7 +6,6 @@ import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-c
 
 @Injectable()
 export class UsersRepository {
-  //инжектирование модели через DI
   constructor(@InjectModel(User.name) private UserModel: UserModelType) {}
 
   async findById(id: string): Promise<UserDocument | null> {
@@ -24,7 +23,6 @@ export class UsersRepository {
     const user = await this.findById(id);
 
     if (!user) {
-      //TODO: replace with domain exception
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
         extensions: [
