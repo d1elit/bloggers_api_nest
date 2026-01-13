@@ -11,7 +11,6 @@ import {
   Query,
 } from '@nestjs/common';
 import { CreatePostInputDto } from './input-dto/create-post.input-dto';
-import { PostsQueryRepository } from '../infrastructure/query/posts.query-repository';
 import { UpdatePostDto } from '../dto/create-post.dto';
 import { GetPostsQueryParams } from './input-dto/get-posts-query-params.input-dto';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';

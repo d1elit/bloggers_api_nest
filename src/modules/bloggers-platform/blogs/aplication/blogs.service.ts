@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BlogsRepository } from '../infrastructure/blogs.repository';
 import { InjectModel } from '@nestjs/mongoose';
 import { Blog, type BlogModelType } from '../domain/blog-entity';
-import { CreateBlogDto, UpdateBlogDto } from '../dto/create-blog.dto';
+import { UpdateBlogDto } from '../dto/create-blog.dto';
 import { CreteBlogInputDto } from '../api/input-dto/crete-blog.input-dto';
 
 @Injectable()
