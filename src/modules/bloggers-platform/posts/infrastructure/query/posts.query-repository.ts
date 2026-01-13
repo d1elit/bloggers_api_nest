@@ -27,13 +27,18 @@ export class PostsQueryRepository {
 
   async getAll(
     query: GetPostsQueryParams,
+    blogId?: string,
   ): Promise<PaginatedViewDto<PostViewDto[]>> {
     const filter: {
       deletedAt: null;
+      blogId?: string;
       $or?: any[];
     } = {
       deletedAt: null,
     };
+    if (blogId) {
+      filter.blogId = blogId;
+    }
 
     const orConditions: any[] = [];
     console.log('QUERY IN REPO', query);
