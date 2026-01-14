@@ -21,7 +21,12 @@ export class BlogsQueryRepository {
     if (!blog) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
-        message: 'Blog not found',
+        extensions: [
+          {
+            field: 'blog',
+            message: 'Blog not found',
+          },
+        ],
       });
     }
 

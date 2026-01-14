@@ -17,15 +17,20 @@ import { Session, SessionSchema } from './domain/session.entity';
 import { AuthService } from './application/auth.service';
 import { SessionsRepository } from './infrastructure/sessions.repository';
 import { NodemailerService } from './application/nodemailer.service';
+import { CqrsModule } from '@nestjs/cqrs';
+import { CreateUserUseCase } from './application/usecases/create-user.usecase';
+import { DeleteUserUseCase } from './application/usecases/delete-user.usecase';
+import { AccessTokenGuard } from './guards/bearer/access-token.guard';
+import { Reflector } from '@nestjs/core';
 
 @Module({
   imports: [
+    CqrsModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([{ name: Session.name, schema: SessionSchema }]),
   ],
   controllers: [UsersController, AuthController, SecurityDevicesController],
   providers: [
-    UsersService,
     UsersRepository,
     UsersQueryRepository,
     SecurityDevicesQueryRepository,
@@ -37,7 +42,18 @@ import { NodemailerService } from './application/nodemailer.service';
     AuthService,
     SessionsRepository,
     NodemailerService,
+    CreateUserUseCase,
+    DeleteUserUseCase,
+    UsersService,
+    AccessTokenGuard,
   ],
-  exports: [UsersExternalQueryRepository, UsersExternalService],
+  exports: [
+    UsersExternalQueryRepository,
+    UsersExternalService,
+    AccessTokenGuard,
+    JwtService,
+    UsersService,
+    UsersQueryRepository,
+  ],
 })
 export class UserAccountsModule {}

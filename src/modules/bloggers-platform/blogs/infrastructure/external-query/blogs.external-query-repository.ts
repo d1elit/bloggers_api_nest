@@ -15,7 +15,12 @@ export class BlogsExternalQueryRepository {
     if (!id) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
-        message: 'Blog not found',
+        extensions: [
+          {
+            field: 'blog',
+            message: 'Blog not found',
+          },
+        ],
       });
     }
     const blog = await this.blogModel.findOne({
@@ -26,7 +31,12 @@ export class BlogsExternalQueryRepository {
     if (!blog) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
-        message: 'Blog not found',
+        extensions: [
+          {
+            field: 'blog',
+            message: 'Blog not found',
+          },
+        ],
       });
     }
 

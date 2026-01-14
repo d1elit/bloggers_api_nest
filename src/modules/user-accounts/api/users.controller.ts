@@ -18,13 +18,16 @@ import { PaginatedViewDto } from '../../../core/dto/base.paginated.view-dto';
 import { ApiParam } from '@nestjs/swagger';
 import { GetUsersQueryParams } from './input-dto/users/get-users-query-params.input-dto';
 import { BasicAuthGuard } from '../guards/basic/basic-auth.guard';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreateUserCommand } from '../application/usecases/create-user.usecase';
+import { DeleteUserCommand } from '../application/usecases/delete-user.usecase';
 
 @UseGuards(BasicAuthGuard)
 @Controller('users')
 export class UsersController {
   constructor(
     private usersQueryRepository: UsersQueryRepository,
-    private usersService: UsersService,
+    private commandBus: CommandBus,
   ) {
     console.log('UsersController created');
   }
@@ -46,7 +49,7 @@ export class UsersController {
   async createUser(@Body() body: CreateUserInputDto): Promise<UserViewDto> {
     console.log('Received body:', body); // ← Добавьте это
     console.log('Body validation:', body instanceof CreateUserInputDto);
-    const userId = await this.usersService.createUser(body);
+    const userId = await this.commandBus.execute(new CreateUserCommand(body));
 
     return this.usersQueryRepository.getByIdOrNotFoundFail(userId);
   }
@@ -55,6 +58,6 @@ export class UsersController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteUser(@Param('id') id: string): Promise<void> {
-    return this.usersService.deleteUser(id);
+    return this.commandBus.execute(new DeleteUserCommand(id));
   }
 }

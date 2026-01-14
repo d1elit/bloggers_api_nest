@@ -22,16 +22,36 @@ import { UpdatePostUseCase } from './posts/aplication/usecases/update-post.useca
 import { DeletePostUseCase } from './posts/aplication/usecases/delete-post.usecase';
 import { GetPostByIdQueryHandler } from './posts/aplication/queries/get-post-by-id.query-handler';
 import { GetPostsQueryHandler } from './posts/aplication/queries/get-posts.query-handler';
+import { Comment, CommentSchema } from './comments/domain/comment.entity';
+import {
+  CommentLike,
+  CommentLikeSchema,
+} from './comments/domain/comment-like.entity';
+import { CommentsController } from './comments/api/comments.controller';
+import { CreateCommentUseCase } from './comments/application/usecases/create-comment.usecase';
+import { UpdateCommentUseCase } from './comments/application/usecases/update-comment.usecase';
+import { DeleteCommentUseCase } from './comments/application/usecases/delete-comment.usecase';
+import { UpdateLikeStatusUseCase } from './comments/application/usecases/update-like-status.usecase';
+import { GetCommentByIdQueryHandler } from './comments/application/queries/get-comment-by-id.query-handler';
+import { GetPostsCommentQueryHandler } from './comments/application/queries/get-comments-for-post.query-handler';
+import { CommentsRepository } from './comments/infrastructure/comments.repository';
+import { CommentLikesRepository } from './comments/infrastructure/comment-likes.repository';
+import { CommentsQueryRepository } from './comments/infrastructure/query/comments.query-repository';
+
+import { UserAccountsModule } from '../user-accounts/user-accounts.module';
 
 @Module({
   imports: [
     CqrsModule,
+    UserAccountsModule,
     MongooseModule.forFeature([
       { name: Blog.name, schema: BlogSchema },
       { name: Post.name, schema: PostSchema },
+      { name: Comment.name, schema: CommentSchema },
+      { name: CommentLike.name, schema: CommentLikeSchema },
     ]),
   ],
-  controllers: [BlogsController, PostsController],
+  controllers: [BlogsController, PostsController, CommentsController],
   providers: [
     BlogsService,
     BlogsRepository,
@@ -40,6 +60,9 @@ import { GetPostsQueryHandler } from './posts/aplication/queries/get-posts.query
     PostsRepository,
     PostsQueryRepository,
     PostsExternalQueryRepository,
+    CommentsRepository,
+    CommentLikesRepository,
+    CommentsQueryRepository,
     CreateBlogUseCase,
     UpdateBlogUseCase,
     DeleteBlogUseCase,
@@ -50,6 +73,12 @@ import { GetPostsQueryHandler } from './posts/aplication/queries/get-posts.query
     DeletePostUseCase,
     GetPostByIdQueryHandler,
     GetPostsQueryHandler,
+    CreateCommentUseCase,
+    UpdateCommentUseCase,
+    DeleteCommentUseCase,
+    UpdateLikeStatusUseCase,
+    GetCommentByIdQueryHandler,
+    GetPostsCommentQueryHandler,
   ],
   exports: [],
 })

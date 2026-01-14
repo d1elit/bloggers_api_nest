@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 
 import { CreteBlogInputDto } from './input-dto/crete-blog.input-dto';
@@ -26,6 +27,7 @@ import { UpdateBlogCommand } from '../aplication/usecases/update-blog.usecase';
 import { DeleteBlogCommand } from '../aplication/usecases/delete-blog.usecase';
 import { GetBlogsQuery } from '../aplication/queries/get-blogs.query-handler';
 import { GetPostsQueryParams } from '../../posts/api/input-dto/get-posts-query-params.input-dto';
+import { AccessTokenGuard } from '../../../user-accounts/guards/bearer/access-token.guard';
 
 @Controller('blogs')
 export class BlogsController {
@@ -56,6 +58,7 @@ export class BlogsController {
   async deleteBlog(@Param('id') id: string) {
     return await this.commandBus.execute(new DeleteBlogCommand(id));
   }
+
   @Get()
   async getBlogList(@Query() query: GetBlogsQueryParams) {
     return this.queryBus.execute(new GetBlogsQuery(query));
