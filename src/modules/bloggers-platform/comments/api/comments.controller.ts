@@ -6,16 +6,15 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  Post,
   Put,
   UseGuards,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { CreateCommentInputDto } from './input-dto/create-comment.input-dto';
+
 import { UpdateCommentInputDto } from './input-dto/update-comment.input-dto';
 import { UpdateLikeStatusInputDto } from './input-dto/update-like-status.input-dto';
 import { GetCommentByIdQuery } from '../application/queries/get-comment-by-id.query-handler';
-import { CreateCommentCommand } from '../application/usecases/create-comment.usecase';
+
 import { DeleteCommentCommand } from '../application/usecases/delete-comment.usecase';
 import { UpdateCommentCommand } from '../application/usecases/update-comment.usecase';
 import { UpdateLikeStatusCommand } from '../application/usecases/update-like-status.usecase';

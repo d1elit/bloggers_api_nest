@@ -12,7 +12,6 @@ import {
 } from '@nestjs/common';
 import { UsersQueryRepository } from '../infrastructure/query/users.query-repository';
 import { UserViewDto } from './view-dto/users.view-dto';
-import { UsersService } from '../application/users.service';
 import { CreateUserInputDto } from './input-dto/users/users.input-dto';
 import { PaginatedViewDto } from '../../../core/dto/base.paginated.view-dto';
 import { ApiParam } from '@nestjs/swagger';

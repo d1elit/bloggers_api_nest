@@ -26,7 +26,6 @@ import { CreateCommentCommand } from '../../comments/application/usecases/create
 import { GetCommentByIdQuery } from '../../comments/application/queries/get-comment-by-id.query-handler';
 import { AccessTokenGuard } from '../../../user-accounts/guards/bearer/access-token.guard';
 import { GetPostsCommentQuery } from '../../comments/application/queries/get-comments-for-post.query-handler';
-import { GetBlogByIdQuery } from '../../blogs/aplication/queries/get-blog-by-id.query-handler';
 
 @Controller('posts')
 export class PostsController {

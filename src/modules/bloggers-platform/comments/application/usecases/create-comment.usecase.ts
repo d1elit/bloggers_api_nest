@@ -4,7 +4,6 @@ import { Comment, type CommentModelType } from '../../domain/comment.entity';
 import { PostsQueryRepository } from '../../../posts/infrastructure/query/posts.query-repository';
 import { UsersQueryRepository } from '../../../../user-accounts/infrastructure/query/users.query-repository';
 import { InjectModel } from '@nestjs/mongoose';
-import { Blog, type BlogModelType } from '../../../blogs/domain/blog-entity';
 
 export class CreateCommentCommand {
   constructor(

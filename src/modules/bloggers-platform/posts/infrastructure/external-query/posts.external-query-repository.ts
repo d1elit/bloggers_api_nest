@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post, type PostModelType } from '../../domain/post-entity';
 import { PostViewDto } from '../../api/view-dto/post.view-dto';

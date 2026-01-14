@@ -21,7 +21,6 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { CreateUserUseCase } from './application/usecases/create-user.usecase';
 import { DeleteUserUseCase } from './application/usecases/delete-user.usecase';
 import { AccessTokenGuard } from './guards/bearer/access-token.guard';
-import { Reflector } from '@nestjs/core';
 
 @Module({
   imports: [

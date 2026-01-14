@@ -6,7 +6,6 @@ import {
   type CommentLikeModelType,
 } from '../../domain/comment-like.entity';
 import { InjectModel } from '@nestjs/mongoose';
-import { Blog, type BlogModelType } from '../../../blogs/domain/blog-entity';
 
 export class UpdateLikeStatusCommand {
   constructor(

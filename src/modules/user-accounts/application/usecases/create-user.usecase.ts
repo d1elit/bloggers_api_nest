@@ -1,5 +1,3 @@
-
-import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, type UserModelType } from '../../domain/user.entity';
 import { CreateUserDto } from '../../dto/create-user.dto';
@@ -10,14 +8,17 @@ import { DomainExceptionCode } from '../../../../core/exceptions/domain-exceptio
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 export class CreateUserCommand {
-    constructor(
-        public dto: CreateUserDto,
-        public confirmationCode?: string,
-    ) {}
+  constructor(
+    public dto: CreateUserDto,
+    public confirmationCode?: string,
+  ) {}
 }
 
 @CommandHandler(CreateUserCommand)
-export class CreateUserUseCase implements ICommandHandler<CreateUserCommand, string> {
+export class CreateUserUseCase implements ICommandHandler<
+  CreateUserCommand,
+  string
+> {
   constructor(
     @InjectModel(User.name)
     private UserModel: UserModelType,
@@ -25,7 +26,7 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand, str
     private cryptoService: CryptoService,
   ) {}
 
-  async execute({dto, confirmationCode}: CreateUserCommand): Promise<string> {
+  async execute({ dto, confirmationCode }: CreateUserCommand): Promise<string> {
     await this.ensureIsUserUnique(dto.login, dto.email);
     console.log(dto);
     const passwordHash = await this.cryptoService.createPasswordHash(
