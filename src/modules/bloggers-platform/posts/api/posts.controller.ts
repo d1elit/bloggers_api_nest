@@ -86,7 +86,10 @@ export class PostsController {
     @Query() query: GetPostsQueryParams,
     @ExtractUserFromRequest() user,
   ) {
+    const userId = user.userId;
     await this.queryBus.execute(new GetPostByIdQuery(postId));
-    return await this.queryBus.execute(new GetPostsCommentQuery(query, postId));
+    return await this.queryBus.execute(
+      new GetPostsCommentQuery(query, postId, userId),
+    );
   }
 }

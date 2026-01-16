@@ -6,14 +6,19 @@ import { PaginatedViewDto } from '../../../../../core/dto/base.paginated.view-dt
 import { BaseQueryParams } from '../../../../../core/dto/base.query-params.input-dto';
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
+import { CommentLikesRepository } from '../comment-likes.repository';
 
 @Injectable()
 export class CommentsQueryRepository {
   constructor(
     @InjectModel(Comment.name)
     private commentModel: CommentModelType,
+    private readonly commentLikesRepository: CommentLikesRepository,
   ) {}
-  async getByIdOrNotFoundFail(id: string): Promise<CommentViewDto> {
+  async getByIdOrNotFoundFail(
+    id: string,
+    userId?: string | null,
+  ): Promise<CommentViewDto> {
     const comment = await this.commentModel.findOne({
       _id: id,
       deletedAt: null,
@@ -31,12 +36,24 @@ export class CommentsQueryRepository {
       });
     }
 
-    return CommentViewDto.mapToView(comment);
+    let myStatus = 'None';
+    if (userId) {
+      const like = await this.commentLikesRepository.find(
+        userId,
+        comment._id.toString(),
+      );
+      if (like) {
+        myStatus = like.myStatus;
+      }
+    }
+
+    return CommentViewDto.mapToView(comment, myStatus);
   }
 
   async getAllForPost(
     query: BaseQueryParams,
     postId: string,
+    userId?: string | null,
   ): Promise<PaginatedViewDto<CommentViewDto[]>> {
     const filter = {
       postId,
@@ -52,7 +69,24 @@ export class CommentsQueryRepository {
 
     const totalCount = await this.commentModel.countDocuments(filter);
 
-    const items = comments.map((comment) => CommentViewDto.mapToView(comment));
+    const commentIds = comments.map((c) => c._id.toString());
+    const likesInfo: Record<string, string> = {};
+
+    if (userId) {
+      const likes = await this.commentLikesRepository.findByAllId(
+        commentIds,
+        userId,
+      );
+
+      likes.forEach((l) => {
+        likesInfo[l.commentId] = l.myStatus;
+      });
+    }
+
+    const items = comments.map((comment) => {
+      const myStatus = likesInfo[comment._id.toString()] || 'None';
+      return CommentViewDto.mapToView(comment, myStatus);
+    });
 
     return PaginatedViewDto.mapToView({
       items,

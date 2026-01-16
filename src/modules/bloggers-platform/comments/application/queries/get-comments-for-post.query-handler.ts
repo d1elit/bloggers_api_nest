@@ -8,6 +8,7 @@ export class GetPostsCommentQuery {
   constructor(
     public queryParams: BaseQueryParams,
     public postId: string,
+    public userId?: string,
   ) {}
 }
 
@@ -23,6 +24,7 @@ export class GetPostsCommentQueryHandler implements IQueryHandler<
     return this.commentsQueryRepository.getAllForPost(
       query.queryParams,
       query.postId,
+      query.userId,
     );
   }
 }

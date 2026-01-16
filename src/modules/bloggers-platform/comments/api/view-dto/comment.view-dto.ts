@@ -15,13 +15,20 @@ export class CommentViewDto {
     myStatus: string;
   };
 
-  static mapToView(comment: CommentDocument): CommentViewDto {
+  static mapToView(
+    comment: CommentDocument,
+    myStatus: string = 'None',
+  ): CommentViewDto {
     const dto = new CommentViewDto();
     dto.id = comment._id.toString();
     dto.content = comment.content;
     dto.commentatorInfo = comment.commentatorInfo;
     dto.createdAt = comment.createdAt;
-    dto.likesInfo = comment.likesInfo;
+    dto.likesInfo = {
+      likesCount: comment.likesInfo.likesCount,
+      dislikesCount: comment.likesInfo.dislikesCount,
+      myStatus,
+    };
     return dto;
   }
 }
