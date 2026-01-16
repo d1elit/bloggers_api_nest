@@ -46,8 +46,6 @@ export class UsersController {
 
   @Post()
   async createUser(@Body() body: CreateUserInputDto): Promise<UserViewDto> {
-    console.log('Received body:', body); // ← Добавьте это
-    console.log('Body validation:', body instanceof CreateUserInputDto);
     const userId = await this.commandBus.execute(new CreateUserCommand(body));
 
     return this.usersQueryRepository.getByIdOrNotFoundFail(userId);

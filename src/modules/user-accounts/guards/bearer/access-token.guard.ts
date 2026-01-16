@@ -6,7 +6,7 @@ import { DomainExceptionCode } from '../../../../core/exceptions/domain-exceptio
 import { JwtService } from '../../application/jwt.service';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
-export interface UserContext {
+interface UserContext {
   userId: string;
   deviceId?: string;
   likeStatus?: string;
