@@ -26,6 +26,7 @@ import { CreateCommentCommand } from '../../comments/application/usecases/create
 import { GetCommentByIdQuery } from '../../comments/application/queries/get-comment-by-id.query-handler';
 import { AccessTokenGuard } from '../../../user-accounts/guards/bearer/access-token.guard';
 import { GetPostsCommentQuery } from '../../comments/application/queries/get-comments-for-post.query-handler';
+import { AccessOptionalGuard } from '../../../user-accounts/guards/bearer/access-optional.guard';
 
 @Controller('posts')
 export class PostsController {
@@ -78,10 +79,12 @@ export class PostsController {
     return this.queryBus.execute(new GetCommentByIdQuery(commentId));
   }
 
+  @UseGuards(AccessOptionalGuard)
   @Get(':id/comments')
   async getPostComments(
     @Param('id') postId: string,
     @Query() query: GetPostsQueryParams,
+    @ExtractUserFromRequest() user,
   ) {
     await this.queryBus.execute(new GetPostByIdQuery(postId));
     return await this.queryBus.execute(new GetPostsCommentQuery(query, postId));

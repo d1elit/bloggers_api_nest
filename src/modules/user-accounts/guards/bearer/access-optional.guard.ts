@@ -2,20 +2,7 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { JwtService } from '../../application/jwt.service';
 import { CommentLikesRepository } from '../../../bloggers-platform/comments/infrastructure/comment-likes.repository';
-
-// This context allows userId to be optional for anonymous users.
-interface UserContext {
-  userId?: string | null;
-  likeStatus?: string;
-}
-
-declare global {
-  namespace Express {
-    interface Request {
-      user?: UserContext;
-    }
-  }
-}
+import { OptionalUserContext } from '../types.d';
 
 @Injectable()
 export class AccessOptionalGuard implements CanActivate {
@@ -29,20 +16,20 @@ export class AccessOptionalGuard implements CanActivate {
 
     const authHeader = request.headers.authorization;
     if (!authHeader) {
-      request.user = { likeStatus: 'None', userId: null };
+      request.user = { likeStatus: 'None', userId: null } as OptionalUserContext;
       return true;
     }
 
     const [authType, token] = authHeader.split(' ');
     if (authType !== 'Bearer' || !token) {
-      request.user = { likeStatus: 'None', userId: null };
+      request.user = { likeStatus: 'None', userId: null } as OptionalUserContext;
       return true;
     }
 
     try {
       const payload = await this.jwtService.verifyToken(token);
       if (!payload) {
-        request.user = { likeStatus: 'None', userId: null };
+        request.user = { likeStatus: 'None', userId: null } as OptionalUserContext;
         return true;
       }
 
@@ -61,10 +48,10 @@ export class AccessOptionalGuard implements CanActivate {
       // The original middleware referenced a PostLikesRepository, which is not found in the current project structure.
       // if (request.originalUrl.includes('/posts/') && entityId) { ... }
 
-      request.user = { userId, likeStatus };
+      request.user = { userId, likeStatus } as OptionalUserContext;
     } catch (error) {
       // If token is invalid or expired, we treat the user as anonymous.
-      request.user = { likeStatus: 'None', userId: null };
+      request.user = { likeStatus: 'None', userId: null } as OptionalUserContext;
     }
 
     return true;

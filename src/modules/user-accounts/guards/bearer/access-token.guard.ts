@@ -5,20 +5,7 @@ import { DomainException } from '../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
 import { JwtService } from '../../application/jwt.service';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
-
-interface UserContext {
-  userId: string;
-  deviceId?: string;
-  likeStatus?: string;
-}
-
-declare global {
-  namespace Express {
-    interface Request {
-      user?: UserContext;
-    }
-  }
-}
+import { UserContext } from '../types.d';
 
 @Injectable()
 export class AccessTokenGuard implements CanActivate {
@@ -65,7 +52,7 @@ export class AccessTokenGuard implements CanActivate {
 
       request.user = {
         userId: payload.userId,
-      };
+      } as UserContext;
 
       return true;
     } catch (error) {
