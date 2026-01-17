@@ -28,9 +28,9 @@ import { AccessTokenGuard } from '../../../user-accounts/guards/bearer/access-to
 import { GetPostsCommentQuery } from '../../comments/application/queries/get-comments-for-post.query-handler';
 import { AccessOptionalGuard } from '../../../user-accounts/guards/bearer/access-optional.guard';
 import {
-  UpdatePostLikeStatusCommand,
-  UpdatePostLikeStatusUseCase,
-} from '../aplication/usecases/update-post-like-status.usecase';
+  PostLikeStatusCommand,
+  PostLikeStatusUseCase,
+} from '../aplication/usecases/post-like-status-use.case';
 
 @Controller('posts')
 export class PostsController {
@@ -107,8 +107,8 @@ export class PostsController {
   ) {
     const userId = user.userId;
 
-    await this.commandBus.execute(
-      new UpdatePostLikeStatusCommand(postId, userId, body.likeStatus),
+    return await this.commandBus.execute(
+      new PostLikeStatusCommand(postId, userId, body.likeStatus),
     );
   }
 }

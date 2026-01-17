@@ -7,7 +7,7 @@ import { PostLike } from '../../domain/post-like.entity';
 import { UsersRepository } from '../../../../user-accounts/infrastructure/users.repository';
 import { UsersExternalRepository } from '../../../../user-accounts/infrastructure/users.external.repository';
 
-export class UpdatePostLikeStatusCommand {
+export class PostLikeStatusCommand {
   constructor(
     public readonly postId: string,
     public readonly userId: string,
@@ -15,15 +15,16 @@ export class UpdatePostLikeStatusCommand {
   ) {}
 }
 
-@CommandHandler(UpdatePostLikeStatusCommand)
-export class UpdatePostLikeStatusUseCase implements ICommandHandler<UpdatePostLikeStatusCommand> {
+@CommandHandler(PostLikeStatusCommand)
+export class PostLikeStatusUseCase implements ICommandHandler<PostLikeStatusCommand> {
   constructor(
     private readonly postLikesRepository: PostLikesRepository,
     private readonly postsRepository: PostsRepository,
     private readonly usersExternalRepository: UsersExternalRepository,
   ) {}
 
-  async execute(command: UpdatePostLikeStatusCommand): Promise<void> {
+  async execute(command: PostLikeStatusCommand): Promise<void> {
+    console.log('POST LIKE CONTROLLER');
     const post = await this.postsRepository.findById(command.postId);
     const user = await this.usersExternalRepository.findOrNotFoundFail(
       command.userId,
@@ -49,10 +50,33 @@ export class UpdatePostLikeStatusUseCase implements ICommandHandler<UpdatePostLi
 
       await this.postLikesRepository.create(newLike);
       return;
+    } else {
+      if (command.likeStatus === like.myStatus) {
+        return;
+      }
+      console.log('POST:', post);
+      const oldStatus = like.myStatus;
+      like.updateLikeStatus(oldStatus);
+      post.updateLikeCount(oldStatus);
+
+      await this.postLikesRepository.update(like);
     }
+    console.log(post);
+    const newestLikes = await this.getNewestLikes(command.postId);
+    post.updateNewestLikes(newestLikes);
+    await this.postsRepository.save(post);
+    return;
+  }
+  async getNewestLikes(postId: string) {
+    const lastLikes = await this.postLikesRepository.findLastLikes(postId);
 
-    like.updateLikeStatus(command.likeStatus);
-
-    await this.postLikesRepository.update(like);
+    if (!lastLikes) return [];
+    return lastLikes.map((like) => {
+      return {
+        addedAt: like.addedAt.toISOString(),
+        userId: like.userId,
+        login: like.userLogin,
+      };
+    });
   }
 }

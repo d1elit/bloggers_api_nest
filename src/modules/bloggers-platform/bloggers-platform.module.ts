@@ -42,7 +42,7 @@ import { UserAccountsModule } from '../user-accounts/user-accounts.module';
 
 import { PostLike, PostLikeSchema } from './posts/domain/post-like.entity';
 import { PostLikesRepository } from './posts/infrastructure/post-likes.repository';
-import { UpdatePostLikeStatusUseCase } from './posts/aplication/usecases/update-post-like-status.usecase';
+import { PostLikeStatusUseCase } from './posts/aplication/usecases/post-like-status-use.case';
 
 @Module({
   imports: [
@@ -77,7 +77,7 @@ import { UpdatePostLikeStatusUseCase } from './posts/aplication/usecases/update-
     CreatePostUseCase,
     UpdatePostUseCase,
     DeletePostUseCase,
-    UpdatePostLikeStatusUseCase,
+    PostLikeStatusUseCase,
     GetPostByIdQueryHandler,
     GetPostsQueryHandler,
     CreateCommentUseCase,
