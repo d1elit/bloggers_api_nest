@@ -7,21 +7,22 @@ import { DomainExceptionCode } from '../../../../core/exceptions/domain-exceptio
 import { AuthService } from '../../application/auth.service';
 import { JwtService } from '../../application/jwt.service';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { UserContext } from '../types';
 
-export interface UserContext {
-  userId: string;
-  deviceId?: string;
-  likeStatus?: string;
-}
-
-// Расширяем тип Request для TypeScript
-declare global {
-  namespace Express {
-    interface Request {
-      user?: UserContext;
-    }
-  }
-}
+// export interface UserContext {
+//   userId: string;
+//   deviceId?: string;
+//   likeStatus?: string;
+// }
+//
+// // Расширяем тип Request для TypeScript
+// declare global {
+//   namespace Express {
+//     interface Request {
+//       user?: UserContext;
+//     }
+//   }
+// }
 //todo Типы для всего
 @Injectable()
 export class RefreshTokenGuard implements CanActivate {
@@ -48,7 +49,12 @@ export class RefreshTokenGuard implements CanActivate {
     if (!refreshToken) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
-        message: 'Refresh token not found',
+        extensions: [
+          {
+            field: 'token',
+            message: 'Refresh token not found',
+          },
+        ],
       });
     }
 
@@ -59,7 +65,12 @@ export class RefreshTokenGuard implements CanActivate {
       if (!payload) {
         throw new DomainException({
           code: DomainExceptionCode.Forbidden,
-          message: 'Refresh token not found',
+          extensions: [
+            {
+              field: 'token',
+              message: 'Refresh token not found',
+            },
+          ],
         });
       }
       await this.authService.ensureRefreshTokenValid(payload, refreshToken);
@@ -74,7 +85,12 @@ export class RefreshTokenGuard implements CanActivate {
     } catch (error) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
-        message: 'Invalid or expired refresh token',
+        extensions: [
+          {
+            field: 'token',
+            message: 'Invalid or expired token not found',
+          },
+        ],
       });
     }
   }
