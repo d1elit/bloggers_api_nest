@@ -35,4 +35,51 @@ export class PostsService {
     post.makeDeleted();
     return this.postsRepository.save(post);
   }
+  async postLike(
+    likeStatus: string,
+    postId: string,
+    userId: string,
+  ): Promise<void> {
+    let post = await this.postsRepository.findByIdOrError(postId);
+    let user = await this.usersRepository.findByIdOrError(userId);
+    let like = await this.postLikesRepository.find(userId, postId);
+
+    if (like === null) {
+      const newLike = PostLikeEntity.createNew({
+        postId: postId.toString(),
+        userId: userId.toString(),
+        userLogin: user.login,
+        likeStatus,
+      });
+
+      post.updateLikeCount(likeStatus);
+      await this.postLikesRepository.create(newLike);
+    } else {
+      if (likeStatus === like.myStatus) {
+        return;
+      }
+      const oldStatus = like.myStatus;
+      like.updateLikeStatus(likeStatus);
+      post.updateLikeCount(likeStatus, oldStatus);
+
+      await this.postLikesRepository.update(like);
+    }
+    const newestLikes = await this.getNewestLikes(postId);
+    post.updateNewestLikes(newestLikes);
+    await this.postsRepository.save(post);
+    return;
+  }
+
+  async getNewestLikes(postId: string) {
+    const lastLikes = await this.postLikesRepository.findLastLikes(postId);
+
+    if (!lastLikes) return [];
+    return lastLikes.map((like) => {
+      return {
+        addedAt: like.addedAt,
+        userId: like.userId,
+        login: like.userLogin,
+      };
+    });
+  }
 }

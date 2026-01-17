@@ -21,6 +21,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { CreateUserUseCase } from './application/usecases/create-user.usecase';
 import { DeleteUserUseCase } from './application/usecases/delete-user.usecase';
 import { AccessTokenGuard } from './guards/bearer/access-token.guard';
+import { UsersExternalRepository } from './infrastructure/users.external.repository';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { AccessTokenGuard } from './guards/bearer/access-token.guard';
     DeleteUserUseCase,
     UsersService,
     AccessTokenGuard,
+    UsersExternalRepository,
   ],
   exports: [
     UsersExternalQueryRepository,
@@ -53,6 +55,7 @@ import { AccessTokenGuard } from './guards/bearer/access-token.guard';
     JwtService,
     UsersService,
     UsersQueryRepository,
+    UsersExternalRepository,
   ],
 })
 export class UserAccountsModule {}

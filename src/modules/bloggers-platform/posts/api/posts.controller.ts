@@ -27,6 +27,10 @@ import { GetCommentByIdQuery } from '../../comments/application/queries/get-comm
 import { AccessTokenGuard } from '../../../user-accounts/guards/bearer/access-token.guard';
 import { GetPostsCommentQuery } from '../../comments/application/queries/get-comments-for-post.query-handler';
 import { AccessOptionalGuard } from '../../../user-accounts/guards/bearer/access-optional.guard';
+import {
+  UpdatePostLikeStatusCommand,
+  UpdatePostLikeStatusUseCase,
+} from '../aplication/usecases/update-post-like-status.usecase';
 
 @Controller('posts')
 export class PostsController {
@@ -90,6 +94,21 @@ export class PostsController {
     await this.queryBus.execute(new GetPostByIdQuery(postId));
     return await this.queryBus.execute(
       new GetPostsCommentQuery(query, postId, userId),
+    );
+  }
+
+  @UseGuards(AccessOptionalGuard)
+  @Put(':id/like-status')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async postLike(
+    @Param('id') postId: string,
+    @Body() body: { likeStatus: string },
+    @ExtractUserFromRequest() user,
+  ) {
+    const userId = user.userId;
+
+    await this.commandBus.execute(
+      new UpdatePostLikeStatusCommand(postId, userId, body.likeStatus),
     );
   }
 }
