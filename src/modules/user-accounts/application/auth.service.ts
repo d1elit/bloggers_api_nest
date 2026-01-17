@@ -210,7 +210,7 @@ export class AuthService {
         ],
       });
     }
-    let newPassword = await this.cryptoService.createPasswordHash(password);
+    const newPassword = await this.cryptoService.createPasswordHash(password);
     user.updatePassword(newPassword);
     await this.usersRepository.save(user);
   }

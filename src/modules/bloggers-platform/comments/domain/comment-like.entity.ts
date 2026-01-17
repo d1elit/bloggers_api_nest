@@ -1,4 +1,3 @@
-
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model } from 'mongoose';
 
@@ -31,4 +30,5 @@ export const CommentLikeSchema = SchemaFactory.createForClass(CommentLike);
 CommentLikeSchema.loadClass(CommentLike);
 
 export type CommentLikeDocument = HydratedDocument<CommentLike>;
-export type CommentLikeModelType = Model<CommentLikeDocument> & typeof CommentLike;
+export type CommentLikeModelType = Model<CommentLikeDocument> &
+  typeof CommentLike;

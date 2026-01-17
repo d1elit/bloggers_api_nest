@@ -50,7 +50,7 @@ export class UsersRepository {
 
   async findByCodeOrError(code: string): Promise<UserDocument> {
     console.log('findByCode: ', code);
-    let resultUser = await this.UserModel.findOne({
+    const resultUser = await this.UserModel.findOne({
       'confirmationEmail.confirmationCode': code,
     });
     if (!resultUser) {
@@ -68,7 +68,7 @@ export class UsersRepository {
   }
   async findByRecoveryCodeOrError(code: string): Promise<UserDocument> {
     console.log('findByCode: ', code);
-    let resultUser = await this.UserModel.findOne({
+    const resultUser = await this.UserModel.findOne({
       'passwordRecovery.confirmationCode': code,
     });
     if (!resultUser) {

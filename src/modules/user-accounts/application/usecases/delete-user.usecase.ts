@@ -1,4 +1,3 @@
-
 import { UsersRepository } from '../../infrastructure/users.repository';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
@@ -7,7 +6,10 @@ export class DeleteUserCommand {
 }
 
 @CommandHandler(DeleteUserCommand)
-export class DeleteUserUseCase implements ICommandHandler<DeleteUserCommand, void> {
+export class DeleteUserUseCase implements ICommandHandler<
+  DeleteUserCommand,
+  void
+> {
   constructor(private usersRepository: UsersRepository) {}
 
   async execute({ id }: DeleteUserCommand): Promise<void> {

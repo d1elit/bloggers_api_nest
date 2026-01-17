@@ -1,4 +1,3 @@
-
 import { CommentDocument } from '../../domain/comment.entity';
 
 export class CommentViewDto {

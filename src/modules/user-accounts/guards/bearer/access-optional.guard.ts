@@ -16,20 +16,29 @@ export class AccessOptionalGuard implements CanActivate {
 
     const authHeader = request.headers.authorization;
     if (!authHeader) {
-      request.user = { likeStatus: 'None', userId: null } as OptionalUserContext;
+      request.user = {
+        likeStatus: 'None',
+        userId: null,
+      } as OptionalUserContext;
       return true;
     }
 
     const [authType, token] = authHeader.split(' ');
     if (authType !== 'Bearer' || !token) {
-      request.user = { likeStatus: 'None', userId: null } as OptionalUserContext;
+      request.user = {
+        likeStatus: 'None',
+        userId: null,
+      } as OptionalUserContext;
       return true;
     }
 
     try {
       const payload = await this.jwtService.verifyToken(token);
       if (!payload) {
-        request.user = { likeStatus: 'None', userId: null } as OptionalUserContext;
+        request.user = {
+          likeStatus: 'None',
+          userId: null,
+        } as OptionalUserContext;
         return true;
       }
 
@@ -51,7 +60,10 @@ export class AccessOptionalGuard implements CanActivate {
       request.user = { userId, likeStatus } as OptionalUserContext;
     } catch (error) {
       // If token is invalid or expired, we treat the user as anonymous.
-      request.user = { likeStatus: 'None', userId: null } as OptionalUserContext;
+      request.user = {
+        likeStatus: 'None',
+        userId: null,
+      } as OptionalUserContext;
     }
 
     return true;

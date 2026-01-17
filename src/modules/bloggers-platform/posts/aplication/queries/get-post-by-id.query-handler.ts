@@ -1,4 +1,3 @@
-
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { PostsQueryRepository } from '../../infrastructure/query/posts.query-repository';
 import { PostViewDto } from '../../api/view-dto/post.view-dto';
@@ -9,7 +8,7 @@ export class GetPostByIdQuery {
 
 @QueryHandler(GetPostByIdQuery)
 export class GetPostByIdQueryHandler implements IQueryHandler<
-GetPostByIdQuery,
+  GetPostByIdQuery,
   PostViewDto
 > {
   constructor(public postsQueryRepository: PostsQueryRepository) {}

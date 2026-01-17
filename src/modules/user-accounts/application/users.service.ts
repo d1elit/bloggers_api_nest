@@ -39,11 +39,11 @@ export class UsersService {
   }
 
   async ensureIsUserUnique(login: string, email: string) {
-    let resLogin = await this.usersRepository.findFieldWithValue(
+    const resLogin = await this.usersRepository.findFieldWithValue(
       'login',
       login,
     );
-    let resEmail = await this.usersRepository.findFieldWithValue(
+    const resEmail = await this.usersRepository.findFieldWithValue(
       'email',
       email,
     );

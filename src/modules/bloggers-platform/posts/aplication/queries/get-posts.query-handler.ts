@@ -1,4 +1,3 @@
-
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { PaginatedViewDto } from '../../../../../core/dto/base.paginated.view-dto';
 import { PostsQueryRepository } from '../../infrastructure/query/posts.query-repository';
@@ -13,9 +12,10 @@ export class GetPostsQuery {
 }
 
 @QueryHandler(GetPostsQuery)
-export class GetPostsQueryHandler
-  implements IQueryHandler<GetPostsQuery, PaginatedViewDto<PostViewDto[]>>
-{
+export class GetPostsQueryHandler implements IQueryHandler<
+  GetPostsQuery,
+  PaginatedViewDto<PostViewDto[]>
+> {
   constructor(private readonly postsQueryRepository: PostsQueryRepository) {}
   async execute(query: GetPostsQuery) {
     return this.postsQueryRepository.getAll(query.queryParams, query.blogId);

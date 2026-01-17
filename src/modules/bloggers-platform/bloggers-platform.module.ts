@@ -40,6 +40,10 @@ import { CommentsQueryRepository } from './comments/infrastructure/query/comment
 
 import { UserAccountsModule } from '../user-accounts/user-accounts.module';
 
+import { PostLike, PostLikeSchema } from './posts/domain/post-like.entity';
+import { PostLikesRepository } from './posts/infrastructure/post-likes.repository';
+import { UpdatePostLikeStatusUseCase } from './posts/application/usecases/update-post-like-status.usecase';
+
 @Module({
   imports: [
     CqrsModule,
@@ -49,6 +53,7 @@ import { UserAccountsModule } from '../user-accounts/user-accounts.module';
       { name: Post.name, schema: PostSchema },
       { name: Comment.name, schema: CommentSchema },
       { name: CommentLike.name, schema: CommentLikeSchema },
+      { name: PostLike.name, schema: PostLikeSchema },
     ]),
   ],
   controllers: [BlogsController, PostsController, CommentsController],
@@ -58,6 +63,7 @@ import { UserAccountsModule } from '../user-accounts/user-accounts.module';
     BlogsQueryRepository,
     BlogsExternalQueryRepository,
     PostsRepository,
+    PostLikesRepository,
     PostsQueryRepository,
     PostsExternalQueryRepository,
     CommentsRepository,
@@ -71,6 +77,7 @@ import { UserAccountsModule } from '../user-accounts/user-accounts.module';
     CreatePostUseCase,
     UpdatePostUseCase,
     DeletePostUseCase,
+    UpdatePostLikeStatusUseCase,
     GetPostByIdQueryHandler,
     GetPostsQueryHandler,
     CreateCommentUseCase,

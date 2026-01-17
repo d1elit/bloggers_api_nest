@@ -1,4 +1,3 @@
-
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { CommentsQueryRepository } from '../../infrastructure/query/comments.query-repository';
 import { CommentViewDto } from '../../api/view-dto/comment.view-dto';
@@ -9,7 +8,7 @@ export class GetCommentByIdQuery {
 
 @QueryHandler(GetCommentByIdQuery)
 export class GetCommentByIdQueryHandler implements IQueryHandler<
-GetCommentByIdQuery,
+  GetCommentByIdQuery,
   CommentViewDto
 > {
   constructor(public commentsQueryRepository: CommentsQueryRepository) {}

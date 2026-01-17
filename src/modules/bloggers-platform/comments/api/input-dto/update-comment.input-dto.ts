@@ -1,4 +1,3 @@
-
 import { IsStringWithTrim } from '../../../../../core/decorators/validation/is-string-with-trim';
 
 export class UpdateCommentInputDto {

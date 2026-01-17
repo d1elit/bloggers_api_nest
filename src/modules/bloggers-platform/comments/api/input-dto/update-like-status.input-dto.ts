@@ -1,4 +1,3 @@
-
 import { IsIn } from 'class-validator';
 
 export class UpdateLikeStatusInputDto {

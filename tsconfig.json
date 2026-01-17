@@ -21,8 +21,6 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "compilerOptions": {
-      "typeRoots": ["./node_modules/@types", "./src/core/types"]
-    }
+    "typeRoots": ["./node_modules/@types", "./src/core/types"]
   }
 }
