@@ -28,10 +28,9 @@ export class CommentLikesRepository {
     await like.save();
   }
   async findByAllId(ids: string[], userId: string | undefined) {
-    const likes = await this.commentLikeModel.find({
+    return this.commentLikeModel.find({
       commentId: { $in: ids },
       userId: userId,
     });
-    return likes;
   }
 }

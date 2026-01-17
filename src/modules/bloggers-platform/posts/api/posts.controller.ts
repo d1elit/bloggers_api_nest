@@ -27,10 +27,8 @@ import { GetCommentByIdQuery } from '../../comments/application/queries/get-comm
 import { AccessTokenGuard } from '../../../user-accounts/guards/bearer/access-token.guard';
 import { GetPostsCommentQuery } from '../../comments/application/queries/get-comments-for-post.query-handler';
 import { AccessOptionalGuard } from '../../../user-accounts/guards/bearer/access-optional.guard';
-import {
-  PostLikeStatusCommand,
-  PostLikeStatusUseCase,
-} from '../aplication/usecases/post-like-status-use.case';
+import { PostLikeStatusCommand } from '../aplication/usecases/post-like-status-use.case';
+import { BasicAuthGuard } from '../../../user-accounts/guards/basic/basic-auth.guard';
 
 @Controller('posts')
 export class PostsController {
@@ -39,6 +37,7 @@ export class PostsController {
     private readonly queryBus: QueryBus,
   ) {}
 
+  @UseGuards(BasicAuthGuard)
   @Post()
   async createPost(@Body() body: CreatePostInputDto) {
     const postId = await this.commandBus.execute<CreatePostCommand, string>(
@@ -52,12 +51,13 @@ export class PostsController {
     return this.queryBus.execute(new GetPostByIdQuery(id));
   }
 
+  @UseGuards(BasicAuthGuard)
   @Put(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePost(@Param('id') id: string, @Body() body: UpdatePostDto) {
     return this.commandBus.execute(new UpdatePostCommand(id, body));
   }
-
+  @UseGuards(BasicAuthGuard)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePost(@Param('id') id: string) {
@@ -97,7 +97,7 @@ export class PostsController {
     );
   }
 
-  @UseGuards(AccessOptionalGuard)
+  @UseGuards(AccessTokenGuard)
   @Put(':id/like-status')
   @HttpCode(HttpStatus.NO_CONTENT)
   async postLike(

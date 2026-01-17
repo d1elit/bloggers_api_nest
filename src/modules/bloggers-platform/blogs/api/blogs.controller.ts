@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 
 import { CreteBlogInputDto } from './input-dto/crete-blog.input-dto';
@@ -26,6 +27,7 @@ import { UpdateBlogCommand } from '../aplication/usecases/update-blog.usecase';
 import { DeleteBlogCommand } from '../aplication/usecases/delete-blog.usecase';
 import { GetBlogsQuery } from '../aplication/queries/get-blogs.query-handler';
 import { GetPostsQueryParams } from '../../posts/api/input-dto/get-posts-query-params.input-dto';
+import { BasicAuthGuard } from '../../../user-accounts/guards/basic/basic-auth.guard';
 
 @Controller('blogs')
 export class BlogsController {
@@ -35,6 +37,7 @@ export class BlogsController {
     private readonly queryBus: QueryBus,
   ) {}
 
+  @UseGuards(BasicAuthGuard)
   @Post()
   async createBlog(@Body() body: CreteBlogInputDto) {
     const id = await this.commandBus.execute<CreateBlogCommand, string>(
@@ -46,11 +49,15 @@ export class BlogsController {
   async getBlog(@Param('id') id: string) {
     return this.queryBus.execute(new GetBlogByIdQuery(id));
   }
+
+  @UseGuards(BasicAuthGuard)
   @Put(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateBlog(@Param('id') id: string, @Body() body: UpdateBlogInputDto) {
     return this.commandBus.execute(new UpdateBlogCommand(id, body));
   }
+
+  @UseGuards(BasicAuthGuard)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(@Param('id') id: string) {
@@ -61,6 +68,8 @@ export class BlogsController {
   async getBlogList(@Query() query: GetBlogsQueryParams) {
     return this.queryBus.execute(new GetBlogsQuery(query));
   }
+
+  @UseGuards(BasicAuthGuard)
   @Post(':id/posts')
   async createPost(@Body() body: CreatePostDto, @Param('id') id: string) {
     const postId = await this.commandBus.execute(

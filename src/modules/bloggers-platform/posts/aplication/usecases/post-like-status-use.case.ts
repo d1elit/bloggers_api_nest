@@ -15,9 +15,7 @@ export class PostLikeStatusCommand {
 }
 
 @CommandHandler(PostLikeStatusCommand)
-export class PostLikeStatusUseCase
-  implements ICommandHandler<PostLikeStatusCommand>
-{
+export class PostLikeStatusUseCase implements ICommandHandler<PostLikeStatusCommand> {
   constructor(
     private readonly postLikesRepository: PostLikesRepository,
     private readonly postsRepository: PostsRepository,
@@ -47,7 +45,7 @@ export class PostLikeStatusUseCase
         likeStatus: command.likeStatus,
         postId: command.postId,
         userId: command.userId,
-        userLogin: user!.login,
+        userLogin: user.login,
       });
       post.updateLikeCount(command.likeStatus);
       await this.postLikesRepository.create(newLike);

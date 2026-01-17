@@ -7,12 +7,14 @@ import { PaginatedViewDto } from '../../../../../core/dto/base.paginated.view-dt
 import { GetPostsQueryParams } from '../../api/input-dto/get-posts-query-params.input-dto';
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
+import { PostLikesRepository } from '../post-likes.repository';
 
 @Injectable()
 export class PostsQueryRepository {
   constructor(
     @InjectModel(Post.name)
     private postModel: PostModelType,
+    private postLikesRepository: PostLikesRepository,
   ) {}
   async getByIdOrNotFoundFail(id: string) {
     const post = await this.postModel.findOne({
@@ -38,6 +40,7 @@ export class PostsQueryRepository {
   async getAll(
     query: GetPostsQueryParams,
     blogId?: string,
+    userId?: string,
   ): Promise<PaginatedViewDto<PostViewDto[]>> {
     const filter: {
       deletedAt: null;
@@ -86,6 +89,16 @@ export class PostsQueryRepository {
       .limit(query.pageSize);
 
     const totalCount = await this.postModel.countDocuments(filter);
+
+    const postIds = posts.map((c) => c._id.toString());
+    const likesInfo: Record<string, string> = {};
+
+    if (userId) {
+      const likes = await this.postLikesRepository.find(userId, postIds);
+      likes.forEach((l) => {
+        likesInfo[l.commentId] = l.myStatus;
+      });
+    }
 
     const items = posts.map((post) => PostViewDto.mapToView(post));
 

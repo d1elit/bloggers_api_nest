@@ -37,6 +37,7 @@ export class UsersController {
     return this.usersQueryRepository.getByIdOrNotFoundFail(id);
   }
 
+  @UseGuards(BasicAuthGuard)
   @Get()
   async getAll(
     @Query() query: GetUsersQueryParams,
@@ -44,6 +45,7 @@ export class UsersController {
     return this.usersQueryRepository.getAll(query);
   }
 
+  @UseGuards(BasicAuthGuard)
   @Post()
   async createUser(@Body() body: CreateUserInputDto): Promise<UserViewDto> {
     const userId = await this.commandBus.execute(new CreateUserCommand(body));
@@ -51,6 +53,7 @@ export class UsersController {
     return this.usersQueryRepository.getByIdOrNotFoundFail(userId);
   }
 
+  @UseGuards(BasicAuthGuard)
   @ApiParam({ name: 'id' }) //для сваггера
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
