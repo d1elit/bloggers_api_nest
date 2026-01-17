@@ -4,8 +4,7 @@ import { DomainException } from '../../../../../core/exceptions/domain-exception
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
 import { PostsRepository } from '../../infrastructure/posts.repository';
 import { PostLike } from '../../domain/post-like.entity';
-import { UsersRepository } from '../../../../user-accounts/infrastructure/users.repository';
-import { UsersExternalRepository } from '../../../../user-accounts/infrastructure/users.external.repository';
+import { UsersExternalQueryRepository } from '../../../../user-accounts/infrastructure/external-query/users.external-query-repository';
 
 export class PostLikeStatusCommand {
   constructor(
@@ -16,25 +15,28 @@ export class PostLikeStatusCommand {
 }
 
 @CommandHandler(PostLikeStatusCommand)
-export class PostLikeStatusUseCase implements ICommandHandler<PostLikeStatusCommand> {
+export class PostLikeStatusUseCase
+  implements ICommandHandler<PostLikeStatusCommand>
+{
   constructor(
     private readonly postLikesRepository: PostLikesRepository,
     private readonly postsRepository: PostsRepository,
-    private readonly usersExternalRepository: UsersExternalRepository,
+    private readonly usersExternalQueryRepository: UsersExternalQueryRepository,
   ) {}
 
   async execute(command: PostLikeStatusCommand): Promise<void> {
     console.log('POST LIKE CONTROLLER');
     const post = await this.postsRepository.findById(command.postId);
-    const user = await this.usersExternalRepository.findOrNotFoundFail(
-      command.userId,
-    );
     if (!post) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
         message: 'Post not found',
       });
     }
+    const user = await this.usersExternalQueryRepository.getByIdOrNotFoundFail(
+      command.userId,
+    );
+
     const like = await this.postLikesRepository.find(
       command.userId,
       command.postId,
@@ -47,21 +49,18 @@ export class PostLikeStatusUseCase implements ICommandHandler<PostLikeStatusComm
         userId: command.userId,
         userLogin: user!.login,
       });
-
+      post.updateLikeCount(command.likeStatus);
       await this.postLikesRepository.create(newLike);
-      return;
     } else {
       if (command.likeStatus === like.myStatus) {
         return;
       }
-      console.log('POST:', post);
       const oldStatus = like.myStatus;
-      like.updateLikeStatus(oldStatus);
-      post.updateLikeCount(oldStatus);
+      like.updateLikeStatus(command.likeStatus);
+      post.updateLikeCount(command.likeStatus, oldStatus);
 
       await this.postLikesRepository.update(like);
     }
-    console.log(post);
     const newestLikes = await this.getNewestLikes(command.postId);
     post.updateNewestLikes(newestLikes);
     await this.postsRepository.save(post);
