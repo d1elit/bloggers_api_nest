@@ -3,12 +3,14 @@ import { Request } from 'express';
 import { JwtService } from '../../application/jwt.service';
 import { CommentLikesRepository } from '../../../bloggers-platform/comments/infrastructure/comment-likes.repository';
 import { OptionalUserContext } from '../types.d';
+import { PostLikesRepository } from '../../../bloggers-platform/posts/infrastructure/post-likes.repository';
 
 @Injectable()
 export class AccessOptionalGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     private readonly commentLikesRepository: CommentLikesRepository,
+    private readonly postLikesRepository: PostLikesRepository,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -33,6 +35,7 @@ export class AccessOptionalGuard implements CanActivate {
     }
 
     try {
+      console.log('IN TRY OF ACCESS GUARD OPTIONAL');
       const payload = await this.jwtService.verifyToken(token);
       if (!payload) {
         request.user = {
@@ -48,6 +51,12 @@ export class AccessOptionalGuard implements CanActivate {
 
       if (request.originalUrl.includes('/comments/') && entityId) {
         const like = await this.commentLikesRepository.find(userId, entityId);
+        if (like) {
+          likeStatus = like.myStatus;
+        }
+      } else {
+        console.log('NA MESTE');
+        const like = await this.postLikesRepository.find(userId, entityId);
         if (like) {
           likeStatus = like.myStatus;
         }

@@ -16,7 +16,7 @@ export class PostsQueryRepository {
     private postModel: PostModelType,
     private postLikesRepository: PostLikesRepository,
   ) {}
-  async getByIdOrNotFoundFail(id: string) {
+  async getByIdOrNotFoundFail(id: string, likeStatus?: string) {
     const post = await this.postModel.findOne({
       _id: id,
       deletedAt: null,
@@ -34,7 +34,7 @@ export class PostsQueryRepository {
       });
     }
 
-    return PostViewDto.mapToView(post);
+    return PostViewDto.mapToView(post, likeStatus);
   }
 
   async getAll(
@@ -92,15 +92,20 @@ export class PostsQueryRepository {
 
     const postIds = posts.map((c) => c._id.toString());
     const likesInfo: Record<string, string> = {};
-
+    console.log('USER ID IN REPOSITORY:', userId);
     if (userId) {
-      const likes = await this.postLikesRepository.find(userId, postIds);
+      const likes = await this.postLikesRepository.findByIds(postIds, userId);
+      console.log('Likes ID IN REPOSITORY:', likes);
       likes.forEach((l) => {
-        likesInfo[l.commentId] = l.myStatus;
+        likesInfo[l.postId] = l.myStatus;
       });
+      console.log('LIKES INFO:', likesInfo);
     }
 
-    const items = posts.map((post) => PostViewDto.mapToView(post));
+    const items = posts.map((post) => {
+      const myStatus = likesInfo[post._id.toString()];
+      return PostViewDto.mapToView(post, myStatus);
+    });
 
     return PaginatedViewDto.mapToView({
       items,

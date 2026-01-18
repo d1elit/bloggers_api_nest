@@ -28,6 +28,10 @@ import { DeleteBlogCommand } from '../aplication/usecases/delete-blog.usecase';
 import { GetBlogsQuery } from '../aplication/queries/get-blogs.query-handler';
 import { GetPostsQueryParams } from '../../posts/api/input-dto/get-posts-query-params.input-dto';
 import { BasicAuthGuard } from '../../../user-accounts/guards/basic/basic-auth.guard';
+import { AccessOptionalGuard } from '../../../user-accounts/guards/bearer/access-optional.guard';
+import { ExtractUserFromRequest } from '../../../user-accounts/guards/decorators/param/extract-user-from-request.decorator';
+import { UserContextDto } from '../../../user-accounts/guards/dto/user-context.dto';
+import { type UserContext } from '../../../user-accounts/guards/types';
 
 @Controller('blogs')
 export class BlogsController {
@@ -77,12 +81,19 @@ export class BlogsController {
     );
     return this.queryBus.execute(new GetPostByIdQuery(postId));
   }
+
+  @UseGuards(AccessOptionalGuard)
   @Get(':id/posts')
   async getPostList(
     @Param('id') id: string,
     @Query() query: GetPostsQueryParams,
+    @ExtractUserFromRequest() user: UserContext,
   ) {
+    const userId = user.userId;
+    console.log('USER ID IN BLOGERS POSTS: ', userId);
     await this.queryBus.execute(new GetBlogByIdQuery(id));
-    return this.queryBus.execute(new GetPostsQuery(query, id));
+    return this.queryBus.execute(
+      new GetPostsQuery(query, { blogId: id, userId }),
+    );
   }
 }

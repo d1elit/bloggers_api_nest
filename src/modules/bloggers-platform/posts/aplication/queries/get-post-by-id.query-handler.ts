@@ -3,7 +3,10 @@ import { PostsQueryRepository } from '../../infrastructure/query/posts.query-rep
 import { PostViewDto } from '../../api/view-dto/post.view-dto';
 
 export class GetPostByIdQuery {
-  constructor(public id: string) {}
+  constructor(
+    public id: string,
+    public likeStatus?: string,
+  ) {}
 }
 
 @QueryHandler(GetPostByIdQuery)
@@ -14,6 +17,9 @@ export class GetPostByIdQueryHandler implements IQueryHandler<
   constructor(public postsQueryRepository: PostsQueryRepository) {}
 
   async execute(query: GetPostByIdQuery) {
-    return await this.postsQueryRepository.getByIdOrNotFoundFail(query.id);
+    return await this.postsQueryRepository.getByIdOrNotFoundFail(
+      query.id,
+      query.likeStatus,
+    );
   }
 }

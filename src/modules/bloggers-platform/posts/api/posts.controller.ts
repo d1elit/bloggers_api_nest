@@ -29,6 +29,7 @@ import { GetPostsCommentQuery } from '../../comments/application/queries/get-com
 import { AccessOptionalGuard } from '../../../user-accounts/guards/bearer/access-optional.guard';
 import { PostLikeStatusCommand } from '../aplication/usecases/post-like-status-use.case';
 import { BasicAuthGuard } from '../../../user-accounts/guards/basic/basic-auth.guard';
+import { PostLikeStatusDto } from './input-dto/post-like-status.input-dto';
 
 @Controller('posts')
 export class PostsController {
@@ -45,10 +46,12 @@ export class PostsController {
     );
     return this.queryBus.execute(new GetPostByIdQuery(postId));
   }
-
+  @UseGuards(AccessOptionalGuard)
   @Get(':id')
-  async getPost(@Param('id') id: string) {
-    return this.queryBus.execute(new GetPostByIdQuery(id));
+  async getPost(@Param('id') id: string, @ExtractUserFromRequest() user) {
+    const likeStatus = user.likeStatus;
+    console.log(likeStatus);
+    return this.queryBus.execute(new GetPostByIdQuery(id, likeStatus));
   }
 
   @UseGuards(BasicAuthGuard)
@@ -64,9 +67,15 @@ export class PostsController {
     return this.commandBus.execute(new DeletePostCommand(id));
   }
 
+  @UseGuards(AccessOptionalGuard)
   @Get()
-  async getPostList(@Query() query: GetPostsQueryParams) {
-    return this.queryBus.execute(new GetPostsQuery(query));
+  async getPostList(
+    @Query() query: GetPostsQueryParams,
+    @ExtractUserFromRequest() user,
+  ) {
+    console.log(user);
+    const userId = user.userId;
+    return this.queryBus.execute(new GetPostsQuery(query, { userId: userId }));
   }
 
   @UseGuards(AccessTokenGuard)

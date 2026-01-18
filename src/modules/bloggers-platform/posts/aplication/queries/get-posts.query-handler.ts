@@ -4,10 +4,15 @@ import { PostsQueryRepository } from '../../infrastructure/query/posts.query-rep
 import { GetPostsQueryParams } from '../../api/input-dto/get-posts-query-params.input-dto';
 import { PostViewDto } from '../../api/view-dto/post.view-dto';
 
+export type GetPostsQueryOptions = {
+  blogId?: string;
+  userId?: string;
+};
+
 export class GetPostsQuery {
   constructor(
     public queryParams: GetPostsQueryParams,
-    public blogId?: string,
+    public options: GetPostsQueryOptions = {},
   ) {}
 }
 
@@ -18,6 +23,8 @@ export class GetPostsQueryHandler implements IQueryHandler<
 > {
   constructor(private readonly postsQueryRepository: PostsQueryRepository) {}
   async execute(query: GetPostsQuery) {
-    return this.postsQueryRepository.getAll(query.queryParams, query.blogId);
+    console.log(query.options);
+    const { blogId, userId } = query.options;
+    return this.postsQueryRepository.getAll(query.queryParams, blogId, userId);
   }
 }

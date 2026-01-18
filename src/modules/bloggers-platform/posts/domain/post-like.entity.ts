@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import { CreatePostLikeDomainDto } from './dto/create-post-like.domain.dto';
+import { PostLikeStatusDto } from '../api/input-dto/post-like-status.input-dto';
 
 @Schema()
 export class PostLike {
