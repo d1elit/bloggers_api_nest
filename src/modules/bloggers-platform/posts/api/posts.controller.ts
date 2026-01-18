@@ -1,3 +1,4 @@
+import { UserContextDto } from '../../../user-accounts/guards/dto/user-context.dto';
 import {
   Body,
   Controller,
@@ -31,39 +32,56 @@ import { PostLikeStatusCommand } from '../aplication/usecases/post-like-status-u
 import { BasicAuthGuard } from '../../../user-accounts/guards/basic/basic-auth.guard';
 import { PostLikeStatusDto } from './input-dto/post-like-status.input-dto';
 
+import { CommentViewDto } from '../../comments/api/view-dto/comment.view-dto';
+
+import { PostViewDto } from './view-dto/post.view-dto';
+
+import { PaginatedViewDto } from '../../../../core/dto/base.paginated.view-dto';
+import { UpdatePostInputDto } from './input-dto/update-post.input-dto';
+
 @Controller('posts')
 export class PostsController {
   constructor(
     private readonly commandBus: CommandBus,
+
     private readonly queryBus: QueryBus,
   ) {}
 
   @UseGuards(BasicAuthGuard)
   @Post()
-  async createPost(@Body() body: CreatePostInputDto) {
+  async createPost(@Body() body: CreatePostInputDto): Promise<PostViewDto> {
     const postId = await this.commandBus.execute<CreatePostCommand, string>(
       new CreatePostCommand(body),
     );
+
     return this.queryBus.execute(new GetPostByIdQuery(postId));
   }
+
   @UseGuards(AccessOptionalGuard)
   @Get(':id')
-  async getPost(@Param('id') id: string, @ExtractUserFromRequest() user) {
+  async getPost(
+    @Param('id') id: string,
+    @ExtractUserFromRequest() user: UserContextDto,
+  ): Promise<PostViewDto> {
     const likeStatus = user.likeStatus;
-    console.log(likeStatus);
+
     return this.queryBus.execute(new GetPostByIdQuery(id, likeStatus));
   }
 
   @UseGuards(BasicAuthGuard)
   @Put(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async updatePost(@Param('id') id: string, @Body() body: UpdatePostDto) {
+  async updatePost(
+    @Param('id') id: string,
+    @Body() body: UpdatePostInputDto,
+  ): Promise<void> {
     return this.commandBus.execute(new UpdatePostCommand(id, body));
   }
+
   @UseGuards(BasicAuthGuard)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deletePost(@Param('id') id: string) {
+  async deletePost(@Param('id') id: string): Promise<void> {
     return this.commandBus.execute(new DeletePostCommand(id));
   }
 
@@ -71,10 +89,11 @@ export class PostsController {
   @Get()
   async getPostList(
     @Query() query: GetPostsQueryParams,
-    @ExtractUserFromRequest() user,
-  ) {
-    console.log(user);
+
+    @ExtractUserFromRequest() user: UserContextDto,
+  ): Promise<PaginatedViewDto<PostViewDto[]>> {
     const userId = user.userId;
+
     return this.queryBus.execute(new GetPostsQuery(query, { userId: userId }));
   }
 
@@ -82,13 +101,15 @@ export class PostsController {
   @Post(':id/comments')
   async createComment(
     @Param('id') postId: string,
+
     @Body() body: CreateCommentInputDto,
-    @ExtractUserFromRequest() user,
-  ) {
-    console.log(user);
+
+    @ExtractUserFromRequest() user: UserContextDto,
+  ): Promise<CommentViewDto> {
     const commentId = await this.commandBus.execute(
       new CreateCommentCommand(body.content, user.userId, postId),
     );
+
     return this.queryBus.execute(new GetCommentByIdQuery(commentId));
   }
 
@@ -97,8 +118,8 @@ export class PostsController {
   async getPostComments(
     @Param('id') postId: string,
     @Query() query: GetPostsQueryParams,
-    @ExtractUserFromRequest() user,
-  ) {
+    @ExtractUserFromRequest() user: UserContextDto,
+  ): Promise<PaginatedViewDto<CommentViewDto[]>> {
     const userId = user.userId;
     await this.queryBus.execute(new GetPostByIdQuery(postId));
     return await this.queryBus.execute(
@@ -111,9 +132,9 @@ export class PostsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async postLike(
     @Param('id') postId: string,
-    @Body() body: { likeStatus: string },
-    @ExtractUserFromRequest() user,
-  ) {
+    @Body() body: PostLikeStatusDto,
+    @ExtractUserFromRequest() user: UserContextDto,
+  ): Promise<void> {
     const userId = user.userId;
 
     return await this.commandBus.execute(

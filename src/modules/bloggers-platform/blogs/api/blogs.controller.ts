@@ -32,6 +32,8 @@ import { AccessOptionalGuard } from '../../../user-accounts/guards/bearer/access
 import { ExtractUserFromRequest } from '../../../user-accounts/guards/decorators/param/extract-user-from-request.decorator';
 import { UserContextDto } from '../../../user-accounts/guards/dto/user-context.dto';
 import { type UserContext } from '../../../user-accounts/guards/types';
+import { CreatePostInputDto } from '../../posts/api/input-dto/create-post.input-dto';
+import { BlogsPostCreateInputDto } from './input-dto/blogs-post-create.input-dto';
 
 @Controller('blogs')
 export class BlogsController {
@@ -75,7 +77,10 @@ export class BlogsController {
 
   @UseGuards(BasicAuthGuard)
   @Post(':id/posts')
-  async createPost(@Body() body: CreatePostDto, @Param('id') id: string) {
+  async createPost(
+    @Body() body: BlogsPostCreateInputDto,
+    @Param('id') id: string,
+  ) {
     const postId = await this.commandBus.execute(
       new CreatePostCommand(body, id),
     );
