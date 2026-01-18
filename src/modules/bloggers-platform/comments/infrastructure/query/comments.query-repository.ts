@@ -7,6 +7,7 @@ import { BaseQueryParams } from '../../../../../core/dto/base.query-params.input
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
 import { CommentLikesRepository } from '../comment-likes.repository';
+import { GetCommentsQueryParamsInputDto } from '../../api/input-dto/get-comments-query-params.input.dto';
 
 @Injectable()
 export class CommentsQueryRepository {
@@ -35,7 +36,7 @@ export class CommentsQueryRepository {
         ],
       });
     }
-
+    console.log('COMMMMMMMENTS USER ID', userId);
     let myStatus = 'None';
     if (userId) {
       const like = await this.commentLikesRepository.find(
@@ -51,7 +52,7 @@ export class CommentsQueryRepository {
   }
 
   async getAllForPost(
-    query: BaseQueryParams,
+    query: GetCommentsQueryParamsInputDto,
     postId: string,
     userId?: string | null,
   ): Promise<PaginatedViewDto<CommentViewDto[]>> {
@@ -63,7 +64,7 @@ export class CommentsQueryRepository {
     const comments = await this.commentModel
       .find(filter)
       //todo uncomment
-      // .sort({ [query.sortBy]: query.sortDirection })
+      .sort({ [query.sortBy]: query.sortDirection })
       .skip(query.calculateSkip())
       .limit(query.pageSize);
 

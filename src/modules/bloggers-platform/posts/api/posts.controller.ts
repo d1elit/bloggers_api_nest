@@ -38,6 +38,7 @@ import { PostViewDto } from './view-dto/post.view-dto';
 
 import { PaginatedViewDto } from '../../../../core/dto/base.paginated.view-dto';
 import { UpdatePostInputDto } from './input-dto/update-post.input-dto';
+import { GetCommentsQueryParamsInputDto } from '../../comments/api/input-dto/get-comments-query-params.input.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -117,7 +118,7 @@ export class PostsController {
   @Get(':id/comments')
   async getPostComments(
     @Param('id') postId: string,
-    @Query() query: GetPostsQueryParams,
+    @Query() query: GetCommentsQueryParamsInputDto,
     @ExtractUserFromRequest() user: UserContextDto,
   ): Promise<PaginatedViewDto<CommentViewDto[]>> {
     const userId = user.userId;

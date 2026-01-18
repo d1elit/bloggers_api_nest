@@ -21,6 +21,9 @@ import { UpdateLikeStatusCommand } from '../application/usecases/update-like-sta
 
 import { ExtractUserFromRequest } from '../../../user-accounts/guards/decorators/param/extract-user-from-request.decorator';
 import { AccessTokenGuard } from '../../../user-accounts/guards/bearer/access-token.guard';
+import { AccessOptionalGuard } from '../../../user-accounts/guards/bearer/access-optional.guard';
+import { UserContext } from '../../../user-accounts/guards/types';
+import { UserContextDto } from '../../../user-accounts/guards/dto/user-context.dto';
 
 @Controller('comments')
 export class CommentsController {
@@ -29,9 +32,14 @@ export class CommentsController {
     private readonly queryBus: QueryBus,
   ) {}
 
+  @UseGuards(AccessOptionalGuard)
   @Get(':id')
-  async getComment(@Param('id') id: string) {
-    return this.queryBus.execute(new GetCommentByIdQuery(id));
+  async getComment(
+    @Param('id') id: string,
+    @ExtractUserFromRequest() user: UserContextDto,
+  ) {
+    const userId = user.userId;
+    return this.queryBus.execute(new GetCommentByIdQuery(id, userId));
   }
 
   @UseGuards(AccessTokenGuard)

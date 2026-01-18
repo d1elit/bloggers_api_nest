@@ -3,7 +3,10 @@ import { CommentsQueryRepository } from '../../infrastructure/query/comments.que
 import { CommentViewDto } from '../../api/view-dto/comment.view-dto';
 
 export class GetCommentByIdQuery {
-  constructor(public id: string) {}
+  constructor(
+    public id: string,
+    public userId?: string,
+  ) {}
 }
 
 @QueryHandler(GetCommentByIdQuery)
@@ -14,6 +17,9 @@ export class GetCommentByIdQueryHandler implements IQueryHandler<
   constructor(public commentsQueryRepository: CommentsQueryRepository) {}
 
   async execute(query: GetCommentByIdQuery) {
-    return await this.commentsQueryRepository.getByIdOrNotFoundFail(query.id);
+    return await this.commentsQueryRepository.getByIdOrNotFoundFail(
+      query.id,
+      query.userId,
+    );
   }
 }

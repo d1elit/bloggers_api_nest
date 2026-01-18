@@ -3,10 +3,11 @@ import { CommentsQueryRepository } from '../../infrastructure/query/comments.que
 import { PaginatedViewDto } from '../../../../../core/dto/base.paginated.view-dto';
 import { CommentViewDto } from '../../api/view-dto/comment.view-dto';
 import { BaseQueryParams } from '../../../../../core/dto/base.query-params.input-dto';
+import { GetCommentsQueryParamsInputDto } from '../../api/input-dto/get-comments-query-params.input.dto';
 
 export class GetPostsCommentQuery {
   constructor(
-    public queryParams: BaseQueryParams,
+    public queryParams: GetCommentsQueryParamsInputDto,
     public postId: string,
     public userId?: string,
   ) {}
