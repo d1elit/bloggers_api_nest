@@ -21,12 +21,15 @@ import { UsersQueryRepository } from '../infrastructure/query/users.query-reposi
 import { NewPasswordInputDto } from './input-dto/auth/new-password.input-dto';
 import { PasswordRecoveryInputDto } from './input-dto/auth/password-recovery.input-dto';
 import { CreateUserInputDto } from './input-dto/users/users.input-dto';
+import { CommandBus } from '@nestjs/cqrs';
+import { LoginUserCommand } from '../application/usecases/login.usecase';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
     private usersQueryRepository: UsersQueryRepository,
+    private commandBus: CommandBus,
   ) {}
 
   @Post('/registration')
@@ -47,11 +50,15 @@ export class AuthController {
     const deviceName = userAgent?.split('/')[0] || 'unknown device';
     const clientIp = ip || 'unknown ip';
 
-    const [accessToken, refreshToken] = await this.authService.login({
-      loginDto,
-      ip: clientIp,
-      deviceName,
-    });
+    const [accessToken, refreshToken] = await this.commandBus.execute(
+      new LoginUserCommand({ loginDto, ip: clientIp, deviceName }),
+    );
+
+    // const [accessToken, refreshToken] = await this.authService.login({
+    //   loginDto,
+    //   ip: clientIp,
+    //   deviceName,
+    // });
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,

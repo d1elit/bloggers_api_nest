@@ -22,6 +22,7 @@ import { CreateUserUseCase } from './application/usecases/create-user.usecase';
 import { DeleteUserUseCase } from './application/usecases/delete-user.usecase';
 import { AccessTokenGuard } from './guards/bearer/access-token.guard';
 import { UsersExternalRepository } from './infrastructure/users.external.repository';
+import { LoginUserUseCase } from './application/usecases/login.usecase';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { UsersExternalRepository } from './infrastructure/users.external.reposit
     UsersService,
     AccessTokenGuard,
     UsersExternalRepository,
+    LoginUserUseCase,
   ],
   exports: [
     UsersExternalQueryRepository,

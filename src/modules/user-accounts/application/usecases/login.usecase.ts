@@ -11,7 +11,7 @@ import { DomainExceptionCode } from '../../../../core/exceptions/domain-exceptio
 import crypto from 'node:crypto';
 import { jwtDecode } from 'jwt-decode';
 import { LoginInput } from '../../api/input-dto/auth/login.input.dto';
-import type { SessionModelType } from '../../domain/session.entity';
+import { Session, type SessionModelType } from '../../domain/session.entity';
 import { UsersRepository } from '../../infrastructure/users.repository';
 import { CryptoService } from '../crypto.service';
 import { JwtService } from '../jwt.service';
@@ -27,8 +27,7 @@ export class LoginUserUseCase implements ICommandHandler<
   string[]
 > {
   constructor(
-    @InjectModel(User.name)
-    private UserModel: UserModelType,
+    @InjectModel(Session.name)
     private SessionModel: SessionModelType,
     private sessionsRepository: SessionsRepository,
     private usersRepository: UsersRepository,
@@ -37,7 +36,9 @@ export class LoginUserUseCase implements ICommandHandler<
   ) {}
 
   async execute(command: LoginUserCommand) {
-    const {inputDto} = command
+    const { inputDto } = command;
+    const deviceName = inputDto.deviceName;
+    const ip = inputDto.ip;
 
     const user = await this.checkUserCredentials(inputDto.loginDto);
     if (!user) {
@@ -65,9 +66,9 @@ export class LoginUserUseCase implements ICommandHandler<
 
     const session = this.SessionModel.createNew({
       deviceId,
-      inputDto.deviceName,
+      deviceName,
       userId: user._id.toString(),
-      inputDto.ip,
+      ip,
       iat: iat!,
       exp: exp!,
     });
