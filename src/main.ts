@@ -6,9 +6,14 @@ import cookieParser from 'cookie-parser';
 import { appSetup } from './setup/app.setup';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const appContext = await NestFactory.createApplicationContext(AppModule);
+  const coreConfig = appContext.get(CoreConfig);
+  const DynamicAppModule = await AppModule.forRoot(coreConfig);
+  const app = await NestFactory.create(DynamicAppModule);
+  console.log(coreConfig);
+  await appContext.close();
+
   app.use(cookieParser());
-  const coreConfig = app.get(CoreConfig);
   appSetup(app);
   const port = coreConfig.port;
   await app.listen(port, () => {

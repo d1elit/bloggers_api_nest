@@ -35,7 +35,6 @@ export class AccessOptionalGuard implements CanActivate {
     }
 
     try {
-      console.log('IN TRY OF ACCESS GUARD OPTIONAL');
       const payload = await this.jwtService.verifyToken(token);
       if (!payload) {
         request.user = {
@@ -55,16 +54,11 @@ export class AccessOptionalGuard implements CanActivate {
           likeStatus = like.myStatus;
         }
       } else {
-        console.log('NA MESTE');
         const like = await this.postLikesRepository.find(userId, entityId);
         if (like) {
           likeStatus = like.myStatus;
         }
       }
-
-      // TODO: Implement post like status check when PostLikesRepository is available.
-      // The original middleware referenced a PostLikesRepository, which is not found in the current project structure.
-      // if (request.originalUrl.includes('/posts/') && entityId) { ... }
 
       request.user = { userId, likeStatus } as OptionalUserContext;
     } catch (error) {

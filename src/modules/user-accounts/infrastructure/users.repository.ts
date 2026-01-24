@@ -39,13 +39,14 @@ export class UsersRepository {
   async findByLoginOrEmail(loginOrEmail: string): Promise<UserDocument | null> {
     return this.UserModel.findOne({
       $or: [{ email: loginOrEmail }, { login: loginOrEmail }],
+      deletedAt: null,
     });
   }
   async findFieldWithValue(
     fieldName: string,
     fieldValue: string,
   ): Promise<UserDocument | null> {
-    return this.UserModel.findOne({ [fieldName]: fieldValue });
+    return this.UserModel.findOne({ [fieldName]: fieldValue, deletedAt: null });
   }
 
   async findByCodeOrError(code: string): Promise<UserDocument> {

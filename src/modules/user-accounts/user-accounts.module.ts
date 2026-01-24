@@ -1,28 +1,51 @@
 import { Module } from '@nestjs/common';
-import { UsersController } from './api/users.controller';
-import { UsersService } from './application/users.service';
+import { CqrsModule } from '@nestjs/cqrs';
 import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from './domain/user.entity';
-import { UsersRepository } from './infrastructure/users.repository';
-import { UsersQueryRepository } from './infrastructure/query/users.query-repository';
+import { AccessTokenGuard } from './guards/bearer/access-token.guard';
 import { AuthController } from './api/auth.controller';
-import { SecurityDevicesQueryRepository } from './infrastructure/query/security-devices.query-repository';
-import { AuthQueryRepository } from './infrastructure/query/auth.query-repository';
 import { SecurityDevicesController } from './api/security-devices.controller';
-import { UsersExternalQueryRepository } from './infrastructure/external-query/users.external-query-repository';
-import { UsersExternalService } from './application/users.external-service';
+import { UsersController } from './api/users.controller';
 import { CryptoService } from './application/crypto.service';
 import { JwtService } from './application/jwt.service';
-import { Session, SessionSchema } from './domain/session.entity';
-import { AuthService } from './application/auth.service';
-import { SessionsRepository } from './infrastructure/sessions.repository';
 import { NodemailerService } from './application/nodemailer.service';
-import { CqrsModule } from '@nestjs/cqrs';
 import { CreateUserUseCase } from './application/usecases/create-user.usecase';
 import { DeleteUserUseCase } from './application/usecases/delete-user.usecase';
-import { AccessTokenGuard } from './guards/bearer/access-token.guard';
-import { UsersExternalRepository } from './infrastructure/users.external.repository';
+import { EmailResendingUseCase } from './application/usecases/email-resending.usecase';
 import { LoginUserUseCase } from './application/usecases/login.usecase';
+import { LogoutUseCase } from './application/usecases/logout.usecase';
+import { PasswordRecoveryConfirmationUseCase } from './application/usecases/password-recovery-confirmation.usecase';
+import { PasswordRecoveryUseCase } from './application/usecases/password-recovery.usecase';
+import { RefreshTokenUseCase } from './application/usecases/refresh-token.usecase';
+import { RegisterUseCase } from './application/usecases/register.usecase';
+import { RegistrationConfirmationUseCase } from './application/usecases/registration-confirmation.usecase';
+import { ValidateRefreshTokenUseCase } from './application/usecases/validate-refresh-token.usecase';
+import { UsersExternalService } from './application/users.external-service';
+import { UsersService } from './application/users.service';
+import { Session, SessionSchema } from './domain/session.entity';
+import { User, UserSchema } from './domain/user.entity';
+import { UsersExternalQueryRepository } from './infrastructure/external-query/users.external-query-repository';
+import { UsersExternalRepository } from './infrastructure/users.external.repository';
+import { AuthQueryRepository } from './infrastructure/query/auth.query-repository';
+import { SecurityDevicesQueryRepository } from './infrastructure/query/security-devices.query-repository';
+import { UsersQueryRepository } from './infrastructure/query/users.query-repository';
+import { SessionsRepository } from './infrastructure/sessions.repository';
+import { UsersRepository } from './infrastructure/users.repository';
+import { RefreshTokenGuard } from './guards/bearer/refresh-token.guard';
+import { AuthService } from './application/auth.service';
+
+const useCases = [
+  CreateUserUseCase,
+  DeleteUserUseCase,
+  LoginUserUseCase,
+  RegisterUseCase,
+  RegistrationConfirmationUseCase,
+  EmailResendingUseCase,
+  PasswordRecoveryUseCase,
+  PasswordRecoveryConfirmationUseCase,
+  RefreshTokenUseCase,
+  ValidateRefreshTokenUseCase,
+  LogoutUseCase,
+];
 
 @Module({
   imports: [
@@ -40,15 +63,14 @@ import { LoginUserUseCase } from './application/usecases/login.usecase';
     UsersExternalService,
     CryptoService,
     JwtService,
-    AuthService,
     SessionsRepository,
     NodemailerService,
-    CreateUserUseCase,
-    DeleteUserUseCase,
     UsersService,
     AccessTokenGuard,
+    RefreshTokenGuard,
     UsersExternalRepository,
-    LoginUserUseCase,
+    AuthService,
+    ...useCases,
   ],
   exports: [
     UsersExternalQueryRepository,

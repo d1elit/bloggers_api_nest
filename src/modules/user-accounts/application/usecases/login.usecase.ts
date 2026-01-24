@@ -1,10 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectModel } from '@nestjs/mongoose';
-import {
-  User,
-  UserDocument,
-  type UserModelType,
-} from '../../domain/user.entity';
+import { UserDocument } from '../../domain/user.entity';
 import { authInput } from '../../api/input-dto/auth/auth.input-dto';
 import { DomainException } from '../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
@@ -22,10 +18,9 @@ export class LoginUserCommand {
 }
 
 @CommandHandler(LoginUserCommand)
-export class LoginUserUseCase implements ICommandHandler<
-  LoginUserCommand,
-  string[]
-> {
+export class LoginUserUseCase
+  implements ICommandHandler<LoginUserCommand, string[]>
+{
   constructor(
     @InjectModel(Session.name)
     private SessionModel: SessionModelType,
@@ -35,23 +30,12 @@ export class LoginUserUseCase implements ICommandHandler<
     private jwtService: JwtService,
   ) {}
 
-  async execute(command: LoginUserCommand) {
+  async execute(command: LoginUserCommand): Promise<string[]> {
     const { inputDto } = command;
     const deviceName = inputDto.deviceName;
     const ip = inputDto.ip;
 
     const user = await this.checkUserCredentials(inputDto.loginDto);
-    if (!user) {
-      throw new DomainException({
-        code: DomainExceptionCode.Unauthorized,
-        extensions: [
-          {
-            field: 'login',
-            message: 'Wrong login or password',
-          },
-        ],
-      });
-    }
 
     const deviceId = crypto.randomUUID();
 
@@ -64,7 +48,7 @@ export class LoginUserUseCase implements ICommandHandler<
     );
     const { exp, iat } = jwtDecode(refreshToken);
 
-    const session = this.SessionModel.createNew({
+    const session = Session.createNew({
       deviceId,
       deviceName,
       userId: user._id.toString(),
@@ -83,7 +67,7 @@ export class LoginUserUseCase implements ICommandHandler<
       hash: user.passwordHash,
     });
 
-    if (!user || !isPasswordVerified) {
+    if (!isPasswordVerified) {
       throw new DomainException({
         code: DomainExceptionCode.Unauthorized,
         extensions: [

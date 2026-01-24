@@ -4,6 +4,7 @@ import { Comment, type CommentModelType } from '../../domain/comment.entity';
 import { PostsQueryRepository } from '../../../posts/infrastructure/query/posts.query-repository';
 import { UsersQueryRepository } from '../../../../user-accounts/infrastructure/query/users.query-repository';
 import { InjectModel } from '@nestjs/mongoose';
+import { UsersExternalRepository } from '../../../../user-accounts/infrastructure/users.external.repository';
 
 export class CreateCommentCommand {
   constructor(
@@ -23,7 +24,7 @@ export class CreateCommentUseCase implements ICommandHandler<
     private commentModel: CommentModelType,
     private commentsRepository: CommentsRepository,
     private postsQueryRepository: PostsQueryRepository,
-    private usersQueryRepository: UsersQueryRepository,
+    private usersExternalRepository: UsersExternalRepository,
   ) {}
 
   async execute({
@@ -32,7 +33,7 @@ export class CreateCommentUseCase implements ICommandHandler<
     postId,
   }: CreateCommentCommand): Promise<string> {
     await this.postsQueryRepository.getByIdOrNotFoundFail(postId);
-    const user = await this.usersQueryRepository.getByIdOrNotFoundFail(userId);
+    const user = await this.usersExternalRepository.findOrNotFoundFail(userId);
 
     const comment = this.commentModel.createInstance(
       content,

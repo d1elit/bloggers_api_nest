@@ -1,3 +1,4 @@
+import { configModule } from './config-dynamic-module';
 import { DynamicModule, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -10,7 +11,6 @@ import { APP_FILTER } from '@nestjs/core';
 import { AllHttpExceptionsFilter } from './core/exceptions/filters/base-exception.filter';
 import { DomainHttpExceptionsFilter } from './core/exceptions/filters/domain-exception.filter';
 
-import { configModule } from './config-dynamic-module';
 import { CoreConfig } from './core/core.config'; // ← Правильный путь
 
 @Module({
