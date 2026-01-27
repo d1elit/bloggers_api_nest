@@ -43,6 +43,7 @@ import { UserAccountsModule } from '../user-accounts/user-accounts.module';
 import { PostLike, PostLikeSchema } from './posts/domain/post-like.entity';
 import { PostLikesRepository } from './posts/infrastructure/post-likes.repository';
 import { PostLikeStatusUseCase } from './posts/aplication/usecases/post-like-status-use.case';
+import { GetDeviceListQueryHandler } from '../user-accounts/application/queries/get-device-list.query';
 
 @Module({
   imports: [

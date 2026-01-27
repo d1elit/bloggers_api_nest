@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { IsEnum, IsNotEmpty, IsNumber } from 'class-validator';
+import { IsBoolean, IsEnum, IsNotEmpty, IsNumber } from 'class-validator';
 import { ConfigService } from '@nestjs/config';
 import { configValidationUtility } from '../setup/config-validation-utility';
 
@@ -49,6 +49,12 @@ export class CoreConfig {
   get refreshTokenSecret(): string {
     return this.configService.get('REFRESH_TOKEN_SECRET');
   }
+
+  // @IsBoolean({
+  //   message:
+  //     'Set Env variable INCLUDE_TESTING_MODULE to enable/disable Dangerous for production TestingModule, example: true, available values: true, false, 0, 1',
+  // })
+  includeTestingModule: boolean;
 
   @IsNotEmpty({
     message: 'Set Env variable ACCESS_TOKEN_SECRET, dangerous for security!',

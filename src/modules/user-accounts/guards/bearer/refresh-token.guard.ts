@@ -48,7 +48,7 @@ export class RefreshTokenGuard implements CanActivate {
     console.log('refreshToken', refreshToken);
     if (!refreshToken) {
       throw new DomainException({
-        code: DomainExceptionCode.NotFound,
+        code: DomainExceptionCode.Unauthorized,
         extensions: [
           {
             field: 'token',
@@ -64,7 +64,7 @@ export class RefreshTokenGuard implements CanActivate {
 
       if (!payload) {
         throw new DomainException({
-          code: DomainExceptionCode.Forbidden,
+          code: DomainExceptionCode.Unauthorized,
           extensions: [
             {
               field: 'token',
@@ -84,11 +84,11 @@ export class RefreshTokenGuard implements CanActivate {
       return true;
     } catch (error) {
       throw new DomainException({
-        code: DomainExceptionCode.BadRequest,
+        code: DomainExceptionCode.Unauthorized,
         extensions: [
           {
             field: 'token',
-            message: 'Invalid or expired token not found',
+            message: 'Invalid or expired REFRESH token',
           },
         ],
       });

@@ -32,6 +32,10 @@ import { SessionsRepository } from './infrastructure/sessions.repository';
 import { UsersRepository } from './infrastructure/users.repository';
 import { RefreshTokenGuard } from './guards/bearer/refresh-token.guard';
 import { AuthService } from './application/auth.service';
+import { SessionsQueryRepository } from './infrastructure/query/sessions.query-repository';
+import { GetDeviceListQueryHandler } from './application/queries/get-device-list.query';
+import { DeleteDeviceUseCase } from './application/usecases/delete-device.usecase';
+import { DeleteDeviceExceptCurrentUseCase } from './application/usecases/delete-device-except-current.usecase';
 
 const useCases = [
   CreateUserUseCase,
@@ -45,6 +49,8 @@ const useCases = [
   RefreshTokenUseCase,
   ValidateRefreshTokenUseCase,
   LogoutUseCase,
+  DeleteDeviceUseCase,
+  DeleteDeviceExceptCurrentUseCase,
 ];
 
 @Module({
@@ -53,7 +59,12 @@ const useCases = [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([{ name: Session.name, schema: SessionSchema }]),
   ],
-  controllers: [UsersController, AuthController, SecurityDevicesController],
+  controllers: [
+    UsersController,
+    AuthController,
+    SecurityDevicesController,
+    SecurityDevicesController,
+  ],
   providers: [
     UsersRepository,
     UsersQueryRepository,
@@ -70,6 +81,8 @@ const useCases = [
     RefreshTokenGuard,
     UsersExternalRepository,
     AuthService,
+    SessionsQueryRepository,
+    GetDeviceListQueryHandler,
     ...useCases,
   ],
   exports: [

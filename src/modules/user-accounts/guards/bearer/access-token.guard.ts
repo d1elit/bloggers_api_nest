@@ -29,7 +29,12 @@ export class AccessTokenGuard implements CanActivate {
     if (!authHeader) {
       throw new DomainException({
         code: DomainExceptionCode.Unauthorized,
-        message: 'Authorization header is missing',
+        extensions: [
+          {
+            field: 'token',
+            message: 'Authorization header is missing',
+          },
+        ],
       });
     }
 
@@ -37,7 +42,12 @@ export class AccessTokenGuard implements CanActivate {
     if (authType !== 'Bearer' || !token) {
       throw new DomainException({
         code: DomainExceptionCode.Unauthorized,
-        message: 'Invalid authorization header',
+        extensions: [
+          {
+            field: 'token',
+            message: 'Authorization header is missing',
+          },
+        ],
       });
     }
 
@@ -46,7 +56,12 @@ export class AccessTokenGuard implements CanActivate {
       if (!payload) {
         throw new DomainException({
           code: DomainExceptionCode.Unauthorized,
-          message: 'Invalid access token',
+          extensions: [
+            {
+              field: 'token',
+              message: 'Invalid access token',
+            },
+          ],
         });
       }
 
@@ -59,7 +74,12 @@ export class AccessTokenGuard implements CanActivate {
       // Catching errors from jwtService.verifyToken (like token expiration)
       throw new DomainException({
         code: DomainExceptionCode.Unauthorized,
-        message: 'Invalid or expired access token',
+        extensions: [
+          {
+            field: 'token',
+            message: 'Invalid or expired access token',
+          },
+        ],
       });
     }
   }

@@ -34,7 +34,8 @@ import { UserContextDto } from '../../../user-accounts/guards/dto/user-context.d
 import { type UserContext } from '../../../user-accounts/guards/types';
 import { CreatePostInputDto } from '../../posts/api/input-dto/create-post.input-dto';
 import { BlogsPostCreateInputDto } from './input-dto/blogs-post-create.input-dto';
-
+import { SkipThrottle } from '@nestjs/throttler';
+@SkipThrottle()
 @Controller('blogs')
 export class BlogsController {
   constructor(

@@ -1,4 +1,48 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Req, UseGuards } from '@nestjs/common';
+import { SecurityDevicesQueryRepository } from '../infrastructure/query/security-devices.query-repository';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { RefreshTokenGuard } from '../guards/bearer/refresh-token.guard';
+import { ExtractUserFromRequest } from '../guards/decorators/param/extract-user-from-request.decorator';
+import { UserContextDto } from '../guards/dto/user-context.dto';
+import { GetDeviceListQuery } from '../application/queries/get-device-list.query';
+import {
+  DeleteDeviceCommand,
+  DeleteDeviceUseCase,
+} from '../application/usecases/delete-device.usecase';
+import { DeleteDeviceExceptCurrentCommand } from '../application/usecases/delete-device-except-current.usecase';
+import type { Request } from 'express';
 
-@Controller('security-devices')
-export class SecurityDevicesController {}
+import { refreshTokenPayload } from './input-dto/auth/refresh-token-payload';
+import { jwtDecode } from 'jwt-decode';
+
+@Controller('security/devices')
+export class SecurityDevicesController {
+  constructor(
+    private readonly queryBus: QueryBus,
+    private commandBus: CommandBus,
+  ) {}
+
+  @UseGuards(RefreshTokenGuard)
+  @Get('')
+  async getAll(@ExtractUserFromRequest() user: UserContextDto) {
+    return this.queryBus.execute(new GetDeviceListQuery(user.userId));
+  }
+
+  @UseGuards(RefreshTokenGuard)
+  @Delete(':id')
+  async deleteDevice(
+    @ExtractUserFromRequest() user: UserContextDto,
+    @Param('id') id: string,
+  ) {
+    return this.commandBus.execute(new DeleteDeviceCommand(id, user.userId));
+  }
+  @UseGuards(RefreshTokenGuard)
+  @Delete('')
+  async deleteDeviceExceptCurrent(@Req() req: Request) {
+    const refreshToken = req.cookies.refreshToken;
+    const { deviceId }: refreshTokenPayload = jwtDecode(refreshToken);
+    return this.commandBus.execute(
+      new DeleteDeviceExceptCurrentCommand(deviceId),
+    );
+  }
+}

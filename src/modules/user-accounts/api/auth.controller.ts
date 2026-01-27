@@ -31,6 +31,8 @@ import { PasswordRecoveryInputDto } from './input-dto/auth/password-recovery.inp
 import { CreateUserInputDto } from './input-dto/users/users.input-dto';
 import { ExtractUserFromRequest } from '../guards/decorators/param/extract-user-from-request.decorator';
 import { UserContextDto } from '../guards/dto/user-context.dto';
+import { SkipThrottle, Throttle } from '@nestjs/throttler';
+import { AccessTokenGuard } from '../guards/bearer/access-token.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -83,7 +85,9 @@ export class AuthController {
   async emailResending(@Body() body: EmailResendingInputDto) {
     await this.commandBus.execute(new EmailResendingCommand(body.email));
   }
-  @UseGuards(RefreshTokenGuard)
+
+  @SkipThrottle()
+  @UseGuards(AccessTokenGuard)
   @Get('/me')
   @HttpCode(HttpStatus.OK)
   async getAuthMe(@Req() req: Request) {
@@ -114,7 +118,7 @@ export class AuthController {
       new PasswordRecoveryConfirmationCommand(code, password),
     );
   }
-
+  @SkipThrottle()
   @UseGuards(RefreshTokenGuard)
   @Post('/refresh-token')
   @HttpCode(HttpStatus.OK)
@@ -136,6 +140,7 @@ export class AuthController {
     return { accessToken };
   }
 
+  @SkipThrottle()
   @UseGuards(RefreshTokenGuard)
   @Post('/logout')
   @HttpCode(HttpStatus.NO_CONTENT)

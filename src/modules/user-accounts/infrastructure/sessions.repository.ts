@@ -5,6 +5,8 @@ import {
   SessionDocument,
   type SessionModelType,
 } from '../domain/session.entity';
+import { DomainException } from '../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
 
 @Injectable()
 export class SessionsRepository {
@@ -20,8 +22,20 @@ export class SessionsRepository {
     return this.SessionModel.findOne({ iat: iat, deviceId: deviceId });
   }
 
-  findByDeviceId(deviceId: string) {
-    return this.SessionModel.findOne({ deviceId: deviceId });
+  findByDeviceIdOrFail(deviceId: string) {
+    const session = this.SessionModel.findOne({ deviceId: deviceId });
+    if (!session) {
+      throw new DomainException({
+        code: DomainExceptionCode.NotFound,
+        extensions: [
+          {
+            field: 'device',
+            message: 'Device not found',
+          },
+        ],
+      });
+    }
+    return session;
   }
 
   async update(iat: number, exp: number, oldVersion: number) {

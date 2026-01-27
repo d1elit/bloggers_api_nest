@@ -24,7 +24,8 @@ import { AccessTokenGuard } from '../../../user-accounts/guards/bearer/access-to
 import { AccessOptionalGuard } from '../../../user-accounts/guards/bearer/access-optional.guard';
 import { UserContext } from '../../../user-accounts/guards/types';
 import { UserContextDto } from '../../../user-accounts/guards/dto/user-context.dto';
-
+import { SkipThrottle } from '@nestjs/throttler';
+@SkipThrottle()
 @Controller('comments')
 export class CommentsController {
   constructor(
