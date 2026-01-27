@@ -22,8 +22,8 @@ export class SessionsRepository {
     return this.SessionModel.findOne({ iat: iat, deviceId: deviceId });
   }
 
-  findByDeviceIdOrFail(deviceId: string) {
-    const session = this.SessionModel.findOne({ deviceId: deviceId });
+  async findByDeviceIdOrFail(deviceId: string) {
+    const session = await this.SessionModel.findOne({ deviceId: deviceId });
     if (!session) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,

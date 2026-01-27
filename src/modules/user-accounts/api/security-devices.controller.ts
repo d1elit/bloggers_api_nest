@@ -1,4 +1,13 @@
-import { Controller, Delete, Get, Param, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { SecurityDevicesQueryRepository } from '../infrastructure/query/security-devices.query-repository';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { RefreshTokenGuard } from '../guards/bearer/refresh-token.guard';
@@ -14,7 +23,8 @@ import type { Request } from 'express';
 
 import { refreshTokenPayload } from './input-dto/auth/refresh-token-payload';
 import { jwtDecode } from 'jwt-decode';
-
+import { SkipThrottle } from '@nestjs/throttler';
+@SkipThrottle()
 @Controller('security/devices')
 export class SecurityDevicesController {
   constructor(
@@ -29,6 +39,7 @@ export class SecurityDevicesController {
   }
 
   @UseGuards(RefreshTokenGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   async deleteDevice(
     @ExtractUserFromRequest() user: UserContextDto,
@@ -37,6 +48,7 @@ export class SecurityDevicesController {
     return this.commandBus.execute(new DeleteDeviceCommand(id, user.userId));
   }
   @UseGuards(RefreshTokenGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('')
   async deleteDeviceExceptCurrent(@Req() req: Request) {
     const refreshToken = req.cookies.refreshToken;
