@@ -8,16 +8,12 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { SecurityDevicesQueryRepository } from '../infrastructure/query/security-devices.query-repository';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { RefreshTokenGuard } from '../guards/bearer/refresh-token.guard';
 import { ExtractUserFromRequest } from '../guards/decorators/param/extract-user-from-request.decorator';
 import { UserContextDto } from '../guards/dto/user-context.dto';
 import { GetDeviceListQuery } from '../application/queries/get-device-list.query';
-import {
-  DeleteDeviceCommand,
-  DeleteDeviceUseCase,
-} from '../application/usecases/delete-device.usecase';
+import { DeleteDeviceCommand } from '../application/usecases/delete-device.usecase';
 import { DeleteDeviceExceptCurrentCommand } from '../application/usecases/delete-device-except-current.usecase';
 import type { Request } from 'express';
 

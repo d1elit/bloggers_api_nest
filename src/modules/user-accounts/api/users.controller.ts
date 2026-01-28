@@ -31,8 +31,8 @@ export class UsersController {
     console.log('UsersController created');
   }
 
-  @ApiParam({ name: 'id' }) //для сваггера
-  @Get(':id') //users/232342-sdfssdf-23234323
+  @ApiParam({ name: 'id' })
+  @Get(':id')
   async getById(@Param('id') id: string): Promise<UserViewDto> {
     return this.usersQueryRepository.getByIdOrNotFoundFail(id);
   }
