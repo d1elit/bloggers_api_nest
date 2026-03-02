@@ -20,6 +20,7 @@ import { BasicAuthGuard } from '../guards/basic/basic-auth.guard';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from '../application/usecases/create-user.usecase';
 import { DeleteUserCommand } from '../application/usecases/delete-user.usecase';
+import { buildDocumentBase } from '@nestjs/swagger/dist/fixtures/document.base';
 
 @UseGuards(BasicAuthGuard)
 @Controller('users')

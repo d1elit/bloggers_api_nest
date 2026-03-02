@@ -11,7 +11,7 @@ export class UserViewDto {
 
     dto.email = user.email;
     dto.login = user.login;
-    dto.id = user._id.toString();
+    dto.id = user._id ? user._id.toString() : user.id;
     dto.createdAt = user.createdAt;
 
     return dto;
