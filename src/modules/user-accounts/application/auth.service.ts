@@ -1,6 +1,10 @@
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
-import { User, UserDocument, type UserModelType } from '../domain/user.entity';
+import {
+  UserMongo,
+  UserMongoDocument,
+  type UserMongoModelType,
+} from '../domain/user-mongo.entity';
 import { UsersRepository } from '../infrastructure/users.repository';
 import { authInput } from '../api/input-dto/auth/auth.input-dto';
 import { LoginInput } from '../api/input-dto/auth/login.input.dto';
@@ -21,8 +25,8 @@ import { refreshTokenPayload } from '../api/input-dto/auth/refresh-token-payload
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel(User.name)
-    private UserModel: UserModelType,
+    @InjectModel(UserMongo.name)
+    private UserModel: UserMongoModelType,
     @InjectModel(Session.name)
     private SessionModel: SessionModelType,
     private usersRepository: UsersRepository,

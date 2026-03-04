@@ -1,4 +1,4 @@
-import { UserDocument } from '../../../domain/user.entity';
+import { UserMongoDocument } from '../../../domain/user-mongo.entity';
 
 export class UserExternalDto {
   id: string;
@@ -6,7 +6,7 @@ export class UserExternalDto {
   email: string;
   createdAt: Date;
 
-  static mapToView(user: UserDocument): UserExternalDto {
+  static mapToView(user: UserMongoDocument): UserExternalDto {
     const dto = new UserExternalDto();
 
     dto.email = user.email;

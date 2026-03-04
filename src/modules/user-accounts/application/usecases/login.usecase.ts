@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectModel } from '@nestjs/mongoose';
-import { UserDocument } from '../../domain/user.entity';
+import { UserMongoDocument } from '../../domain/user-mongo.entity';
 import { authInput } from '../../api/input-dto/auth/auth.input-dto';
 import { DomainException } from '../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
@@ -18,9 +18,10 @@ export class LoginUserCommand {
 }
 
 @CommandHandler(LoginUserCommand)
-export class LoginUserUseCase
-  implements ICommandHandler<LoginUserCommand, string[]>
-{
+export class LoginUserUseCase implements ICommandHandler<
+  LoginUserCommand,
+  string[]
+> {
   constructor(
     @InjectModel(Session.name)
     private SessionModel: SessionModelType,
@@ -40,10 +41,10 @@ export class LoginUserUseCase
     const deviceId = crypto.randomUUID();
 
     const accessToken = await this.jwtService.createAccessToken(
-      user._id.toString(),
+      user.id.toString(),
     );
     const refreshToken = await this.jwtService.createRefreshToken(
-      user._id.toString(),
+      user.id.toString(),
       deviceId,
     );
     const { exp, iat } = jwtDecode(refreshToken);
@@ -51,7 +52,7 @@ export class LoginUserUseCase
     const session = Session.createNew({
       deviceId,
       deviceName,
-      userId: user._id.toString(),
+      userId: user.id.toString(),
       ip,
       iat: iat!,
       exp: exp!,
@@ -60,7 +61,7 @@ export class LoginUserUseCase
 
     return [accessToken, refreshToken];
   }
-  async checkUserCredentials(loginDto: LoginInput): Promise<UserDocument> {
+  async checkUserCredentials(loginDto: LoginInput): Promise<UserMongoDocument> {
     const user = await this.verifyLoginOrEmail(loginDto.loginOrEmail);
     const isPasswordVerified = await this.cryptoService.comparePassword({
       password: loginDto.password,
@@ -81,7 +82,7 @@ export class LoginUserUseCase
     return user;
   }
 
-  async verifyLoginOrEmail(login: string): Promise<UserDocument> {
+  async verifyLoginOrEmail(login: string): Promise<UserMongoDocument> {
     const user = await this.usersRepository.findByLoginOrEmail(login);
     if (!user) {
       throw new DomainException({

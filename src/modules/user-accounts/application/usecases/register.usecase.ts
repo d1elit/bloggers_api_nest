@@ -2,7 +2,10 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectModel } from '@nestjs/mongoose';
 import * as crypto from 'node:crypto';
 import { CreateUserInputDto } from '../../api/input-dto/users/users.input-dto';
-import { User, type UserModelType } from '../../domain/user.entity';
+import {
+  UserMongo,
+  type UserMongoModelType,
+} from '../../domain/user-mongo.entity';
 import { UsersRepository } from '../../infrastructure/users.repository';
 import { CryptoService } from '../crypto.service';
 import { emailExamples } from '../email-examples';
@@ -19,7 +22,7 @@ export class RegisterUseCase implements ICommandHandler<RegisterCommand, void> {
     private usersRepository: UsersRepository,
     private cryptoService: CryptoService,
     private userService: UsersService,
-    @InjectModel(User.name) private UserModel: UserModelType,
+    @InjectModel(UserMongo.name) private UserModel: UserMongoModelType,
   ) {}
 
   async execute(command: RegisterCommand): Promise<void> {

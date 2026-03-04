@@ -1,23 +1,29 @@
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument, type UserModelType } from '../domain/user.entity';
+import {
+  UserMongo,
+  UserMongoDocument,
+  type UserMongoModelType,
+} from '../domain/user-mongo.entity';
 import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
 
 export class UsersExternalRepository {
-  constructor(@InjectModel(User.name) private UserModel: UserModelType) {}
+  constructor(
+    @InjectModel(UserMongo.name) private UserModel: UserMongoModelType,
+  ) {}
 
-  async findById(id: string): Promise<UserDocument | null> {
+  async findById(id: string): Promise<UserMongoDocument | null> {
     return this.UserModel.findOne({
       _id: id,
       deletedAt: null,
     });
   }
 
-  async save(user: UserDocument) {
+  async save(user: UserMongoDocument) {
     await user.save();
   }
 
-  async findOrNotFoundFail(id: string): Promise<UserDocument> {
+  async findOrNotFoundFail(id: string): Promise<UserMongoDocument> {
     const user = await this.findById(id);
 
     if (!user) {

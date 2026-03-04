@@ -1,14 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, type UserModelType } from '../domain/user.entity';
+import {
+  UserMongo,
+  type UserMongoModelType,
+} from '../domain/user-mongo.entity';
 import { UsersRepository } from '../infrastructure/users.repository';
 
 @Injectable()
 export class UsersExternalService {
   constructor(
     //инжектирование модели в сервис через DI
-    @InjectModel(User.name)
-    private UserModel: UserModelType,
+    @InjectModel(UserMongo.name)
+    private UserModel: UserMongoModelType,
     private usersRepository: UsersRepository,
   ) {}
 

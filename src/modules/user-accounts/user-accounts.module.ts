@@ -22,7 +22,7 @@ import { ValidateRefreshTokenUseCase } from './application/usecases/validate-ref
 import { UsersExternalService } from './application/users.external-service';
 import { UsersService } from './application/users.service';
 import { Session, SessionSchema } from './domain/session.entity';
-import { User, UserSchema } from './domain/user.entity';
+import { UserMongo, UserSchema } from './domain/user-mongo.entity';
 import { UsersExternalQueryRepository } from './infrastructure/external-query/users.external-query-repository';
 import { UsersExternalRepository } from './infrastructure/users.external.repository';
 import { AuthQueryRepository } from './infrastructure/query/auth.query-repository';
@@ -56,7 +56,7 @@ const useCases = [
 @Module({
   imports: [
     CqrsModule,
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([{ name: UserMongo.name, schema: UserSchema }]),
     MongooseModule.forFeature([{ name: Session.name, schema: SessionSchema }]),
   ],
   controllers: [

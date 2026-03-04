@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model } from 'mongoose';
-import { User } from './user.entity';
+import { UserMongo } from './user-mongo.entity';
 
 export type SessionDto = {
   userId: string;

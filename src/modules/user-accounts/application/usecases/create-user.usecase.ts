@@ -1,11 +1,15 @@
 import { InjectModel } from '@nestjs/mongoose';
-import { User, type UserModelType } from '../../domain/user.entity';
+import {
+  UserMongo,
+  type UserMongoModelType,
+} from '../../domain/user-mongo.entity';
 import { CreateUserDto } from '../../dto/create-user.dto';
 import { UsersRepository } from '../../infrastructure/users.repository';
 import { CryptoService } from '../crypto.service';
 import { DomainException } from '../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { User } from '../../domain/user.entity';
 
 export class CreateUserCommand {
   constructor(
@@ -20,8 +24,8 @@ export class CreateUserUseCase implements ICommandHandler<
   string
 > {
   constructor(
-    @InjectModel(User.name)
-    private UserModel: UserModelType,
+    // @InjectModel(UserMongo.name)
+    // private UserModel: UserMongoModelType,
     private usersRepository: UsersRepository,
     private cryptoService: CryptoService,
   ) {}
@@ -33,14 +37,14 @@ export class CreateUserUseCase implements ICommandHandler<
       dto.password,
     );
 
-    const user = this.UserModel.createInstance({
+    const user = User.create({
       email: dto.email,
       login: dto.login,
       passwordHash: passwordHash,
       confirmationCode,
     });
 
-    await this.usersRepository.save(user);
+    await this.usersRepository.create(user);
 
     return user.id.toString();
   }
@@ -54,6 +58,7 @@ export class CreateUserUseCase implements ICommandHandler<
       'email',
       email,
     );
+    console.log(`res email:`, resEmail);
     if (resEmail) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,

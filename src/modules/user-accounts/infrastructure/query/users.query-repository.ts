@@ -1,4 +1,4 @@
-import { User, type UserModelType } from '../../domain/user.entity';
+import { UserMongo } from '../../domain/user-mongo.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserViewDto } from '../../api/view-dto/users.view-dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
@@ -9,16 +9,20 @@ import { DataSource } from 'typeorm';
 @Injectable()
 export class UsersQueryRepository {
   constructor(
-    @InjectModel(User.name)
-    private UserModel: UserModelType,
+    // @InjectModel(User.name)
+    // private UserModel: UserModelType,
     private dataSource: DataSource,
   ) {}
 
   async getByIdOrNotFoundFail(id: string): Promise<UserViewDto> {
-    const user = await this.UserModel.findOne({
-      _id: id,
-      deletedAt: null,
-    });
+    // const user = await this.UserModel.findOne({
+    //   _id: id,
+    //   deletedAt: null,
+    // });
+    const user = await this.dataSource.query(
+      `SELECT * FROM users WHERE id = $1 and "deletedAt" is NULL`,
+      [id],
+    );
 
     if (!user) {
       throw new NotFoundException('user not found');
