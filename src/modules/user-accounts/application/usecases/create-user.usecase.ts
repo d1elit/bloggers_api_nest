@@ -44,7 +44,7 @@ export class CreateUserUseCase implements ICommandHandler<
       confirmationCode,
     });
 
-    await this.usersRepository.create(user);
+    await this.usersRepository.save(user);
 
     return user.id.toString();
   }

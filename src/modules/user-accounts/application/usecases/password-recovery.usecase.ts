@@ -9,9 +9,10 @@ export class PasswordRecoveryCommand {
 }
 
 @CommandHandler(PasswordRecoveryCommand)
-export class PasswordRecoveryUseCase
-  implements ICommandHandler<PasswordRecoveryCommand, void>
-{
+export class PasswordRecoveryUseCase implements ICommandHandler<
+  PasswordRecoveryCommand,
+  void
+> {
   constructor(
     private usersRepository: UsersRepository,
     private nodemailerService: NodemailerService,
@@ -23,10 +24,13 @@ export class PasswordRecoveryUseCase
 
     const recoveryCode = crypto.randomUUID();
     user.updatePasswordRecoveryCode(recoveryCode);
-    await this.usersRepository.save(user);
+    await this.usersRepository.saveMongo(user);
 
     this.nodemailerService
-      .sendEmail(command.email, emailExamples.passwordRecoveryEmail(recoveryCode))
+      .sendEmail(
+        command.email,
+        emailExamples.passwordRecoveryEmail(recoveryCode),
+      )
       .catch((error) => {
         console.log('Email sending failed', error);
       });

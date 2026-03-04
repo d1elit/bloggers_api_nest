@@ -9,6 +9,7 @@ import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
 import { User } from '../domain/user.entity';
 import { DataSource } from 'typeorm';
+import { UsersMapper } from './users-mapper';
 
 @Injectable()
 export class UsersRepository {
@@ -17,62 +18,75 @@ export class UsersRepository {
     private dataSource: DataSource,
   ) {}
 
-  async findById(id: string): Promise<UserMongoDocument | null> {
-    // return this.UserModel.findOne({
-    //   _id: id,
-    //   deletedAt: null,
-    // });
-
-    return this.dataSource.query(
+  async findById(id: string): Promise<User | null> {
+    console.log('IM IN FIND', [id]);
+    const raw = await this.dataSource.query(
       `SELECT * FROM users
-                WHERE id = $1 and "deletedAt" IS NOT NULL `,
+                WHERE id = $1 and "deleted_at" IS NULL `,
       [id],
     );
+    console.log(raw);
+    return UsersMapper.toDomain(raw[0]);
   }
 
-  async create(user: User) {
+  async saveMongo(user: UserMongoDocument) {
+    await user.save();
+  }
+
+  async save(domainUser: User) {
+    const user = UsersMapper.toPersistence(domainUser);
     await this.dataSource.query(
       `
-      INSERT INTO users (
-        id, login, email, password_hash,
-        "createdAt", "updatedAt", "deletedAt",
-        email_confirmation_code,
-        email_is_confirmed,
-        email_confirmation_expiration,
-        recovery_code,
-        recovery_is_used,
-        recovery_expiration
-      )
-      VALUES (
-        $1,$2,$3,$4,
-        $5,$6,$7,
-        $8,$9,$10,
-        $11,$12,$13
-      )
+        INSERT INTO users (
+          id, login, email, password_hash,
+          created_at, updated_at, deleted_at,
+          email_confirmation_code,
+          email_is_confirmed,
+          email_confirmation_expiration,
+          recovery_code,
+          recovery_is_used,
+          recovery_expiration
+        )
+        VALUES (
+                 $1,$2,$3,$4,
+                 $5,$6,$7,
+                 $8,$9,$10,
+                 $11,$12,$13
+               )
+          ON CONFLICT (id)
+    DO UPDATE SET
+          login = EXCLUDED.login,
+                   email = EXCLUDED.email,
+                   password_hash = EXCLUDED.password_hash,
+                   updated_at = EXCLUDED.updated_at,
+                   deleted_at = EXCLUDED.deleted_at,
+                   email_confirmation_code = EXCLUDED.email_confirmation_code,
+                   email_is_confirmed = EXCLUDED.email_is_confirmed,
+                   email_confirmation_expiration = EXCLUDED.email_confirmation_expiration,
+                   recovery_code = EXCLUDED.recovery_code,
+                   recovery_is_used = EXCLUDED.recovery_is_used,
+                   recovery_expiration = EXCLUDED.recovery_expiration
       `,
       [
         user.id,
         user.login,
         user.email,
-        user.passwordHash,
-        user.createdAt,
-        user.updatedAt,
-        user.deletedAt,
-        user.emailConfirmationCode,
-        user.emailIsConfirmed,
-        user.emailConfirmationExpiration,
-        user.recoveryCode,
-        user.recoveryIsUsed,
-        user.recoveryExpiration,
+        user.password_hash,
+        user.created_at,
+        user.updated_at,
+        user.deleted_at,
+        user.email_confirmation_code,
+        user.email_is_confirmed,
+        user.email_confirmation_expiration,
+        user.recovery_code,
+        user.recovery_is_used,
+        user.recovery_expiration,
       ],
     );
+    return user;
   }
 
-  async save(user: UserMongoDocument) {
-    await user.save();
-  }
-
-  async findOrNotFoundFail(id: string): Promise<UserMongoDocument> {
+  async findOrNotFoundFail(id: string): Promise<User> {
     const user = await this.findById(id);
 
     if (!user) {
@@ -89,6 +103,7 @@ export class UsersRepository {
 
     return user;
   }
+
   async findByLoginOrEmail(
     loginOrEmail: string,
   ): Promise<UserMongoDocument | null> {
@@ -116,7 +131,7 @@ export class UsersRepository {
     }
     const user = await this.dataSource.query(
       `SELECT * from users 
-         WHERE  ${fieldName} = $1`,
+         WHERE  ${fieldName} = $1 and deleted_at is not null `,
       [fieldValue],
     );
     if (user.length === 0) return null;

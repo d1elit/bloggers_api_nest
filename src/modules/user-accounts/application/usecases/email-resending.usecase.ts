@@ -11,9 +11,10 @@ export class EmailResendingCommand {
 }
 
 @CommandHandler(EmailResendingCommand)
-export class EmailResendingUseCase
-  implements ICommandHandler<EmailResendingCommand, void>
-{
+export class EmailResendingUseCase implements ICommandHandler<
+  EmailResendingCommand,
+  void
+> {
   constructor(
     private usersRepository: UsersRepository,
     private nodemailerService: NodemailerService,
@@ -46,7 +47,7 @@ export class EmailResendingUseCase
     const confirmationCode = crypto.randomUUID();
 
     user.updateEmailConfirmationCode(confirmationCode);
-    await this.usersRepository.save(user);
+    await this.usersRepository.saveMongo(user);
 
     await this.nodemailerService.sendEmail(
       command.email,

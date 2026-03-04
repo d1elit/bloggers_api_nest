@@ -8,9 +8,10 @@ export class RegistrationConfirmationCommand {
 }
 
 @CommandHandler(RegistrationConfirmationCommand)
-export class RegistrationConfirmationUseCase
-  implements ICommandHandler<RegistrationConfirmationCommand, void>
-{
+export class RegistrationConfirmationUseCase implements ICommandHandler<
+  RegistrationConfirmationCommand,
+  void
+> {
   constructor(private usersRepository: UsersRepository) {}
 
   async execute(command: RegistrationConfirmationCommand): Promise<void> {
@@ -28,6 +29,6 @@ export class RegistrationConfirmationUseCase
       });
     }
     user.confirmEmail();
-    await this.usersRepository.save(user);
+    await this.usersRepository.saveMongo(user);
   }
 }

@@ -5,13 +5,17 @@ import { UsersRepository } from '../../infrastructure/users.repository';
 import { CryptoService } from '../crypto.service';
 
 export class PasswordRecoveryConfirmationCommand {
-  constructor(public code: string, public password: string) {}
+  constructor(
+    public code: string,
+    public password: string,
+  ) {}
 }
 
 @CommandHandler(PasswordRecoveryConfirmationCommand)
-export class PasswordRecoveryConfirmationUseCase
-  implements ICommandHandler<PasswordRecoveryConfirmationCommand, void>
-{
+export class PasswordRecoveryConfirmationUseCase implements ICommandHandler<
+  PasswordRecoveryConfirmationCommand,
+  void
+> {
   constructor(
     private usersRepository: UsersRepository,
     private cryptoService: CryptoService,
@@ -37,6 +41,6 @@ export class PasswordRecoveryConfirmationUseCase
       command.password,
     );
     user.updatePassword(newPassword);
-    await this.usersRepository.save(user);
+    await this.usersRepository.saveMongo(user);
   }
 }

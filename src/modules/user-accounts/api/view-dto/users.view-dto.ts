@@ -1,4 +1,6 @@
 import { UserMongoDocument } from '../../domain/user-mongo.entity';
+import { User } from '../../domain/user.entity';
+import { UsersMapper } from '../../infrastructure/users-mapper';
 
 export class UserViewDto {
   id: string;
@@ -6,13 +8,13 @@ export class UserViewDto {
   email: string;
   createdAt: Date;
 
-  static mapToView(user: UserMongoDocument): UserViewDto {
+  static mapToView(user: User): UserViewDto {
     const dto = new UserViewDto();
-
-    dto.email = user.email;
-    dto.login = user.login;
-    dto.id = user.id;
-    dto.createdAt = user.createdAt;
+    const mappedUser = UsersMapper.toDomain(user);
+    dto.login = mappedUser.login;
+    dto.id = mappedUser.id;
+    dto.email = mappedUser.email;
+    dto.createdAt = mappedUser.createdAt;
 
     return dto;
   }
