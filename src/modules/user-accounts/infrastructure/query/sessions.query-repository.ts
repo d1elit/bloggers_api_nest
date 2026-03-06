@@ -1,12 +1,15 @@
 import { DeviceListViewDto } from '../../api/view-dto/device-list.view-dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
-import { Session, type SessionModelType } from '../../domain/session.entity';
+import {
+  SessionMongo,
+  type SessionModelType,
+} from '../../domain/session-mongo.entity';
 
 @Injectable()
 export class SessionsQueryRepository {
   constructor(
-    @InjectModel(Session.name)
+    @InjectModel(SessionMongo.name)
     private SessionModel: SessionModelType,
   ) {}
 

@@ -22,7 +22,7 @@ export class User {
       expirationDate: Date | null;
     },
   ) {}
-  static create(dto: CreateUserDomainDto): User {
+  static createInstance(dto: CreateUserDomainDto): User {
     return new User(
       randomUUID(),
       dto.login,
@@ -32,7 +32,7 @@ export class User {
       new Date(),
       null,
       {
-        confirmationCode: randomUUID(),
+        confirmationCode: dto.confirmationCode || randomUUID(),
         isConfirmed: false,
         expirationDate: add(new Date(), { hours: 1, minutes: 3 }),
       },

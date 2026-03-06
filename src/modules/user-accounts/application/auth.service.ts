@@ -14,7 +14,10 @@ import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-c
 import * as crypto from 'node:crypto';
 import { JwtService } from './jwt.service';
 import { jwtDecode } from 'jwt-decode';
-import { Session, type SessionModelType } from '../domain/session.entity';
+import {
+  SessionMongo,
+  type SessionModelType,
+} from '../domain/session-mongo.entity';
 import { SessionsRepository } from '../infrastructure/sessions.repository';
 import { UsersService } from './users.service';
 import { CreateUserInputDto } from '../api/input-dto/users/users.input-dto';
@@ -27,7 +30,7 @@ export class AuthService {
   constructor(
     @InjectModel(UserMongo.name)
     private UserModel: UserMongoModelType,
-    @InjectModel(Session.name)
+    @InjectModel(SessionMongo.name)
     private SessionModel: SessionModelType,
     private usersRepository: UsersRepository,
     private cryptoService: CryptoService,
@@ -65,7 +68,7 @@ export class AuthService {
       });
     }
     user.confirmEmail();
-    await this.usersRepository.saveMongo(user);
+    await this.usersRepository.save(user);
   }
 
   async emailResending(email: string) {
@@ -95,7 +98,7 @@ export class AuthService {
     const confirmationCode = crypto.randomUUID();
 
     user.updateEmailConfirmationCode(confirmationCode);
-    await this.usersRepository.saveMongo(user);
+    await this.usersRepository.save(user);
 
     await this.nodemailerService.sendEmail(
       email,

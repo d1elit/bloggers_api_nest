@@ -30,7 +30,7 @@ export class UsersService {
       dto.password,
     );
 
-    const user = User.create({
+    const user = User.createInstance({
       email: dto.email,
       login: dto.login,
       passwordHash: passwordHash,
@@ -43,7 +43,7 @@ export class UsersService {
     //   confirmationCode,
     // });
 
-    await this.usersRepository.create(user);
+    await this.usersRepository.save(user);
 
     return user.id.toString();
   }

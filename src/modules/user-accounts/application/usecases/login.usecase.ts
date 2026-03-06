@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { InjectModel } from '@nestjs/mongoose';
+
 import { UserMongoDocument } from '../../domain/user-mongo.entity';
 import { authInput } from '../../api/input-dto/auth/auth.input-dto';
 import { DomainException } from '../../../../core/exceptions/domain-exceptions';
@@ -7,11 +7,13 @@ import { DomainExceptionCode } from '../../../../core/exceptions/domain-exceptio
 import crypto from 'node:crypto';
 import { jwtDecode } from 'jwt-decode';
 import { LoginInput } from '../../api/input-dto/auth/login.input.dto';
-import { Session, type SessionModelType } from '../../domain/session.entity';
 import { UsersRepository } from '../../infrastructure/users.repository';
 import { CryptoService } from '../crypto.service';
 import { JwtService } from '../jwt.service';
 import { SessionsRepository } from '../../infrastructure/sessions.repository';
+import { Session } from '../../domain/session.entity';
+import { randomUUID } from 'crypto';
+import { User } from '../../domain/user.entity';
 
 export class LoginUserCommand {
   constructor(public inputDto: authInput) {}
@@ -23,8 +25,8 @@ export class LoginUserUseCase implements ICommandHandler<
   string[]
 > {
   constructor(
-    @InjectModel(Session.name)
-    private SessionModel: SessionModelType,
+    // @InjectModel(SessionMongo.name)
+    // private SessionModel: SessionModelType,
     private sessionsRepository: SessionsRepository,
     private usersRepository: UsersRepository,
     private cryptoService: CryptoService,
@@ -38,7 +40,8 @@ export class LoginUserUseCase implements ICommandHandler<
 
     const user = await this.checkUserCredentials(inputDto.loginDto);
 
-    const deviceId = crypto.randomUUID();
+    const deviceId = randomUUID();
+    console.log(deviceId);
 
     const accessToken = await this.jwtService.createAccessToken(
       user.id.toString(),
@@ -57,12 +60,14 @@ export class LoginUserUseCase implements ICommandHandler<
       iat: iat!,
       exp: exp!,
     });
+    console.log(session);
     await this.sessionsRepository.create(session);
 
     return [accessToken, refreshToken];
   }
-  async checkUserCredentials(loginDto: LoginInput): Promise<UserMongoDocument> {
+  async checkUserCredentials(loginDto: LoginInput): Promise<User> {
     const user = await this.verifyLoginOrEmail(loginDto.loginOrEmail);
+
     const isPasswordVerified = await this.cryptoService.comparePassword({
       password: loginDto.password,
       hash: user.passwordHash,
@@ -82,8 +87,9 @@ export class LoginUserUseCase implements ICommandHandler<
     return user;
   }
 
-  async verifyLoginOrEmail(login: string): Promise<UserMongoDocument> {
+  async verifyLoginOrEmail(login: string): Promise<User> {
     const user = await this.usersRepository.findByLoginOrEmail(login);
+    console.log(user);
     if (!user) {
       throw new DomainException({
         code: DomainExceptionCode.Unauthorized,

@@ -29,6 +29,6 @@ export class RegistrationConfirmationUseCase implements ICommandHandler<
       });
     }
     user.confirmEmail();
-    await this.usersRepository.saveMongo(user);
+    await this.usersRepository.save(user);
   }
 }

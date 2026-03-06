@@ -37,7 +37,7 @@ export class CreateUserUseCase implements ICommandHandler<
       dto.password,
     );
 
-    const user = User.create({
+    const user = User.createInstance({
       email: dto.email,
       login: dto.login,
       passwordHash: passwordHash,

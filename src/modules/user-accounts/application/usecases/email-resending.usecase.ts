@@ -47,7 +47,7 @@ export class EmailResendingUseCase implements ICommandHandler<
     const confirmationCode = crypto.randomUUID();
 
     user.updateEmailConfirmationCode(confirmationCode);
-    await this.usersRepository.saveMongo(user);
+    await this.usersRepository.save(user);
 
     await this.nodemailerService.sendEmail(
       command.email,

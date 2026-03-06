@@ -104,13 +104,17 @@ export class UsersRepository {
     return user;
   }
 
-  async findByLoginOrEmail(
-    loginOrEmail: string,
-  ): Promise<UserMongoDocument | null> {
-    return this.UserModel.findOne({
-      $or: [{ email: loginOrEmail }, { login: loginOrEmail }],
-      deletedAt: null,
-    });
+  async findByLoginOrEmail(loginOrEmail: string): Promise<User | null> {
+    // return this.UserModel.findOne({
+    //   $or: [{ email: loginOrEmail }, { login: loginOrEmail }],
+    //   deletedAt: null,
+    // });
+    const row = await this.dataSource.query(
+      `Select * from users 
+        WHERE email = $1 or login = $1`,
+      [loginOrEmail],
+    );
+    return UsersMapper.toDomain(row[0]);
   }
 
   async findFieldWithValue(
@@ -139,12 +143,18 @@ export class UsersRepository {
     // return this.UserModel.findOne({ [fieldName]: fieldValue, deletedAt: null });
   }
 
-  async findByCodeOrError(code: string): Promise<UserMongoDocument> {
+  async findByCodeOrError(code: string): Promise<User> {
     console.log('findByCode: ', code);
-    const resultUser = await this.UserModel.findOne({
-      'confirmationEmail.confirmationCode': code,
-    });
-    if (!resultUser) {
+    // const resultUser = await this.UserModel.findOne({
+    //   'confirmationEmail.confirmationCode': code,
+    // });
+    const result = await this.dataSource.query(
+      `SELECT * FROM USERS WHERE email_confirmation_code = $1`,
+      [code],
+    );
+    console.log(result);
+
+    if (result.length === 0) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
         extensions: [
@@ -155,7 +165,7 @@ export class UsersRepository {
         ],
       });
     }
-    return resultUser;
+    return UsersMapper.toDomain(result[0]);
   }
   async findByRecoveryCodeOrError(code: string): Promise<UserMongoDocument> {
     console.log('findByCode: ', code);

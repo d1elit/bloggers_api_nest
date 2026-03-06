@@ -1,50 +1,28 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Model } from 'mongoose';
-import { UserMongo } from './user-mongo.entity';
+import { SessionDto } from './session-mongo.entity';
 
-export type SessionDto = {
-  userId: string;
-  deviceId: string;
-  deviceName: string;
-  ip: string;
-  iat: number;
-  exp: number;
-};
-
-@Schema({ collection: 'sessions' })
 export class Session {
-  @Prop({ required: true })
-  userId!: string;
+  constructor(
+    public userId: string,
+    public deviceId: string,
+    public deviceName: string,
+    public ip: string,
+    public iat: number,
+    public exp: number,
+  ) {}
 
-  @Prop({ required: true })
-  deviceId!: string;
+  static createNew(dto: SessionDto): Session {
+    return new Session(
+      dto.userId,
+      dto.deviceId,
+      dto.deviceName,
+      dto.ip,
+      dto.iat,
+      dto.exp,
+    );
+  }
 
-  @Prop({ required: true })
-  deviceName!: string;
-
-  @Prop({ required: true })
-  ip!: string;
-
-  @Prop({ required: true })
-  iat!: number;
-
-  @Prop({ required: true })
-  exp!: number;
-
-  static createNew(sessionDto: SessionDto): Session {
-    const session = new Session();
-    session.userId = sessionDto.userId;
-    session.deviceId = sessionDto.deviceId;
-    session.deviceName = sessionDto.deviceName;
-    session.ip = sessionDto.ip;
-    session.iat = sessionDto.iat;
-    session.exp = sessionDto.exp;
-    return session;
+  updateTokens(iat: number, exp: number) {
+    this.iat = iat;
+    this.exp = exp;
   }
 }
-
-export const SessionSchema = SchemaFactory.createForClass(Session);
-SessionSchema.loadClass(Session);
-
-export type SessionDocument = HydratedDocument<Session>;
-export type SessionModelType = Model<Session> & typeof Session;
