@@ -41,6 +41,6 @@ export class PasswordRecoveryConfirmationUseCase implements ICommandHandler<
       command.password,
     );
     user.updatePassword(newPassword);
-    await this.usersRepository.saveMongo(user);
+    await this.usersRepository.save(user);
   }
 }

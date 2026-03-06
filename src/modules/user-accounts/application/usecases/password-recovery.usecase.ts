@@ -24,7 +24,7 @@ export class PasswordRecoveryUseCase implements ICommandHandler<
 
     const recoveryCode = crypto.randomUUID();
     user.updatePasswordRecoveryCode(recoveryCode);
-    await this.usersRepository.saveMongo(user);
+    await this.usersRepository.save(user);
 
     this.nodemailerService
       .sendEmail(

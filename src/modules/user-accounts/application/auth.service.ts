@@ -110,7 +110,7 @@ export class AuthService {
 
     const recoveryCode = crypto.randomUUID();
     user.updatePasswordRecoveryCode(recoveryCode);
-    await this.usersRepository.saveMongo(user);
+    await this.usersRepository.save(user);
 
     this.nodemailerService
       .sendEmail(email, emailExamples.passwordRecoveryEmail(recoveryCode))
@@ -142,7 +142,7 @@ export class AuthService {
     }
     const newPassword = await this.cryptoService.createPasswordHash(password);
     user.updatePassword(newPassword);
-    await this.usersRepository.saveMongo(user);
+    await this.usersRepository.save(user);
   }
 
   async refreshToken(token: string, userId: string, deviceId: string) {

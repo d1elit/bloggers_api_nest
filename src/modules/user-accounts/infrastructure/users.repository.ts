@@ -167,12 +167,18 @@ export class UsersRepository {
     }
     return UsersMapper.toDomain(result[0]);
   }
-  async findByRecoveryCodeOrError(code: string): Promise<UserMongoDocument> {
+  async findByRecoveryCodeOrError(code: string): Promise<User> {
     console.log('findByCode: ', code);
-    const resultUser = await this.UserModel.findOne({
-      'passwordRecovery.confirmationCode': code,
-    });
-    if (!resultUser) {
+    // const result = await this.UserModel.findOne({
+    //   'passwordRecovery.confirmationCode': code,
+    // });
+    const result = await this.dataSource.query(
+      `
+    SELECT * FROM USERS WHERE recovery_code = $1`,
+      [code],
+    );
+
+    if (result[0].lenght === 0) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
         extensions: [
@@ -183,9 +189,15 @@ export class UsersRepository {
         ],
       });
     }
-    return resultUser;
+
+    return UsersMapper.toDomain(result[0]);
   }
-  async findByEmail(email: string): Promise<UserMongoDocument | null> {
-    return this.UserModel.findOne({ email: email });
+  async findByEmail(email: string): Promise<User | null> {
+    // return this.UserModel.findOne({ email: email });
+    const result = await this.dataSource.query(
+      `SELECT * FROM USERS WHERE email = $1`,
+      [email],
+    );
+    return UsersMapper.toDomain(result[0]);
   }
 }
