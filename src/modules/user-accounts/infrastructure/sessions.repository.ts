@@ -87,7 +87,7 @@ export class SessionsRepository {
     await this.dataSource.query(
       `
       DELETE FROM sessions
-      WHERE device_id <> $2
+      WHERE device_id <> $1
       `,
       [deviceId],
     );
@@ -96,7 +96,7 @@ export class SessionsRepository {
     await this.dataSource.query(
       `
         DELETE FROM sessions
-        WHERE device_id = $2
+        WHERE device_id = $1
       `,
       [deviceId],
     );
