@@ -1,8 +1,3 @@
-import { InjectModel } from '@nestjs/mongoose';
-import {
-  UserMongo,
-  type UserMongoModelType,
-} from '../../domain/user-mongo.entity';
 import { CreateUserDto } from '../../dto/create-user.dto';
 import { UsersRepository } from '../../infrastructure/users.repository';
 import { CryptoService } from '../crypto.service';
@@ -24,8 +19,6 @@ export class CreateUserUseCase implements ICommandHandler<
   string
 > {
   constructor(
-    // @InjectModel(UserMongo.name)
-    // private UserModel: UserMongoModelType,
     private usersRepository: UsersRepository,
     private cryptoService: CryptoService,
   ) {}

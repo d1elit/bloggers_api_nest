@@ -2,12 +2,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
 import {
   UserMongo,
-  UserMongoDocument,
   type UserMongoModelType,
 } from '../domain/user-mongo.entity';
 import { UsersRepository } from '../infrastructure/users.repository';
-import { authInput } from '../api/input-dto/auth/auth.input-dto';
-import { LoginInput } from '../api/input-dto/auth/login.input.dto';
+
 import { CryptoService } from './crypto.service';
 import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';

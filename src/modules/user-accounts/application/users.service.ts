@@ -1,9 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import {
-  UserMongo,
-  type UserMongoModelType,
-} from '../domain/user-mongo.entity';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UsersRepository } from '../infrastructure/users.repository';
 import { CryptoService } from './crypto.service';
@@ -14,8 +9,6 @@ import { User } from '../domain/user.entity';
 @Injectable()
 export class UsersService {
   constructor(
-    // @InjectModel(User.name)
-    // private UserModel: UserModelType,
     private usersRepository: UsersRepository,
     private cryptoService: CryptoService,
   ) {}
@@ -36,12 +29,6 @@ export class UsersService {
       passwordHash: passwordHash,
       confirmationCode,
     });
-    //   this.UserModel.createInstance({
-    //   email: dto.email,
-    //   login: dto.login,
-    //   passwordHash: passwordHash,
-    //   confirmationCode,
-    // });
 
     await this.usersRepository.save(user);
 

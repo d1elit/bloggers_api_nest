@@ -1,10 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
-import { UserMongoDocument } from '../../domain/user-mongo.entity';
 import { authInput } from '../../api/input-dto/auth/auth.input-dto';
 import { DomainException } from '../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
-import crypto from 'node:crypto';
 import { jwtDecode } from 'jwt-decode';
 import { LoginInput } from '../../api/input-dto/auth/login.input.dto';
 import { UsersRepository } from '../../infrastructure/users.repository';
@@ -25,8 +23,6 @@ export class LoginUserUseCase implements ICommandHandler<
   string[]
 > {
   constructor(
-    // @InjectModel(SessionMongo.name)
-    // private SessionModel: SessionModelType,
     private sessionsRepository: SessionsRepository,
     private usersRepository: UsersRepository,
     private cryptoService: CryptoService,
