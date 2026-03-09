@@ -21,17 +21,7 @@ export class EmailResendingUseCase implements ICommandHandler<
   ) {}
 
   async execute(command: EmailResendingCommand): Promise<void> {
-    const user = await this.usersRepository.findByLoginOrEmail(command.email);
-    if (!user)
-      throw new DomainException({
-        code: DomainExceptionCode.BadRequest,
-        extensions: [
-          {
-            field: 'email',
-            message: 'Email not exist',
-          },
-        ],
-      });
+    const user = await this.usersRepository.findByEmailOrError(command.email);
 
     if (user.isEmailConfirmed())
       throw new DomainException({

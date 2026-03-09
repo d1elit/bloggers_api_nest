@@ -19,7 +19,7 @@ export class PasswordRecoveryUseCase implements ICommandHandler<
   ) {}
 
   async execute(command: PasswordRecoveryCommand): Promise<void> {
-    const user = await this.usersRepository.findByEmail(command.email);
+    const user = await this.usersRepository.findByEmailOrError(command.email);
     if (!user) return;
 
     const recoveryCode = crypto.randomUUID();

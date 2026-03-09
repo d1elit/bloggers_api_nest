@@ -23,7 +23,7 @@ import { DeleteUserCommand } from '../application/usecases/delete-user.usecase';
 import { buildDocumentBase } from '@nestjs/swagger/dist/fixtures/document.base';
 
 @UseGuards(BasicAuthGuard)
-@Controller('users')
+@Controller('sa/users')
 export class UsersController {
   constructor(
     private usersQueryRepository: UsersQueryRepository,

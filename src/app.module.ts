@@ -46,7 +46,7 @@ console.log(CoreConfig);
   providers: [
     AppService,
     {
-      provide: APP_GUARD, // 👈 Добавьте guard глобально
+      provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
     {

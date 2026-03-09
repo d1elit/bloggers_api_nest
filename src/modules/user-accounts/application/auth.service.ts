@@ -105,7 +105,7 @@ export class AuthService {
   }
 
   async passwordRecovery(email: string) {
-    const user = await this.usersRepository.findByEmail(email);
+    const user = await this.usersRepository.findByEmailOrError(email);
     if (!user) return;
 
     const recoveryCode = crypto.randomUUID();

@@ -33,6 +33,7 @@ import { ExtractUserFromRequest } from '../guards/decorators/param/extract-user-
 import { UserContextDto } from '../guards/dto/user-context.dto';
 import { SkipThrottle, Throttle } from '@nestjs/throttler';
 import { AccessTokenGuard } from '../guards/bearer/access-token.guard';
+import { EmailConfirmationInputDto } from './input-dto/auth/email-confirmation.input-dto';
 
 @Controller('auth')
 export class AuthController {
@@ -74,7 +75,7 @@ export class AuthController {
 
   @Post('/registration-confirmation')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async registrationConfirmation(@Body() body: { code: string }) {
+  async registrationConfirmation(@Body() body: EmailConfirmationInputDto) {
     await this.commandBus.execute(
       new RegistrationConfirmationCommand(body.code),
     );
