@@ -39,9 +39,18 @@ export class EmailResendingUseCase implements ICommandHandler<
     user.updateEmailConfirmationCode(confirmationCode);
     await this.usersRepository.save(user);
 
-    await this.nodemailerService.sendEmail(
-      command.email,
-      emailExamples.registrationEmail(confirmationCode),
-    );
+    this.nodemailerService
+      .sendEmail(
+        command.email,
+        emailExamples.registrationEmail(confirmationCode),
+      )
+      .catch((error) => {
+        console.log('Email sending failed', error);
+      });
+
+    // await this.nodemailerService.sendEmail(
+    //   command.email,
+    //   emailExamples.registrationEmail(confirmationCode),
+    // );
   }
 }
