@@ -1,30 +1,61 @@
 import { Injectable } from '@nestjs/common';
-import { BlogDocument, Blog, type BlogModelType } from '../domain/blog-entity';
-import { InjectModel } from '@nestjs/mongoose';
 import { DomainException } from '../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
+import { Blog } from '../domain/blog.entity';
+import { DataSource } from 'typeorm';
+import { BlogsMapper } from './blogs-mapper';
 
 @Injectable()
 export class BlogsRepository {
-  constructor(
-    @InjectModel(Blog.name)
-    private blogModel: BlogModelType,
-  ) {}
-  async save(blog: BlogDocument) {
-    await blog.save();
+  constructor(private dataSource: DataSource) {}
+
+  async save(domainBlog: Blog) {
+    const blog = BlogsMapper.toPersistence(domainBlog);
+    await this.dataSource.query(
+      `
+        INSERT INTO blogs (
+          id, name, description, website_url,
+          created_at, is_membership, deleted_at
+        )
+        VALUES (
+                 $1,$2,$3,$4,
+                 $5,$6,$7
+               )
+          ON CONFLICT (id)
+    DO UPDATE SET
+          name = EXCLUDED.name,
+          description = EXCLUDED.description,
+          website_url = EXCLUDED.website_url,
+          is_membership = EXCLUDED.is_membership,
+          deleted_at = EXCLUDED.deleted_at
+      `,
+      [
+        blog.id,
+        blog.name,
+        blog.description,
+        blog.website_url,
+        blog.created_at,
+        blog.is_membership,
+        blog.deleted_at,
+      ],
+    );
+    return blog;
   }
 
-  async findById(id: string): Promise<BlogDocument | null> {
-    console.log('findById', id);
-    return this.blogModel.findOne({
-      _id: id,
-      deletedAt: null,
-    });
+  async findById(id: string): Promise<Blog | null> {
+    const raw = await this.dataSource.query(
+      `SELECT * FROM blogs
+                WHERE id = $1 and "deleted_at" IS NULL `,
+      [id],
+    );
+    if (!raw[0]) {
+      return null;
+    }
+    return BlogsMapper.toDomain(raw[0]);
   }
 
-  async findOrNotFoundFail(id: string): Promise<BlogDocument> {
+  async findOrNotFoundFail(id: string): Promise<Blog> {
     const blog = await this.findById(id);
-    console.log(blog);
     if (!blog) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,

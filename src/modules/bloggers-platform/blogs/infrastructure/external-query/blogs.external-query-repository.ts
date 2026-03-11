@@ -1,16 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Blog, type BlogModelType } from '../../domain/blog-entity';
 import { BlogViewDto } from '../../api/view-dto/blogs.view-dto';
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class BlogsExternalQueryRepository {
-  constructor(
-    @InjectModel(Blog.name)
-    private blogModel: BlogModelType,
-  ) {}
+  constructor(private dataSource: DataSource) {}
   async getByIdOrNotFoundFail(id: string) {
     if (!id) {
       throw new DomainException({
@@ -23,12 +19,13 @@ export class BlogsExternalQueryRepository {
         ],
       });
     }
-    const blog = await this.blogModel.findOne({
-      _id: id,
-      deletedAt: null,
-    });
 
-    if (!blog) {
+    const raw = await this.dataSource.query(
+      `SELECT * FROM blogs WHERE id = $1 AND deleted_at IS NULL`,
+      [id],
+    );
+
+    if (!raw[0]) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
         extensions: [
@@ -40,6 +37,6 @@ export class BlogsExternalQueryRepository {
       });
     }
 
-    return BlogViewDto.mapToView(blog);
+    return BlogViewDto.mapToView(raw[0]);
   }
 }

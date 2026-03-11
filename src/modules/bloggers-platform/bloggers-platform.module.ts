@@ -3,7 +3,7 @@ import { BlogsController } from './blogs/api/blogs.controller';
 import { BlogsService } from './blogs/aplication/blogs.service';
 import { BlogsRepository } from './blogs/infrastructure/blogs.repository';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Blog, BlogSchema } from './blogs/domain/blog-entity';
+// import { Blog, BlogSchema } from './blogs/domain/blog-mongo.entity';
 import { BlogsQueryRepository } from './blogs/infrastructure/query/blogs.query-repository';
 import { Post, PostSchema } from './posts/domain/post-entity';
 import { PostsRepository } from './posts/infrastructure/posts.repository';
@@ -50,7 +50,7 @@ import { GetDeviceListQueryHandler } from '../user-accounts/application/queries/
     CqrsModule,
     UserAccountsModule,
     MongooseModule.forFeature([
-      { name: Blog.name, schema: BlogSchema },
+      // { name: Blog.name, schema: BlogSchema },
       { name: Post.name, schema: PostSchema },
       { name: Comment.name, schema: CommentSchema },
       { name: CommentLike.name, schema: CommentLikeSchema },
