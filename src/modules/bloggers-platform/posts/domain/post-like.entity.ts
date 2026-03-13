@@ -1,35 +1,22 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
 import { CreatePostLikeDomainDto } from './dto/create-post-like.domain.dto';
-import { PostLikeStatusDto } from '../api/input-dto/post-like-status.input-dto';
 
-@Schema()
 export class PostLike {
-  @Prop({ required: true })
-  userId: string;
-
-  @Prop({ required: true })
-  postId: string;
-
-  @Prop({ required: true })
-  userLogin: string;
-
-  @Prop({ default: () => new Date() })
-  addedAt: Date;
-
-  @Prop({
-    required: true,
-    enum: ['Like', 'Dislike', 'None'],
-  })
-  myStatus: string;
+  constructor(
+    public userId: string,
+    public postId: string,
+    public userLogin: string,
+    public addedAt: Date,
+    public myStatus: string,
+  ) {}
 
   static createNew(dto: CreatePostLikeDomainDto): PostLike {
-    const like = new PostLike();
-    like.userId = dto.userId;
-    like.postId = dto.postId;
-    like.userLogin = dto.userLogin;
-    like.myStatus = dto.likeStatus;
-    return like;
+    return new PostLike(
+      dto.userId,
+      dto.postId,
+      dto.userLogin,
+      new Date(),
+      dto.likeStatus,
+    );
   }
 
   updateLikeStatus(likeStatus: string) {
@@ -37,8 +24,3 @@ export class PostLike {
   }
 }
 
-export type PostLikeDocument = HydratedDocument<PostLike>;
-
-export const PostLikeSchema = SchemaFactory.createForClass(PostLike);
-
-PostLikeSchema.loadClass(PostLike);

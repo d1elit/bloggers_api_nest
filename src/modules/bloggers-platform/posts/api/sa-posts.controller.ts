@@ -28,7 +28,7 @@ import { GetCommentByIdQuery } from '../../comments/application/queries/get-comm
 import { AccessTokenGuard } from '../../../user-accounts/guards/bearer/access-token.guard';
 import { GetPostsCommentQuery } from '../../comments/application/queries/get-comments-for-post.query-handler';
 import { AccessOptionalGuard } from '../../../user-accounts/guards/bearer/access-optional.guard';
-import { PostLikeStatusCommand } from '../aplication/usecases/post-like-status-use.case';
+// import { PostLikeStatusCommand } from '../aplication/usecases/post-like-status-use.case';
 import { BasicAuthGuard } from '../../../user-accounts/guards/basic/basic-auth.guard';
 import { PostLikeStatusDto } from './input-dto/post-like-status.input-dto';
 
@@ -43,62 +43,39 @@ import { SkipThrottle } from '@nestjs/throttler';
 
 @SkipThrottle()
 @Controller('posts')
-export class PostsController {
+export class SaPostsController {
   constructor(
     private readonly commandBus: CommandBus,
 
     private readonly queryBus: QueryBus,
   ) {}
 
-  @UseGuards(BasicAuthGuard)
-  @Post()
-  async createPost(@Body() body: CreatePostInputDto): Promise<PostViewDto> {
-    const postId = await this.commandBus.execute<CreatePostCommand, string>(
-      new CreatePostCommand(body),
-    );
+  // @UseGuards(BasicAuthGuard)
+  // @Post()
+  // async createPost(@Body() body: CreatePostInputDto): Promise<PostViewDto> {
+  //   const postId = await this.commandBus.execute<CreatePostCommand, string>(
+  //     new CreatePostCommand(body),
+  //   );
+  //
+  //   return this.queryBus.execute(new GetPostByIdQuery(postId));
+  // }
 
-    return this.queryBus.execute(new GetPostByIdQuery(postId));
-  }
+  // @UseGuards(BasicAuthGuard)
+  // @Put(':id')
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // async updatePost(
+  //   @Param('id') id: string,
+  //   @Body() body: UpdatePostInputDto,
+  // ): Promise<void> {
+  //   return this.commandBus.execute(new UpdatePostCommand(id, body));
+  // }
 
-  @UseGuards(AccessOptionalGuard)
-  @Get(':id')
-  async getPost(
-    @Param('id') id: string,
-    @ExtractUserFromRequest() user: UserContextDto,
-  ): Promise<PostViewDto> {
-    const likeStatus = user.likeStatus;
-
-    return this.queryBus.execute(new GetPostByIdQuery(id, likeStatus));
-  }
-
-  @UseGuards(BasicAuthGuard)
-  @Put(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async updatePost(
-    @Param('id') id: string,
-    @Body() body: UpdatePostInputDto,
-  ): Promise<void> {
-    return this.commandBus.execute(new UpdatePostCommand(id, body));
-  }
-
-  @UseGuards(BasicAuthGuard)
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async deletePost(@Param('id') id: string): Promise<void> {
-    return this.commandBus.execute(new DeletePostCommand(id));
-  }
-
-  @UseGuards(AccessOptionalGuard)
-  @Get()
-  async getPostList(
-    @Query() query: GetPostsQueryParams,
-
-    @ExtractUserFromRequest() user: UserContextDto,
-  ): Promise<PaginatedViewDto<PostViewDto[]>> {
-    const userId = user.userId;
-
-    return this.queryBus.execute(new GetPostsQuery(query, { userId: userId }));
-  }
+  // @UseGuards(BasicAuthGuard)
+  // @Delete(':id')
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // async deletePost(@Param('id') id: string): Promise<void> {
+  //   return this.commandBus.execute(new DeletePostCommand(id));
+  // }
 
   @UseGuards(AccessTokenGuard)
   @Post(':id/comments')
@@ -130,18 +107,18 @@ export class PostsController {
     );
   }
 
-  @UseGuards(AccessTokenGuard)
-  @Put(':id/like-status')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async postLike(
-    @Param('id') postId: string,
-    @Body() body: PostLikeStatusDto,
-    @ExtractUserFromRequest() user: UserContextDto,
-  ): Promise<void> {
-    const userId = user.userId;
-
-    return await this.commandBus.execute(
-      new PostLikeStatusCommand(postId, userId, body.likeStatus),
-    );
-  }
+  // @UseGuards(AccessTokenGuard)
+  // @Put(':id/like-status')
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // async postLike(
+  //   @Param('id') postId: string,
+  //   @Body() body: PostLikeStatusDto,
+  //   @ExtractUserFromRequest() user: UserContextDto,
+  // ): Promise<void> {
+  //   const userId = user.userId;
+  //
+  //   return await this.commandBus.execute(
+  //     new PostLikeStatusCommand(postId, userId, body.likeStatus),
+  //   );
+  // }
 }

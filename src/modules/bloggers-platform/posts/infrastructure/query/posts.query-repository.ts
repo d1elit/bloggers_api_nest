@@ -1,28 +1,26 @@
 import { Injectable } from '@nestjs/common';
-
-import { InjectModel } from '@nestjs/mongoose';
-import { Post, type PostModelType } from '../../domain/post-entity';
 import { PostViewDto } from '../../api/view-dto/post.view-dto';
 import { PaginatedViewDto } from '../../../../../core/dto/base.paginated.view-dto';
 import { GetPostsQueryParams } from '../../api/input-dto/get-posts-query-params.input-dto';
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
 import { PostLikesRepository } from '../post-likes.repository';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class PostsQueryRepository {
   constructor(
-    @InjectModel(Post.name)
-    private postModel: PostModelType,
+    private dataSource: DataSource,
     private postLikesRepository: PostLikesRepository,
   ) {}
-  async getByIdOrNotFoundFail(id: string, likeStatus?: string) {
-    const post = await this.postModel.findOne({
-      _id: id,
-      deletedAt: null,
-    });
 
-    if (!post) {
+  async getByIdOrNotFoundFail(id: string, likeStatus?: string) {
+    const raw = await this.dataSource.query(
+      `SELECT * FROM posts WHERE id = $1 AND deleted_at IS NULL`,
+      [id],
+    );
+
+    if (!raw[0]) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
         extensions: [
@@ -34,7 +32,7 @@ export class PostsQueryRepository {
       });
     }
 
-    return PostViewDto.mapToView(post, likeStatus);
+    return PostViewDto.mapToView(raw[0], likeStatus);
   }
 
   async getAll(
@@ -42,69 +40,106 @@ export class PostsQueryRepository {
     blogId?: string,
     userId?: string,
   ): Promise<PaginatedViewDto<PostViewDto[]>> {
-    const filter: {
-      deletedAt: null;
-      blogId?: string;
-      $or?: any[];
-    } = {
-      deletedAt: null,
-    };
+    const values: any[] = [];
+    let where = `WHERE deleted_at IS NULL`;
+
     if (blogId) {
-      filter.blogId = blogId;
+      values.push(blogId);
+      where += ` AND blog_id = $${values.length}`;
     }
 
-    const orConditions: any[] = [];
-    console.log('QUERY IN REPO', query);
-    if (query.title) {
-      console.log('Im in title');
-      orConditions.push({
-        title: { $regex: query.title, $options: 'i' },
-      });
+    if (
+      query.title ||
+      query.shortDescription ||
+      query.content ||
+      query.blogName
+    ) {
+      where += ` AND (`;
+      const conditions: string[] = [];
+
+      if (query.title) {
+        values.push(`%${query.title}%`);
+        conditions.push(`title ILIKE $${values.length}`);
+      }
+
+      if (query.shortDescription) {
+        values.push(`%${query.shortDescription}%`);
+        conditions.push(`short_description ILIKE $${values.length}`);
+      }
+
+      if (query.content) {
+        values.push(`%${query.content}%`);
+        conditions.push(`content ILIKE $${values.length}`);
+      }
+
+      if (query.blogName) {
+        values.push(`%${query.blogName}%`);
+        conditions.push(`blog_name ILIKE $${values.length}`);
+      }
+
+      where += conditions.join(` OR `) + `)`;
     }
 
-    if (query.shortDescription) {
-      orConditions.push({
-        shortDescription: { $regex: query.shortDescription, $options: 'i' },
-      });
-    }
-    if (query.content) {
-      orConditions.push({
-        content: { $regex: query.content, $options: 'i' },
-      });
-    }
-    if (query.blogName) {
-      orConditions.push({
-        blogName: { $regex: query.blogName, $options: 'i' },
-      });
-    }
+    const whereParamsCount = values.length;
 
-    if (orConditions.length > 0) {
-      filter.$or = orConditions;
-    }
+    // Mapping sorting
+    const sortMap: Record<string, string> = {
+      title: `title COLLATE "C"`,
+      shortDescription: `short_description COLLATE "C"`,
+      content: `content COLLATE "C"`,
+      blogName: `blog_name COLLATE "C"`,
+      createdAt: `created_at`,
+    };
 
-    const posts = await this.postModel
-      .find(filter)
-      .sort({ [query.sortBy]: query.sortDirection })
-      .skip(query.calculateSkip())
-      .limit(query.pageSize);
+    const sortColumn = sortMap[query.sortBy] ?? `created_at`;
+    const sortDirection =
+      query.sortDirection?.toLowerCase() === `asc` ? `ASC` : `DESC`;
 
-    const totalCount = await this.postModel.countDocuments(filter);
+    values.push(query.pageSize);
+    const limitIndex = values.length;
 
-    const postIds = posts.map((c) => c._id.toString());
-    const likesInfo: Record<string, string> = {};
-    console.log('USER ID IN REPOSITORY:', userId);
-    if (userId) {
-      const likes = await this.postLikesRepository.findByIds(postIds, userId);
-      console.log('Likes ID IN REPOSITORY:', likes);
-      likes.forEach((l) => {
-        likesInfo[l.postId] = l.myStatus;
-      });
-      console.log('LIKES INFO:', likesInfo);
-    }
+    values.push(query.calculateSkip());
+    const offsetIndex = values.length;
 
-    const items = posts.map((post) => {
-      const myStatus = likesInfo[post._id.toString()];
-      return PostViewDto.mapToView(post, myStatus);
+    const dataQuery = `
+      SELECT
+        id, title, short_description, content,
+        blog_id, blog_name, created_at, deleted_at
+--         likes_count, dislikes_count, newest_likes
+      FROM posts
+      ${where}
+      ORDER BY ${sortColumn} ${sortDirection}
+      LIMIT $${limitIndex}
+      OFFSET $${offsetIndex}
+    `;
+
+    const countQuery = `
+      SELECT COUNT(*) FROM posts ${where}
+    `;
+
+    console.log(dataQuery);
+
+    const postsResult = await this.dataSource.query(dataQuery, values);
+    const countResult = await this.dataSource.query(
+      countQuery,
+      values.slice(0, whereParamsCount),
+    );
+
+    const totalCount = Number(countResult[0].count);
+    // const postIds = postsResult.map((c: any) => c.id);
+    // const likesInfo: Record<string, string> = {};
+
+    // if (userId && postIds.length > 0) {
+    //   const likes = await this.postLikesRepository.findByIds(postIds, userId);
+    //   likes.forEach((l) => {
+    //     likesInfo[l.postId] = l.myStatus;
+    //   });
+    // }
+
+    const items = postsResult.map((post: any) => {
+      // const myStatus = likesInfo[post.id];
+      // return PostViewDto.mapToView(post, myStatus);
+      return PostViewDto.mapToView(post);
     });
 
     return PaginatedViewDto.mapToView({

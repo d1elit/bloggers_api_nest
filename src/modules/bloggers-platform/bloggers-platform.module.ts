@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
-import { BlogsController } from './blogs/api/blogs.controller';
+import { SaBlogsController } from './blogs/api/sa-blogs.controller';
 import { BlogsService } from './blogs/aplication/blogs.service';
 import { BlogsRepository } from './blogs/infrastructure/blogs.repository';
 import { MongooseModule } from '@nestjs/mongoose';
 // import { Blog, BlogSchema } from './blogs/domain/blog-mongo.entity';
 import { BlogsQueryRepository } from './blogs/infrastructure/query/blogs.query-repository';
-import { Post, PostSchema } from './posts/domain/post-entity';
 import { PostsRepository } from './posts/infrastructure/posts.repository';
 import { BlogsExternalQueryRepository } from './blogs/infrastructure/external-query/blogs.external-query-repository';
-import { PostsController } from './posts/api/posts.controller';
+import { SaPostsController } from './posts/api/sa-posts.controller';
 import { PostsQueryRepository } from './posts/infrastructure/query/posts.query-repository';
 import { PostsExternalQueryRepository } from './posts/infrastructure/external-query/posts.external-query-repository';
 import { CreateBlogUseCase } from './blogs/aplication/usecases/create-blog.usecase';
@@ -40,10 +39,11 @@ import { CommentsQueryRepository } from './comments/infrastructure/query/comment
 
 import { UserAccountsModule } from '../user-accounts/user-accounts.module';
 
-import { PostLike, PostLikeSchema } from './posts/domain/post-like.entity';
 import { PostLikesRepository } from './posts/infrastructure/post-likes.repository';
-import { PostLikeStatusUseCase } from './posts/aplication/usecases/post-like-status-use.case';
+// import { PostLikeStatusUseCase } from './posts/aplication/usecases/post-like-status-use.case';
 import { GetDeviceListQueryHandler } from '../user-accounts/application/queries/get-device-list.query';
+import { PublicBlogsController } from './blogs/api/public-blogs.controller';
+import { PublicPostsController } from './posts/api/public-posts.controller';
 
 @Module({
   imports: [
@@ -51,13 +51,17 @@ import { GetDeviceListQueryHandler } from '../user-accounts/application/queries/
     UserAccountsModule,
     MongooseModule.forFeature([
       // { name: Blog.name, schema: BlogSchema },
-      { name: Post.name, schema: PostSchema },
       { name: Comment.name, schema: CommentSchema },
       { name: CommentLike.name, schema: CommentLikeSchema },
-      { name: PostLike.name, schema: PostLikeSchema },
     ]),
   ],
-  controllers: [BlogsController, PostsController, CommentsController],
+  controllers: [
+    SaBlogsController,
+    SaPostsController,
+    CommentsController,
+    PublicBlogsController,
+    PublicPostsController,
+  ],
   providers: [
     BlogsService,
     BlogsRepository,
@@ -78,7 +82,7 @@ import { GetDeviceListQueryHandler } from '../user-accounts/application/queries/
     CreatePostUseCase,
     UpdatePostUseCase,
     DeletePostUseCase,
-    PostLikeStatusUseCase,
+    // PostLikeStatusUseCase,
     GetPostByIdQueryHandler,
     GetPostsQueryHandler,
     CreateCommentUseCase,

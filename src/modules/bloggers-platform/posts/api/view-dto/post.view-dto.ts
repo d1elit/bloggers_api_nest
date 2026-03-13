@@ -1,4 +1,4 @@
-import { PostDocument } from '../../domain/post-entity';
+import { PostsMapper } from '../../infrastructure/posts-mapper';
 
 export type newestLikes = {
   addedAt: string;
@@ -21,21 +21,28 @@ export class PostViewDto {
     newestLikes: newestLikes[];
   };
 
-  static mapToView(post: PostDocument, myStatus?: string): PostViewDto {
+  static mapToView(postRow: any, myStatus?: string): PostViewDto {
+    const postDomain = PostsMapper.toDomain(postRow);
     const dto = new PostViewDto();
-    dto.id = post._id.toString();
-    dto.title = post.title;
-    dto.shortDescription = post.shortDescription;
-    dto.content = post.content;
-    dto.blogId = post.blogId;
-    dto.blogName = post.blogName;
-    dto.createdAt = post.createdAt;
+    dto.id = postDomain.id;
+    dto.title = postDomain.title;
+    dto.shortDescription = postDomain.shortDescription;
+    dto.content = postDomain.content;
+    dto.blogId = postDomain.blogId;
+    dto.blogName = postDomain.blogName;
+    dto.createdAt = postDomain.createdAt;
     dto.extendedLikesInfo = {
-      likesCount: post.extendedLikesInfo.likesCount,
-      dislikesCount: post.extendedLikesInfo.dislikesCount,
-      myStatus: myStatus || 'None',
-      newestLikes: post.extendedLikesInfo.newestLikes,
+      dislikesCount: 0,
+      likesCount: 0,
+      myStatus: 'None',
+      newestLikes: [],
     };
+    // dto.extendedLikesInfo = {
+    //   likesCount: postDomain.extendedLikesInfo.likesCount,
+    //   dislikesCount: postDomain.extendedLikesInfo.dislikesCount,
+    //   myStatus: myStatus || 'None',
+    //   newestLikes: postDomain.extendedLikesInfo.newestLikes,
+    // };
 
     return dto;
   }

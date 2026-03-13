@@ -11,7 +11,9 @@ export class TestingController {
     await this.dataSource.query(`
       TRUNCATE TABLE 
         users,
-        sessions
+        sessions,
+        blogs,
+        posts
       RESTART IDENTITY CASCADE
     `);
   }

@@ -1,7 +1,6 @@
-import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
 import { PostsRepository } from '../infrastructure/posts.repository';
-import { Post, type PostModelType } from '../domain/post-entity';
+import { Post } from '../domain/post-entity';
 import { CreatePostDto, UpdatePostDto } from '../dto/create-post.dto';
 import { BlogsExternalQueryRepository } from '../../blogs/infrastructure/external-query/blogs.external-query-repository';
 import { PostLikesRepository } from '../infrastructure/post-likes.repository';
@@ -13,8 +12,6 @@ export class PostsService {
     private readonly postsRepository: PostsRepository,
     private readonly postLikesRepository: PostLikesRepository, // Injected
     private readonly usersRepository: UsersRepository, // Injected
-    @InjectModel(Post.name)
-    private postModel: PostModelType,
     private readonly blogExternalQueryRepository: BlogsExternalQueryRepository,
   ) {}
 
@@ -22,10 +19,10 @@ export class PostsService {
     const blogId = blogIdDto ? blogIdDto : postDto.blogId;
     const blog =
       await this.blogExternalQueryRepository.getByIdOrNotFoundFail(blogId);
-    const post = this.postModel.createInstance(postDto, blog);
+    const post = Post.createInstance(postDto, blog);
     console.log(post);
     await this.postsRepository.save(post);
-    return post._id.toString();
+    return post.id;
   }
   async update(id: string, postDto: UpdatePostDto) {
     const post = await this.postsRepository.findOrNotFoundFail(id);

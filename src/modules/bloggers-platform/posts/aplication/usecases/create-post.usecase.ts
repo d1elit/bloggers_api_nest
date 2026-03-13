@@ -1,6 +1,5 @@
-import { InjectModel } from '@nestjs/mongoose';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Post, type PostModelType } from '../../domain/post-entity';
+import { Post } from '../../domain/post-entity';
 import { PostsRepository } from '../../infrastructure/posts.repository';
 import { CreatePostDto } from '../../dto/create-post.dto';
 import { BlogsExternalQueryRepository } from '../../../blogs/infrastructure/external-query/blogs.external-query-repository';
@@ -18,8 +17,6 @@ export class CreatePostUseCase implements ICommandHandler<
   string
 > {
   constructor(
-    @InjectModel(Post.name)
-    private postModel: PostModelType,
     private readonly postsRepository: PostsRepository,
     private readonly blogExternalQueryRepository: BlogsExternalQueryRepository,
   ) {}
@@ -28,8 +25,9 @@ export class CreatePostUseCase implements ICommandHandler<
     const blogId = blogIdDto ? blogIdDto : dto.blogId;
     const blog =
       await this.blogExternalQueryRepository.getByIdOrNotFoundFail(blogId);
-    const entity = this.postModel.createInstance(dto, blog);
+    const entity = Post.createInstance(dto, blog);
     await this.postsRepository.save(entity);
-    return entity._id.toString();
+    return entity.id;
   }
 }
+
