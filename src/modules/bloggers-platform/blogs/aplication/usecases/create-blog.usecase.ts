@@ -12,9 +12,7 @@ export class CreateBlogUseCase implements ICommandHandler<
   CreateBlogCommand,
   string
 > {
-  constructor(
-    private readonly blogsRepository: BlogsRepository,
-  ) {}
+  constructor(private readonly blogsRepository: BlogsRepository) {}
 
   async execute({ dto }: CreateBlogCommand) {
     const entity = Blog.createInstance(dto);

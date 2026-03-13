@@ -128,7 +128,7 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: express.Response,
   ) {
-    const { userId, deviceId } = user!;
+    const { userId, deviceId } = user;
     const token = req.cookies.refreshToken;
     const [accessToken, refreshToken] = await this.commandBus.execute(
       new RefreshTokenCommand(token, userId, deviceId as string),

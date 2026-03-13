@@ -16,7 +16,7 @@ export class SessionsQueryRepository {
   ) {}
 
   async findAll(userId: string): Promise<DeviceListViewDto[]> {
-    let result = await this.dataSource.query(
+    const result = await this.dataSource.query(
       `
     SELECT * FROM SESSIONS where user_id = $1`,
       [userId],

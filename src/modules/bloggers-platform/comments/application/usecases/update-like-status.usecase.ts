@@ -1,11 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CommentsRepository } from '../../infrastructure/comments.repository';
 import { CommentLikesRepository } from '../../infrastructure/comment-likes.repository';
-import {
-  CommentLike,
-  type CommentLikeModelType,
-} from '../../domain/comment-like.entity';
-import { InjectModel } from '@nestjs/mongoose';
+import { CommentLike } from '../../domain/comment-like.entity';
 
 export class UpdateLikeStatusCommand {
   constructor(
@@ -23,8 +19,6 @@ export class UpdateLikeStatusUseCase implements ICommandHandler<
   constructor(
     private commentsRepository: CommentsRepository,
     private likesRepository: CommentLikesRepository,
-    @InjectModel(CommentLike.name)
-    private commentLike: CommentLikeModelType,
   ) {}
 
   async execute({
@@ -36,11 +30,7 @@ export class UpdateLikeStatusUseCase implements ICommandHandler<
     const like = await this.likesRepository.find(userId, commentId);
 
     if (!like) {
-      const newLike = this.commentLike.createInstance(
-        userId,
-        commentId,
-        likeStatus,
-      );
+      const newLike = CommentLike.createInstance(userId, commentId, likeStatus);
       comment.updateLikeCount(likeStatus);
       await this.likesRepository.create(newLike);
     } else {

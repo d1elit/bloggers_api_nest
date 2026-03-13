@@ -12,9 +12,10 @@ export class RefreshTokenCommand {
 }
 
 @CommandHandler(RefreshTokenCommand)
-export class RefreshTokenUseCase
-  implements ICommandHandler<RefreshTokenCommand, string[]>
-{
+export class RefreshTokenUseCase implements ICommandHandler<
+  RefreshTokenCommand,
+  string[]
+> {
   constructor(
     private jwtService: JwtService,
     private sessionsRepository: SessionsRepository,

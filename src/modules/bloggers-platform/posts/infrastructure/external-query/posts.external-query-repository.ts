@@ -13,7 +13,7 @@ export class PostsExternalQueryRepository {
   async getByIdOrNotFoundFail(id: string) {
     const raw = await this.dataSource.query(
       `SELECT * FROM posts WHERE id = $1 AND deleted_at IS NULL`,
-      [id]
+      [id],
     );
 
     if (!raw[0]) {
@@ -43,7 +43,12 @@ export class PostsExternalQueryRepository {
       where += ` AND blog_id = $${values.length}`;
     }
 
-    if (query.title || query.shortDescription || query.content || query.blogName) {
+    if (
+      query.title ||
+      query.shortDescription ||
+      query.content ||
+      query.blogName
+    ) {
       where += ` AND (`;
       const conditions: string[] = [];
 
@@ -56,12 +61,12 @@ export class PostsExternalQueryRepository {
         values.push(`%${query.shortDescription}%`);
         conditions.push(`short_description ILIKE $${values.length}`);
       }
-      
+
       if (query.content) {
         values.push(`%${query.content}%`);
         conditions.push(`content ILIKE $${values.length}`);
       }
-      
+
       if (query.blogName) {
         values.push(`%${query.blogName}%`);
         conditions.push(`blog_name ILIKE $${values.length}`);
@@ -82,7 +87,8 @@ export class PostsExternalQueryRepository {
     };
 
     const sortColumn = sortMap[query.sortBy] ?? `created_at`;
-    const sortDirection = query.sortDirection?.toLowerCase() === `asc` ? `ASC` : `DESC`;
+    const sortDirection =
+      query.sortDirection?.toLowerCase() === `asc` ? `ASC` : `DESC`;
 
     values.push(query.pageSize);
     const limitIndex = values.length;
@@ -124,4 +130,3 @@ export class PostsExternalQueryRepository {
     });
   }
 }
-

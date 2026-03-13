@@ -23,4 +23,3 @@ export class PostLike {
     this.myStatus = likeStatus;
   }
 }
-

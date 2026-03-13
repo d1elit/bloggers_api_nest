@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { SaBlogsController } from './blogs/api/sa-blogs.controller';
 import { BlogsService } from './blogs/aplication/blogs.service';
 import { BlogsRepository } from './blogs/infrastructure/blogs.repository';
-import { MongooseModule } from '@nestjs/mongoose';
 // import { Blog, BlogSchema } from './blogs/domain/blog-mongo.entity';
 import { BlogsQueryRepository } from './blogs/infrastructure/query/blogs.query-repository';
 import { PostsRepository } from './posts/infrastructure/posts.repository';
@@ -21,12 +20,7 @@ import { UpdatePostUseCase } from './posts/aplication/usecases/update-post.useca
 import { DeletePostUseCase } from './posts/aplication/usecases/delete-post.usecase';
 import { GetPostByIdQueryHandler } from './posts/aplication/queries/get-post-by-id.query-handler';
 import { GetPostsQueryHandler } from './posts/aplication/queries/get-posts.query-handler';
-import { Comment, CommentSchema } from './comments/domain/comment.entity';
-import {
-  CommentLike,
-  CommentLikeSchema,
-} from './comments/domain/comment-like.entity';
-import { CommentsController } from './comments/api/comments.controller';
+import { PublicCommentsController } from './comments/api/public-comments.controller';
 import { CreateCommentUseCase } from './comments/application/usecases/create-comment.usecase';
 import { UpdateCommentUseCase } from './comments/application/usecases/update-comment.usecase';
 import { DeleteCommentUseCase } from './comments/application/usecases/delete-comment.usecase';
@@ -41,24 +35,15 @@ import { UserAccountsModule } from '../user-accounts/user-accounts.module';
 
 import { PostLikesRepository } from './posts/infrastructure/post-likes.repository';
 // import { PostLikeStatusUseCase } from './posts/aplication/usecases/post-like-status-use.case';
-import { GetDeviceListQueryHandler } from '../user-accounts/application/queries/get-device-list.query';
 import { PublicBlogsController } from './blogs/api/public-blogs.controller';
 import { PublicPostsController } from './posts/api/public-posts.controller';
 
 @Module({
-  imports: [
-    CqrsModule,
-    UserAccountsModule,
-    MongooseModule.forFeature([
-      // { name: Blog.name, schema: BlogSchema },
-      { name: Comment.name, schema: CommentSchema },
-      { name: CommentLike.name, schema: CommentLikeSchema },
-    ]),
-  ],
+  imports: [CqrsModule, UserAccountsModule],
   controllers: [
     SaBlogsController,
     SaPostsController,
-    CommentsController,
+    PublicCommentsController,
     PublicBlogsController,
     PublicPostsController,
   ],

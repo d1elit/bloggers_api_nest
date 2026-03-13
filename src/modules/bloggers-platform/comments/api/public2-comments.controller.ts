@@ -22,12 +22,12 @@ import { UpdateLikeStatusCommand } from '../application/usecases/update-like-sta
 import { ExtractUserFromRequest } from '../../../user-accounts/guards/decorators/param/extract-user-from-request.decorator';
 import { AccessTokenGuard } from '../../../user-accounts/guards/bearer/access-token.guard';
 import { AccessOptionalGuard } from '../../../user-accounts/guards/bearer/access-optional.guard';
-import { UserContext } from '../../../user-accounts/guards/types';
 import { UserContextDto } from '../../../user-accounts/guards/dto/user-context.dto';
 import { SkipThrottle } from '@nestjs/throttler';
+
 @SkipThrottle()
 @Controller('comments')
-export class CommentsController {
+export class Public2CommentsController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,

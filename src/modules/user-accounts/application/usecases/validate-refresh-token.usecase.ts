@@ -9,9 +9,10 @@ export class ValidateRefreshTokenCommand {
 }
 
 @CommandHandler(ValidateRefreshTokenCommand)
-export class ValidateRefreshTokenUseCase
-  implements ICommandHandler<ValidateRefreshTokenCommand, void>
-{
+export class ValidateRefreshTokenUseCase implements ICommandHandler<
+  ValidateRefreshTokenCommand,
+  void
+> {
   constructor(private sessionsRepository: SessionsRepository) {}
 
   async execute(command: ValidateRefreshTokenCommand): Promise<void> {

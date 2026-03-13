@@ -35,13 +35,7 @@ export class PostLikesRepository {
       INSERT INTO post_likes (user_id, post_id, user_login, added_at, my_status)
       VALUES ($1, $2, $3, $4, $5)
       `,
-      [
-        like.userId,
-        like.postId,
-        like.userLogin,
-        like.addedAt,
-        like.myStatus,
-      ],
+      [like.userId, like.postId, like.userLogin, like.addedAt, like.myStatus],
     );
   }
 
@@ -70,12 +64,15 @@ export class PostLikesRepository {
     return raw.map(this.mapToDomain);
   }
 
-  async findByIds(ids: string[], userId: string | undefined): Promise<PostLike[]> {
+  async findByIds(
+    ids: string[],
+    userId: string | undefined,
+  ): Promise<PostLike[]> {
     if (!userId || !ids.length) return [];
-    
+
     // Create parameterized list like $2, $3, $4
     const params = ids.map((_, i) => `$${i + 2}`).join(', ');
-    
+
     const raw = await this.dataSource.query(
       `
       SELECT * FROM post_likes
@@ -86,4 +83,3 @@ export class PostLikesRepository {
     return raw.map(this.mapToDomain);
   }
 }
-

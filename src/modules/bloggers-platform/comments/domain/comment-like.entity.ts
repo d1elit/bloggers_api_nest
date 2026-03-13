@@ -1,34 +1,19 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Model } from 'mongoose';
-
-@Schema({ collection: 'comment-likes' })
 export class CommentLike {
-  @Prop({ required: true })
-  userId!: string;
-
-  @Prop({ required: true })
-  commentId!: string;
-
-  @Prop({ required: true })
-  myStatus!: string;
+  constructor(
+    public userId: string,
+    public commentId: string,
+    public myStatus: string,
+    public addedAt: Date,
+  ) {}
 
   static createInstance(
-    this: CommentLikeModelType,
     userId: string,
     commentId: string,
     myStatus: string,
-  ): CommentLikeDocument {
-    const like = new this();
-    like.userId = userId;
-    like.commentId = commentId;
-    like.myStatus = myStatus;
-    return like as CommentLikeDocument;
+  ): CommentLike {
+    return new CommentLike(userId, commentId, myStatus, new Date());
   }
 }
 
-export const CommentLikeSchema = SchemaFactory.createForClass(CommentLike);
-CommentLikeSchema.loadClass(CommentLike);
-
-export type CommentLikeDocument = HydratedDocument<CommentLike>;
-export type CommentLikeModelType = Model<CommentLikeDocument> &
-  typeof CommentLike;
+export type CommentLikeDocument = CommentLike;
+export type CommentLikeModelType = never;

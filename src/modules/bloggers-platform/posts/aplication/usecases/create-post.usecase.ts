@@ -30,4 +30,3 @@ export class CreatePostUseCase implements ICommandHandler<
     return entity.id;
   }
 }
-

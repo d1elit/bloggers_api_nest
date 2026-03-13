@@ -1,69 +1,45 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Model } from 'mongoose';
+import { randomUUID } from 'crypto';
 
-@Schema({ _id: false })
-class CommentatorInfo {
-  @Prop({ required: true })
-  userId!: string;
-
-  @Prop({ required: true })
-  userLogin!: string;
+export class CommentatorInfo {
+  constructor(
+    public userId: string,
+    public userLogin: string,
+  ) {}
 }
 
-@Schema({ _id: false })
-class LikesInfo {
-  @Prop({ default: 0 })
-  likesCount!: number;
-
-  @Prop({ default: 0 })
-  dislikesCount!: number;
-
-  @Prop({ default: 'None' })
-  myStatus!: string;
+export class LikesInfo {
+  constructor(
+    public likesCount: number,
+    public dislikesCount: number,
+  ) {}
 }
 
-@Schema({ collection: 'comments' })
 export class Comment {
-  @Prop({ required: true })
-  content!: string;
-
-  @Prop({ type: CommentatorInfo, required: true })
-  commentatorInfo!: CommentatorInfo;
-
-  @Prop({ required: true })
-  createdAt!: string;
-
-  @Prop({ required: true })
-  postId!: string;
-
-  @Prop({ type: LikesInfo, default: () => ({}) })
-  likesInfo!: LikesInfo;
-
-  @Prop({ type: Date, nullable: true })
-  deletedAt: Date | null;
+  constructor(
+    public id: string,
+    public content: string,
+    public commentatorInfo: CommentatorInfo,
+    public createdAt: string,
+    public postId: string,
+    public likesInfo: LikesInfo,
+    public deletedAt: Date | null,
+  ) {}
 
   static createInstance(
-    this: CommentModelType,
     content: string,
     userId: string,
     userLogin: string,
     postId: string,
-  ): CommentDocument {
-    const comment = new this();
-    comment.content = content;
-    comment.commentatorInfo = {
-      userId,
-      userLogin,
-    };
-    comment.createdAt = new Date().toISOString();
-    comment.postId = postId;
-    comment.likesInfo = {
-      likesCount: 0,
-      dislikesCount: 0,
-      myStatus: 'None',
-    };
-    comment.deletedAt = null;
-    return comment as CommentDocument;
+  ): Comment {
+    return new Comment(
+      randomUUID(),
+      content,
+      new CommentatorInfo(userId, userLogin),
+      new Date().toISOString(),
+      postId,
+      new LikesInfo(0, 0),
+      null,
+    );
   }
 
   update(content: string): void {
@@ -86,8 +62,5 @@ export class Comment {
   }
 }
 
-export const CommentSchema = SchemaFactory.createForClass(Comment);
-CommentSchema.loadClass(Comment);
-
-export type CommentDocument = HydratedDocument<Comment>;
-export type CommentModelType = Model<CommentDocument> & typeof Comment;
+export type CommentDocument = Comment;
+export type CommentModelType = never;

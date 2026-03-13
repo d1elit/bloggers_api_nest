@@ -1,9 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CommentsRepository } from '../../infrastructure/comments.repository';
-import { Comment, type CommentModelType } from '../../domain/comment.entity';
+import { Comment } from '../../domain/comment.entity';
 import { PostsQueryRepository } from '../../../posts/infrastructure/query/posts.query-repository';
-import { UsersQueryRepository } from '../../../../user-accounts/infrastructure/query/users.query-repository';
-import { InjectModel } from '@nestjs/mongoose';
 import { UsersExternalRepository } from '../../../../user-accounts/infrastructure/users.external.repository';
 
 export class CreateCommentCommand {
@@ -20,8 +18,6 @@ export class CreateCommentUseCase implements ICommandHandler<
   string
 > {
   constructor(
-    @InjectModel(Comment.name)
-    private commentModel: CommentModelType,
     private commentsRepository: CommentsRepository,
     private postsQueryRepository: PostsQueryRepository,
     private usersExternalRepository: UsersExternalRepository,
@@ -35,14 +31,9 @@ export class CreateCommentUseCase implements ICommandHandler<
     await this.postsQueryRepository.getByIdOrNotFoundFail(postId);
     const user = await this.usersExternalRepository.findOrNotFoundFail(userId);
 
-    const comment = this.commentModel.createInstance(
-      content,
-      userId,
-      user.login,
-      postId,
-    );
+    const comment = Comment.createInstance(content, userId, user.login, postId);
 
     await this.commentsRepository.save(comment);
-    return comment._id.toString();
+    return comment.id;
   }
 }

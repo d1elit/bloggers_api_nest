@@ -1,5 +1,13 @@
 import { UserContextDto } from '../../../user-accounts/guards/dto/user-context.dto';
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { GetPostsQueryParams } from './input-dto/get-posts-query-params.input-dto';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
@@ -11,6 +19,13 @@ import { AccessOptionalGuard } from '../../../user-accounts/guards/bearer/access
 import { PostViewDto } from './view-dto/post.view-dto';
 import { PaginatedViewDto } from '../../../../core/dto/base.paginated.view-dto';
 import { SkipThrottle } from '@nestjs/throttler';
+import { AccessTokenGuard } from '../../../user-accounts/guards/bearer/access-token.guard';
+import { CreateCommentInputDto } from '../../comments/api/input-dto/create-comment.input-dto';
+import { CommentViewDto } from '../../comments/api/view-dto/comment.view-dto';
+import { CreateCommentCommand } from '../../comments/application/usecases/create-comment.usecase';
+import { GetCommentByIdQuery } from '../../comments/application/queries/get-comment-by-id.query-handler';
+import { GetCommentsQueryParamsInputDto } from '../../comments/api/input-dto/get-comments-query-params.input.dto';
+import { GetPostsCommentQuery } from '../../comments/application/queries/get-comments-for-post.query-handler';
 
 @SkipThrottle()
 @Controller('posts')
@@ -42,5 +57,35 @@ export class PublicPostsController {
     const userId = user.userId;
 
     return this.queryBus.execute(new GetPostsQuery(query, { userId: userId }));
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Post(':id/comments')
+  async createComment(
+    @Param('id') postId: string,
+
+    @Body() body: CreateCommentInputDto,
+
+    @ExtractUserFromRequest() user: UserContextDto,
+  ): Promise<CommentViewDto> {
+    const commentId = await this.commandBus.execute(
+      new CreateCommentCommand(body.content, user.userId, postId),
+    );
+
+    return this.queryBus.execute(new GetCommentByIdQuery(commentId));
+  }
+
+  @UseGuards(AccessOptionalGuard)
+  @Get(':id/comments')
+  async getPostComments(
+    @Param('id') postId: string,
+    @Query() query: GetCommentsQueryParamsInputDto,
+    @ExtractUserFromRequest() user: UserContextDto,
+  ): Promise<PaginatedViewDto<CommentViewDto[]>> {
+    const userId = user.userId;
+    await this.queryBus.execute(new GetPostByIdQuery(postId));
+    return await this.queryBus.execute(
+      new GetPostsCommentQuery(query, postId, userId),
+    );
   }
 }

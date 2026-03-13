@@ -13,7 +13,8 @@ export class TestingController {
         users,
         sessions,
         blogs,
-        posts
+        posts,
+        comments
       RESTART IDENTITY CASCADE
     `);
   }
