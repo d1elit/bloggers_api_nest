@@ -104,8 +104,9 @@ export class PostsQueryRepository {
     const dataQuery = `
       SELECT
         id, title, short_description, content,
-        blog_id, blog_name, created_at, deleted_at
---         likes_count, dislikes_count, newest_likes
+        blog_id, blog_name, created_at, deleted_at,
+        likes_count, dislikes_count
+--         newest_likes
       FROM posts
       ${where}
       ORDER BY ${sortColumn} ${sortDirection}
@@ -117,29 +118,29 @@ export class PostsQueryRepository {
       SELECT COUNT(*) FROM posts ${where}
     `;
 
-    console.log(dataQuery);
+    // console.log(dataQuery);
 
     const postsResult = await this.dataSource.query(dataQuery, values);
     const countResult = await this.dataSource.query(
       countQuery,
       values.slice(0, whereParamsCount),
     );
-
+    console.log(postsResult);
     const totalCount = Number(countResult[0].count);
-    // const postIds = postsResult.map((c: any) => c.id);
-    // const likesInfo: Record<string, string> = {};
+    const postIds = postsResult.map((c: any) => c.id);
+    const likesInfo: Record<string, string> = {};
 
-    // if (userId && postIds.length > 0) {
-    //   const likes = await this.postLikesRepository.findByIds(postIds, userId);
-    //   likes.forEach((l) => {
-    //     likesInfo[l.postId] = l.myStatus;
-    //   });
-    // }
+    if (userId && postIds.length > 0) {
+      const likes = await this.postLikesRepository.findByIds(postIds, userId);
+      likes.forEach((l) => {
+        likesInfo[l.postId] = l.myStatus;
+      });
+    }
 
     const items = postsResult.map((post: any) => {
-      // const myStatus = likesInfo[post.id];
-      // return PostViewDto.mapToView(post, myStatus);
-      return PostViewDto.mapToView(post);
+      const myStatus = likesInfo[post.id];
+      return PostViewDto.mapToView(post, myStatus);
+      // return PostViewDto.mapToView(post);
     });
 
     return PaginatedViewDto.mapToView({

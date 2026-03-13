@@ -40,6 +40,7 @@ export class PostLikesRepository {
   }
 
   async update(like: PostLike) {
+    console.log('++++++++++++UPDATE POST LIKE+++++++++++++++');
     await this.dataSource.query(
       `
       UPDATE post_likes

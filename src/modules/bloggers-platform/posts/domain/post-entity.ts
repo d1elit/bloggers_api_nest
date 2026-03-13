@@ -28,7 +28,7 @@ export class Post {
     public blogName: string,
     public createdAt: string,
     public deletedAt: Date | null,
-    // public extendedLikesInfo: ExtendedLikesInfo,
+    public extendedLikesInfo: ExtendedLikesInfo,
   ) {}
 
   static createInstance(dto: CreatePostDomainDto, blog: BlogViewDto): Post {
@@ -41,12 +41,12 @@ export class Post {
       blog.name,
       new Date().toISOString(),
       null,
-      // {
-      //   likesCount: 0,
-      //   dislikesCount: 0,
-      //   myStatus: 'None',
-      //   newestLikes: [],
-      // },
+      {
+        likesCount: 0,
+        dislikesCount: 0,
+        myStatus: 'None',
+        newestLikes: [],
+      },
     );
   }
 
@@ -63,15 +63,15 @@ export class Post {
     this.deletedAt = new Date();
   }
 
-  // updateLikeCount(newStatus: string, oldStatus?: string): void {
-  //   if (oldStatus === 'Like') this.extendedLikesInfo.likesCount -= 1;
-  //   if (oldStatus === 'Dislike') this.extendedLikesInfo.dislikesCount -= 1;
-  //
-  //   if (newStatus === 'Like') this.extendedLikesInfo.likesCount += 1;
-  //   if (newStatus === 'Dislike') this.extendedLikesInfo.dislikesCount += 1;
-  // }
-  //
-  // updateNewestLikes(likes: NewestLike[]): void {
-  //   this.extendedLikesInfo.newestLikes = likes;
-  // }
+  updateLikeCount(newStatus: string, oldStatus?: string): void {
+    if (oldStatus === 'Like') this.extendedLikesInfo.likesCount -= 1;
+    if (oldStatus === 'Dislike') this.extendedLikesInfo.dislikesCount -= 1;
+
+    if (newStatus === 'Like') this.extendedLikesInfo.likesCount += 1;
+    if (newStatus === 'Dislike') this.extendedLikesInfo.dislikesCount += 1;
+  }
+
+  updateNewestLikes(likes: NewestLike[]): void {
+    this.extendedLikesInfo.newestLikes = likes;
+  }
 }

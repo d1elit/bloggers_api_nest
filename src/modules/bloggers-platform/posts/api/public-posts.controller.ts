@@ -3,8 +3,11 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -26,6 +29,8 @@ import { CreateCommentCommand } from '../../comments/application/usecases/create
 import { GetCommentByIdQuery } from '../../comments/application/queries/get-comment-by-id.query-handler';
 import { GetCommentsQueryParamsInputDto } from '../../comments/api/input-dto/get-comments-query-params.input.dto';
 import { GetPostsCommentQuery } from '../../comments/application/queries/get-comments-for-post.query-handler';
+import { PostLikeStatusDto } from './input-dto/post-like-status.input-dto';
+import { PostLikeStatusCommand } from '../aplication/usecases/post-like-status-use.case';
 
 @SkipThrottle()
 @Controller('posts')
@@ -86,6 +91,20 @@ export class PublicPostsController {
     await this.queryBus.execute(new GetPostByIdQuery(postId));
     return await this.queryBus.execute(
       new GetPostsCommentQuery(query, postId, userId),
+    );
+  }
+  @UseGuards(AccessTokenGuard)
+  @Put(':id/like-status')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async postLike(
+    @Param('id') postId: string,
+    @Body() body: PostLikeStatusDto,
+    @ExtractUserFromRequest() user: UserContextDto,
+  ): Promise<void> {
+    const userId = user.userId;
+
+    return await this.commandBus.execute(
+      new PostLikeStatusCommand(postId, userId, body.likeStatus),
     );
   }
 }

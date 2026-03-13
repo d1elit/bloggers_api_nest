@@ -31,18 +31,19 @@ export class PostViewDto {
     dto.blogId = postDomain.blogId;
     dto.blogName = postDomain.blogName;
     dto.createdAt = postDomain.createdAt;
-    dto.extendedLikesInfo = {
-      dislikesCount: 0,
-      likesCount: 0,
-      myStatus: 'None',
-      newestLikes: [],
-    };
     // dto.extendedLikesInfo = {
-    //   likesCount: postDomain.extendedLikesInfo.likesCount,
-    //   dislikesCount: postDomain.extendedLikesInfo.dislikesCount,
-    //   myStatus: myStatus || 'None',
-    //   newestLikes: postDomain.extendedLikesInfo.newestLikes,
+    //   dislikesCount: 0,
+    //   likesCount: 0,
+    //   myStatus: 'None',
+    //   newestLikes: [],
     // };
+    dto.extendedLikesInfo = {
+      likesCount: postDomain.extendedLikesInfo.likesCount,
+      dislikesCount: postDomain.extendedLikesInfo.dislikesCount,
+      myStatus: myStatus || 'None',
+      newestLikes: [],
+      // newestLikes: postDomain.extendedLikesInfo.newestLikes,
+    };
 
     return dto;
   }

@@ -11,16 +11,20 @@ export class PostsRepository {
 
   async save(domainPost: Post) {
     const post = PostsMapper.toPersistence(domainPost);
+
+    console.log(post);
     await this.dataSource.query(
       `
         INSERT INTO posts (
           id, title, short_description, content,
-          blog_id, blog_name, created_at, deleted_at
+          blog_id, blog_name, created_at, deleted_at,
+          likes_count, dislikes_count
        
         )
         VALUES (
                  $1,$2,$3,$4,
-                 $5,$6,$7,$8
+                 $5,$6,$7,$8,
+                $9, $10
               
                )
           ON CONFLICT (id)
@@ -30,9 +34,9 @@ export class PostsRepository {
           content = EXCLUDED.content,
           blog_id = EXCLUDED.blog_id,
           blog_name = EXCLUDED.blog_name,
-          deleted_at = EXCLUDED.deleted_at
---           likes_count = EXCLUDED.likes_count,
---           dislikes_count = EXCLUDED.dislikes_count,
+          deleted_at = EXCLUDED.deleted_at,
+          likes_count = EXCLUDED.likes_count,
+          dislikes_count = EXCLUDED.dislikes_count
 --           newest_likes = EXCLUDED.newest_likes
       `,
       [
@@ -44,8 +48,8 @@ export class PostsRepository {
         post.blog_name,
         post.created_at,
         post.deleted_at,
-        // post.likes_count,
-        // post.dislikes_count,
+        post.likes_count,
+        post.dislikes_count,
         // post.newest_likes,
       ],
     );

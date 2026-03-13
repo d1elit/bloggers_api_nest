@@ -34,7 +34,7 @@ import { CommentsQueryRepository } from './comments/infrastructure/query/comment
 import { UserAccountsModule } from '../user-accounts/user-accounts.module';
 
 import { PostLikesRepository } from './posts/infrastructure/post-likes.repository';
-// import { PostLikeStatusUseCase } from './posts/aplication/usecases/post-like-status-use.case';
+import { PostLikeStatusUseCase } from './posts/aplication/usecases/post-like-status-use.case';
 import { PublicBlogsController } from './blogs/api/public-blogs.controller';
 import { PublicPostsController } from './posts/api/public-posts.controller';
 
@@ -67,7 +67,7 @@ import { PublicPostsController } from './posts/api/public-posts.controller';
     CreatePostUseCase,
     UpdatePostUseCase,
     DeletePostUseCase,
-    // PostLikeStatusUseCase,
+    PostLikeStatusUseCase,
     GetPostByIdQueryHandler,
     GetPostsQueryHandler,
     CreateCommentUseCase,

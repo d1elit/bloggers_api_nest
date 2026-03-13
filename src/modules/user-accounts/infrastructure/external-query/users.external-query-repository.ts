@@ -1,28 +1,32 @@
-import {
-  UserMongo,
-  type UserMongoModelType,
-} from '../../domain/user-mongo.entity';
-import { InjectModel } from '@nestjs/mongoose';
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { UserExternalDto } from './external-dto/users.external-dto';
+import { Injectable } from '@nestjs/common';
+import { UserViewDto } from '../../api/view-dto/users.view-dto';
+import { DomainException } from '../../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class UsersExternalQueryRepository {
-  constructor(
-    @InjectModel(UserMongo.name)
-    private UserModel: UserMongoModelType,
-  ) {}
+  constructor(private dataSource: DataSource) {}
 
-  async getByIdOrNotFoundFail(id: string): Promise<UserExternalDto> {
-    const user = await this.UserModel.findOne({
-      _id: id,
-      deletedAt: null,
-    });
+  async getByIdOrNotFoundFail(id: string): Promise<UserViewDto> {
+    const user = await this.dataSource.query(
+      `SELECT * FROM users WHERE id = $1 and "deleted_at" is NULL`,
+      [id],
+    );
+    console.log('finded user');
+    console.log(user[0]);
 
-    if (!user) {
-      throw new NotFoundException('user not found');
+    if (!user[0]) {
+      throw new DomainException({
+        code: DomainExceptionCode.NotFound,
+        extensions: [
+          {
+            field: 'user',
+            message: 'User not found',
+          },
+        ],
+      });
     }
-
-    return UserExternalDto.mapToView(user);
+    return UserViewDto.mapToView(user[0]);
   }
 }
