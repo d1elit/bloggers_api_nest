@@ -7,12 +7,12 @@ import { BloggersPlatformModule } from './modules/bloggers-platform/bloggers-pla
 import { TestingModule } from './modules/testing/testing.module';
 import { CoreModule } from './core/core.module';
 import { UserAccountsModule } from './modules/user-accounts/user-accounts.module';
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { APP_FILTER } from '@nestjs/core';
 import { AllHttpExceptionsFilter } from './core/exceptions/filters/base-exception.filter';
 import { DomainHttpExceptionsFilter } from './core/exceptions/filters/domain-exception.filter';
 
 import { CoreConfig } from './core/core.config';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm'; // ← Правильный путь
 console.log(CoreConfig);
 @Module({

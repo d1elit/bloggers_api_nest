@@ -2,25 +2,14 @@ import { UserContextDto } from '../../../user-accounts/guards/dto/user-context.d
 import {
   Body,
   Controller,
-  Delete,
   Get,
-  HttpCode,
-  HttpStatus,
   Param,
   Post,
-  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { CreatePostInputDto } from './input-dto/create-post.input-dto';
-import { UpdatePostDto } from '../dto/create-post.dto';
-import { GetPostsQueryParams } from './input-dto/get-posts-query-params.input-dto';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { CreatePostCommand } from '../aplication/usecases/create-post.usecase';
 import { GetPostByIdQuery } from '../aplication/queries/get-post-by-id.query-handler';
-import { UpdatePostCommand } from '../aplication/usecases/update-post.usecase';
-import { DeletePostCommand } from '../aplication/usecases/delete-post.usecase';
-import { GetPostsQuery } from '../aplication/queries/get-posts.query-handler';
 import { ExtractUserFromRequest } from '../../../user-accounts/guards/decorators/param/extract-user-from-request.decorator';
 import { CreateCommentInputDto } from '../../comments/api/input-dto/create-comment.input-dto';
 import { CreateCommentCommand } from '../../comments/application/usecases/create-comment.usecase';
@@ -29,15 +18,10 @@ import { AccessTokenGuard } from '../../../user-accounts/guards/bearer/access-to
 import { GetPostsCommentQuery } from '../../comments/application/queries/get-comments-for-post.query-handler';
 import { AccessOptionalGuard } from '../../../user-accounts/guards/bearer/access-optional.guard';
 // import { PostLikeStatusCommand } from '../aplication/usecases/post-like-status-use.case';
-import { BasicAuthGuard } from '../../../user-accounts/guards/basic/basic-auth.guard';
-import { PostLikeStatusDto } from './input-dto/post-like-status.input-dto';
 
 import { CommentViewDto } from '../../comments/api/view-dto/comment.view-dto';
 
-import { PostViewDto } from './view-dto/post.view-dto';
-
 import { PaginatedViewDto } from '../../../../core/dto/base.paginated.view-dto';
-import { UpdatePostInputDto } from './input-dto/update-post.input-dto';
 import { GetCommentsQueryParamsInputDto } from '../../comments/api/input-dto/get-comments-query-params.input.dto';
 import { SkipThrottle } from '@nestjs/throttler';
 

@@ -1,40 +1,16 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-  Post,
-  Put,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
-
-import { CreteBlogInputDto } from './input-dto/crete-blog.input-dto';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { BlogsQueryRepository } from '../infrastructure/query/blogs.query-repository';
-import { UpdateBlogInputDto } from './input-dto/update-blog.input-dto';
 import { GetBlogsQueryParams } from './input-dto/get-blogs-query-params.input-dto';
-import { CreatePostDto } from '../../posts/dto/create-post.dto';
 import { GetPostsQuery } from '../../posts/aplication/queries/get-posts.query-handler';
-import { CreatePostCommand } from '../../posts/aplication/usecases/create-post.usecase';
-import { GetPostByIdQuery } from '../../posts/aplication/queries/get-post-by-id.query-handler';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { CreateBlogCommand } from '../aplication/usecases/create-blog.usecase';
 import { GetBlogByIdQuery } from '../aplication/queries/get-blog-by-id.query-handler';
-import { UpdateBlogCommand } from '../aplication/usecases/update-blog.usecase';
-import { DeleteBlogCommand } from '../aplication/usecases/delete-blog.usecase';
 import { GetBlogsQuery } from '../aplication/queries/get-blogs.query-handler';
 import { GetPostsQueryParams } from '../../posts/api/input-dto/get-posts-query-params.input-dto';
-import { BasicAuthGuard } from '../../../user-accounts/guards/basic/basic-auth.guard';
 import { AccessOptionalGuard } from '../../../user-accounts/guards/bearer/access-optional.guard';
 import { ExtractUserFromRequest } from '../../../user-accounts/guards/decorators/param/extract-user-from-request.decorator';
-import { UserContextDto } from '../../../user-accounts/guards/dto/user-context.dto';
 import { type UserContext } from '../../../user-accounts/guards/types';
-import { CreatePostInputDto } from '../../posts/api/input-dto/create-post.input-dto';
-import { BlogsPostCreateInputDto } from './input-dto/blogs-post-create.input-dto';
 import { SkipThrottle } from '@nestjs/throttler';
+
 @SkipThrottle()
 @Controller('blogs')
 export class PublicBlogsController {
