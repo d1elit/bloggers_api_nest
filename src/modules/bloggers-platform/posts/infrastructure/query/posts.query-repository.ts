@@ -7,6 +7,13 @@ import { DomainExceptionCode } from '../../../../../core/exceptions/domain-excep
 import { PostLikesRepository } from '../post-likes.repository';
 import { DataSource } from 'typeorm';
 
+// Тип для маппинга последних лайков (можно вынести в отдельный файл)
+export type NewestLikeView = {
+  addedAt: string;
+  userId: string;
+  login: string;
+};
+
 @Injectable()
 export class PostsQueryRepository {
   constructor(
@@ -32,7 +39,26 @@ export class PostsQueryRepository {
       });
     }
 
-    return PostViewDto.mapToView(raw[0], likeStatus);
+    const newestLikesRaw = await this.dataSource.query(
+      `
+      SELECT added_at as "addedAt", user_id as "userId", user_login as "userLogin"
+      FROM post_likes
+      WHERE post_id = $1 AND my_status = 'Like'
+      ORDER BY added_at DESC
+      LIMIT 3
+      `,
+      [id],
+    );
+    console.log('NEWET LIEKS');
+
+    const newestLikes: NewestLikeView[] = newestLikesRaw.map((like: any) => ({
+      addedAt: like.addedAt.toISOString(),
+      userId: like.userId,
+      login: like.userLogin,
+    }));
+    console.log(newestLikes);
+
+    return PostViewDto.mapToView(raw[0], likeStatus, newestLikes);
   }
 
   async getAll(
@@ -106,7 +132,6 @@ export class PostsQueryRepository {
         id, title, short_description, content,
         blog_id, blog_name, created_at, deleted_at,
         likes_count, dislikes_count
---         newest_likes
       FROM posts
       ${where}
       ORDER BY ${sortColumn} ${sortDirection}
@@ -118,29 +143,65 @@ export class PostsQueryRepository {
       SELECT COUNT(*) FROM posts ${where}
     `;
 
-    // console.log(dataQuery);
-
     const postsResult = await this.dataSource.query(dataQuery, values);
     const countResult = await this.dataSource.query(
       countQuery,
       values.slice(0, whereParamsCount),
     );
-    console.log(postsResult);
+
     const totalCount = Number(countResult[0].count);
     const postIds = postsResult.map((c: any) => c.id);
-    const likesInfo: Record<string, string> = {};
 
-    if (userId && postIds.length > 0) {
-      const likes = await this.postLikesRepository.findByIds(postIds, userId);
-      likes.forEach((l) => {
-        likesInfo[l.postId] = l.myStatus;
+    const likesInfo: Record<string, string> = {};
+    const newestLikesInfo: Record<string, NewestLikeView[]> = {};
+
+    if (postIds.length > 0) {
+      if (userId) {
+        const likes = await this.postLikesRepository.findByIds(postIds, userId);
+        likes.forEach((l) => {
+          likesInfo[l.postId] = l.myStatus;
+        });
+      }
+
+      const newestLikesQuery = `
+        SELECT post_id, added_at as "addedAt", user_id as "userId", user_login
+        FROM (
+          SELECT 
+            post_id, 
+            added_at, 
+            user_id, 
+            user_login,
+            ROW_NUMBER() OVER(PARTITION BY post_id ORDER BY added_at DESC) as rn
+          FROM post_likes
+          WHERE post_id = ANY($1) AND my_status = 'Like'
+        ) as ranked_likes
+        WHERE rn <= 3
+      `;
+
+      const newestLikesRaw = await this.dataSource.query(newestLikesQuery, [
+        postIds,
+      ]);
+
+      // Группируем лайки по post_id
+      newestLikesRaw.forEach((like: any) => {
+        if (!newestLikesInfo[like.post_id]) {
+          newestLikesInfo[like.post_id] = [];
+        }
+        newestLikesInfo[like.post_id].push({
+          addedAt: like.addedAt.toISOString(),
+          userId: like.userId,
+          login: like.user_login,
+        });
       });
     }
 
+    // Собираем итоговые DTO
     const items = postsResult.map((post: any) => {
-      const myStatus = likesInfo[post.id];
-      return PostViewDto.mapToView(post, myStatus);
-      // return PostViewDto.mapToView(post);
+      const myStatus = likesInfo[post.id] || 'None';
+      const newestLikes = newestLikesInfo[post.id] || [];
+
+      // Передаем newestLikes в mapToView
+      return PostViewDto.mapToView(post, myStatus, newestLikes);
     });
 
     return PaginatedViewDto.mapToView({

@@ -14,7 +14,8 @@ export class TestingController {
         sessions,
         blogs,
         posts,
-        comments
+   "post_likes",
+      "comment_likes"
       RESTART IDENTITY CASCADE
     `);
   }

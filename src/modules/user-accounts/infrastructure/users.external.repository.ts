@@ -1,33 +1,23 @@
-import { InjectModel } from '@nestjs/mongoose';
-import {
-  UserMongo,
-  UserMongoDocument,
-  type UserMongoModelType,
-} from '../domain/user-mongo.entity';
 import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
 import { User } from '../domain/user.entity';
 import { UsersMapper } from './users-mapper';
 import { DataSource } from 'typeorm';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class UsersExternalRepository {
-  constructor(
-    @InjectModel(UserMongo.name) private UserModel: UserMongoModelType,
-    private dataSource: DataSource,
-  ) {}
+  constructor(private dataSource: DataSource) {}
 
   async findById(id: string): Promise<any | null> {
-    console.log('IM IN FIND', [id]);
+    console.log('IM IN EXTERNAL USER FIND', [id]);
     const raw = await this.dataSource.query(
       `SELECT * FROM users
                 WHERE id = $1 and "deleted_at" IS NULL `,
       [id],
     );
+    console.log(raw);
     return raw;
-  }
-
-  async save(user: UserMongoDocument) {
-    await user.save();
   }
 
   async findOrNotFoundFail(id: string): Promise<User> {

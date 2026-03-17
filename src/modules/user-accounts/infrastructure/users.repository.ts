@@ -1,9 +1,3 @@
-import { InjectModel } from '@nestjs/mongoose';
-import {
-  UserMongo,
-  UserMongoDocument,
-  type UserMongoModelType,
-} from '../domain/user-mongo.entity';
 import { Injectable } from '@nestjs/common';
 import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
@@ -13,10 +7,7 @@ import { UsersMapper } from './users-mapper';
 
 @Injectable()
 export class UsersRepository {
-  constructor(
-    @InjectModel(UserMongo.name) private UserModel: UserMongoModelType,
-    private dataSource: DataSource,
-  ) {}
+  constructor(private dataSource: DataSource) {}
 
   async findById(id: string): Promise<any | null> {
     console.log('IM IN FIND', [id]);
@@ -26,10 +17,6 @@ export class UsersRepository {
       [id],
     );
     return raw;
-  }
-
-  async saveMongo(user: UserMongoDocument) {
-    await user.save();
   }
 
   async save(domainUser: User) {
@@ -145,7 +132,7 @@ export class UsersRepository {
   async findFieldWithValue(
     fieldName: string,
     fieldValue: string,
-  ): Promise<UserMongoDocument | null> {
+  ): Promise<User | null> {
     const allowedFields = ['login', 'email'];
     if (!allowedFields.includes(fieldName)) {
       throw new DomainException({

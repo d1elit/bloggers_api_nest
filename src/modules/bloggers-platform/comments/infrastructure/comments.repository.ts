@@ -11,6 +11,7 @@ export class CommentsRepository {
 
   async save(domainComment: Comment) {
     const comment = CommentsMapper.toPersistence(domainComment);
+
     await this.dataSource.query(
       `
         INSERT INTO comments (

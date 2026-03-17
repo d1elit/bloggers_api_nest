@@ -1,4 +1,3 @@
-import { UserMongoDocument } from '../../domain/user-mongo.entity';
 import { User } from '../../domain/user.entity';
 import { UsersMapper } from '../../infrastructure/users-mapper';
 

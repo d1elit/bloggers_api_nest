@@ -1,4 +1,4 @@
-import { SessionDto } from './session-mongo.entity';
+import { SessionDto } from './dto/session.domain.dto';
 
 export class Session {
   constructor(

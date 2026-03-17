@@ -1,5 +1,5 @@
-import { SessionDocument } from '../../domain/session-mongo.entity';
 import { SessionsMapper } from '../../infrastructure/sessions-mapper';
+import { Session } from '../../domain/session.entity';
 
 export class DeviceListViewDto {
   ip: string;
@@ -7,7 +7,7 @@ export class DeviceListViewDto {
   lastActiveDate: string;
   deviceId: string;
 
-  static mapToView(deviceList: SessionDocument[]) {
+  static mapToView(deviceList: Session[]) {
     return deviceList.map((raw) => {
       const session = SessionsMapper.toDomain(raw);
       return {

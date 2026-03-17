@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
-import { MongooseModule } from '@nestjs/mongoose';
 import { AccessTokenGuard } from './guards/bearer/access-token.guard';
 import { AuthController } from './api/auth.controller';
 import { SecurityDevicesController } from './api/security-devices.controller';
@@ -19,10 +18,8 @@ import { RefreshTokenUseCase } from './application/usecases/refresh-token.usecas
 import { RegisterUseCase } from './application/usecases/register.usecase';
 import { RegistrationConfirmationUseCase } from './application/usecases/registration-confirmation.usecase';
 import { ValidateRefreshTokenUseCase } from './application/usecases/validate-refresh-token.usecase';
-import { UsersExternalService } from './application/users.external-service';
+
 import { UsersService } from './application/users.service';
-import { SessionMongo, SessionSchema } from './domain/session-mongo.entity';
-import { UserMongo, UserSchema } from './domain/user-mongo.entity';
 import { UsersExternalQueryRepository } from './infrastructure/external-query/users.external-query-repository';
 import { UsersExternalRepository } from './infrastructure/users.external.repository';
 import { AuthQueryRepository } from './infrastructure/query/auth.query-repository';
@@ -56,10 +53,10 @@ const useCases = [
 @Module({
   imports: [
     CqrsModule,
-    MongooseModule.forFeature([{ name: UserMongo.name, schema: UserSchema }]),
-    MongooseModule.forFeature([
-      { name: SessionMongo.name, schema: SessionSchema },
-    ]),
+    // MongooseModule.forFeature([{ name: UserMongo.name, schema: UserSchema }]),
+    // MongooseModule.forFeature([
+    //   { name: SessionMongo.name, schema: SessionSchema },
+    // ]),
   ],
   controllers: [
     UsersController,
@@ -73,7 +70,6 @@ const useCases = [
     SecurityDevicesQueryRepository,
     AuthQueryRepository,
     UsersExternalQueryRepository,
-    UsersExternalService,
     CryptoService,
     JwtService,
     SessionsRepository,
@@ -89,7 +85,6 @@ const useCases = [
   ],
   exports: [
     UsersExternalQueryRepository,
-    UsersExternalService,
     AccessTokenGuard,
     JwtService,
     UsersService,

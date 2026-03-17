@@ -2,7 +2,6 @@ import { configModule } from './config-dynamic-module';
 import { DynamicModule, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { MongooseModule } from '@nestjs/mongoose';
 import { BloggersPlatformModule } from './modules/bloggers-platform/bloggers-platform.module';
 import { TestingModule } from './modules/testing/testing.module';
 import { CoreModule } from './core/core.module';
@@ -36,7 +35,7 @@ console.log(CoreConfig);
       autoLoadEntities: false,
       synchronize: false,
     }),
-    MongooseModule.forRoot('mongodb://localhost/nest-api'),
+    // MongooseModule.forRoot('mongodb://localhost/nest-api'),
     CoreModule,
     UserAccountsModule,
     BloggersPlatformModule,

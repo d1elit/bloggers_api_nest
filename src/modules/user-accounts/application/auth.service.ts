@@ -1,9 +1,5 @@
-import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
-import {
-  UserMongo,
-  type UserMongoModelType,
-} from '../domain/user-mongo.entity';
+
 import { UsersRepository } from '../infrastructure/users.repository';
 
 import { CryptoService } from './crypto.service';
@@ -12,10 +8,7 @@ import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-c
 import * as crypto from 'node:crypto';
 import { JwtService } from './jwt.service';
 import { jwtDecode } from 'jwt-decode';
-import {
-  SessionMongo,
-  type SessionModelType,
-} from '../domain/session-mongo.entity';
+
 import { SessionsRepository } from '../infrastructure/sessions.repository';
 import { UsersService } from './users.service';
 import { CreateUserInputDto } from '../api/input-dto/users/users.input-dto';
@@ -26,10 +19,6 @@ import { refreshTokenPayload } from '../api/input-dto/auth/refresh-token-payload
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel(UserMongo.name)
-    private UserModel: UserMongoModelType,
-    @InjectModel(SessionMongo.name)
-    private SessionModel: SessionModelType,
     private usersRepository: UsersRepository,
     private cryptoService: CryptoService,
     private jwtService: JwtService,
