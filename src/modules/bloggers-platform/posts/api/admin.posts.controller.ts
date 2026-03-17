@@ -5,7 +5,7 @@ import { SkipThrottle } from '@nestjs/throttler';
 
 @SkipThrottle()
 @Controller('posts')
-export class SaPostsController {
+export class AdminPostsController {
   constructor(
     private readonly commandBus: CommandBus,
 

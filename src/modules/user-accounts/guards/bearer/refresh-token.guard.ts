@@ -9,21 +9,6 @@ import { JwtService } from '../../application/jwt.service';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { UserContext } from '../types';
 
-// export interface UserContext {
-//   userId: string;
-//   deviceId?: string;
-//   likeStatus?: string;
-// }
-//
-// // Расширяем тип Request для TypeScript
-// declare global {
-//   namespace Express {
-//     interface Request {
-//       user?: UserContext;
-//     }
-//   }
-// }
-//todo Типы для всего
 @Injectable()
 export class RefreshTokenGuard implements CanActivate {
   constructor(

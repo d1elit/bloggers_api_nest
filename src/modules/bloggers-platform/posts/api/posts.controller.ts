@@ -34,7 +34,7 @@ import { PostLikeStatusCommand } from '../aplication/usecases/post-like-status-u
 
 @SkipThrottle()
 @Controller('posts')
-export class PublicPostsController {
+export class PostsController {
   constructor(
     private readonly commandBus: CommandBus,
 

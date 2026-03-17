@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { SaBlogsController } from './blogs/api/sa-blogs.controller';
+import { AdminBlogsController } from './blogs/api/admin.blogs.controller';
 import { BlogsService } from './blogs/aplication/blogs.service';
 import { BlogsRepository } from './blogs/infrastructure/blogs.repository';
 // import { Blog, BlogSchema } from './blogs/domain/blog-mongo.entity';
 import { BlogsQueryRepository } from './blogs/infrastructure/query/blogs.query-repository';
 import { PostsRepository } from './posts/infrastructure/posts.repository';
 import { BlogsExternalQueryRepository } from './blogs/infrastructure/external-query/blogs.external-query-repository';
-import { SaPostsController } from './posts/api/sa-posts.controller';
+import { AdminPostsController } from './posts/api/admin.posts.controller';
 import { PostsQueryRepository } from './posts/infrastructure/query/posts.query-repository';
 import { PostsExternalQueryRepository } from './posts/infrastructure/external-query/posts.external-query-repository';
 import { CreateBlogUseCase } from './blogs/aplication/usecases/create-blog.usecase';
@@ -35,17 +35,17 @@ import { UserAccountsModule } from '../user-accounts/user-accounts.module';
 
 import { PostLikesRepository } from './posts/infrastructure/post-likes.repository';
 import { PostLikeStatusUseCase } from './posts/aplication/usecases/post-like-status-use.case';
-import { PublicBlogsController } from './blogs/api/public-blogs.controller';
-import { PublicPostsController } from './posts/api/public-posts.controller';
+import { BlogsController } from './blogs/api/blogs.controller';
+import { PostsController } from './posts/api/posts.controller';
 
 @Module({
   imports: [CqrsModule, UserAccountsModule],
   controllers: [
-    SaBlogsController,
-    SaPostsController,
+    AdminBlogsController,
+    AdminPostsController,
     PublicCommentsController,
-    PublicBlogsController,
-    PublicPostsController,
+    BlogsController,
+    PostsController,
   ],
   providers: [
     BlogsService,

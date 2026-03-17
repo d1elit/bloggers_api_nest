@@ -38,7 +38,7 @@ import { DeletePostCommand } from '../../posts/aplication/usecases/delete-post.u
 
 @SkipThrottle()
 @Controller('sa/blogs')
-export class SaBlogsController {
+export class AdminBlogsController {
   constructor(
     private readonly blogsQueryRepository: BlogsQueryRepository,
     private readonly commandBus: CommandBus,
