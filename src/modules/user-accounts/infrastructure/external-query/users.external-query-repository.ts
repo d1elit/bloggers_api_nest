@@ -22,7 +22,7 @@ export class UsersExternalQueryRepository {
         extensions: [
           {
             field: 'user',
-            message: 'User not found',
+            message: 'UserEntity not found',
           },
         ],
       });

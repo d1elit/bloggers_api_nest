@@ -12,7 +12,9 @@ import { DomainHttpExceptionsFilter } from './core/exceptions/filters/domain-exc
 
 import { CoreConfig } from './core/core.config';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { TypeOrmModule } from '@nestjs/typeorm'; // ← Правильный путь
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './modules/user-accounts/domain/user.entity';
+
 console.log(CoreConfig);
 @Module({
   imports: [
@@ -31,9 +33,10 @@ console.log(CoreConfig);
       port: 5432,
       username: 'nodejs',
       password: '12345',
-      database: 'nest-postgre',
-      autoLoadEntities: false,
-      synchronize: false,
+      database: 'nest-typeorm',
+      entities: [User],
+      synchronize: true,
+      logging: true,
     }),
     // MongooseModule.forRoot('mongodb://localhost/nest-api'),
     CoreModule,

@@ -4,7 +4,7 @@ import { CryptoService } from '../crypto.service';
 import { DomainException } from '../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { User } from '../../domain/user.entity';
+import { UserDomain } from '../../domain/user.entity-domain';
 
 export class CreateUserCommand {
   constructor(
@@ -30,7 +30,7 @@ export class CreateUserUseCase implements ICommandHandler<
       dto.password,
     );
 
-    const user = User.createInstance({
+    const user = UserDomain.createInstance({
       email: dto.email,
       login: dto.login,
       passwordHash: passwordHash,

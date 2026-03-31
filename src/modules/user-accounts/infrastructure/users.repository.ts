@@ -1,13 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
-import { User } from '../domain/user.entity';
-import { DataSource } from 'typeorm';
+import { UserDomain } from '../domain/user.entity-domain';
+import { DataSource, Repository } from 'typeorm';
 import { UsersMapper } from './users-mapper';
+import { User } from '../domain/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UsersRepository {
-  constructor(private dataSource: DataSource) {}
+  constructor(
+    private dataSource: DataSource,
+    @InjectRepository(User)
+    private userRepo: Repository<User>,
+  ) {}
+  async findUser() {
+    return await this.userRepo.find();
+  }
 
   async findById(id: string): Promise<any | null> {
     console.log('IM IN FIND', [id]);
@@ -19,7 +28,7 @@ export class UsersRepository {
     return raw;
   }
 
-  async save(domainUser: User) {
+  async save(domainUser: UserDomain) {
     const user = UsersMapper.toPersistence(domainUser);
     await this.dataSource.query(
       `
@@ -72,9 +81,9 @@ export class UsersRepository {
     return user;
   }
 
-  async findOrNotFoundFail(id: string): Promise<User> {
+  async findOrNotFoundFail(id: string): Promise<UserDomain> {
     const raw = await this.findById(id);
-    console.log('User IN FIND to delete');
+    console.log('UserEntity IN FIND to delete');
 
     if (!raw.length) {
       throw new DomainException({
@@ -82,7 +91,7 @@ export class UsersRepository {
         extensions: [
           {
             field: 'user',
-            message: 'User not found',
+            message: 'UserEntity not found',
           },
         ],
       });
@@ -91,7 +100,7 @@ export class UsersRepository {
     return UsersMapper.toDomain(raw[0]);
   }
 
-  async findByEmailOrError(email: string): Promise<User> {
+  async findByEmailOrError(email: string): Promise<UserDomain> {
     const row = await this.dataSource.query(
       `Select * from users 
         WHERE email = $1`,
@@ -110,7 +119,7 @@ export class UsersRepository {
     return UsersMapper.toDomain(row[0]);
   }
 
-  async findByLoginOrEmail(loginOrEmail: string): Promise<User | null> {
+  async findByLoginOrEmail(loginOrEmail: string): Promise<UserDomain | null> {
     const row = await this.dataSource.query(
       `Select * from users 
         WHERE email = $1 or login = $1`,
@@ -132,7 +141,7 @@ export class UsersRepository {
   async findFieldWithValue(
     fieldName: string,
     fieldValue: string,
-  ): Promise<User | null> {
+  ): Promise<UserDomain | null> {
     const allowedFields = ['login', 'email'];
     if (!allowedFields.includes(fieldName)) {
       throw new DomainException({
@@ -157,7 +166,7 @@ export class UsersRepository {
     // return this.UserModel.findOne({ [fieldName]: fieldValue, deletedAt: null });
   }
 
-  async findByCodeOrError(code: string): Promise<User> {
+  async findByCodeOrError(code: string): Promise<UserDomain> {
     console.log('findByCode: ', code);
     const result = await this.dataSource.query(
       `SELECT * FROM USERS WHERE email_confirmation_code = $1`,
@@ -178,7 +187,7 @@ export class UsersRepository {
     }
     return UsersMapper.toDomain(result[0]);
   }
-  async findByRecoveryCodeOrError(code: string): Promise<User> {
+  async findByRecoveryCodeOrError(code: string): Promise<UserDomain> {
     console.log('findByCode: ', code);
     // const result = await this.UserModel.findOne({
     //   'passwordRecovery.confirmationCode': code,
@@ -195,7 +204,7 @@ export class UsersRepository {
         extensions: [
           {
             field: 'user',
-            message: 'User not found',
+            message: 'UserEntity not found',
           },
         ],
       });

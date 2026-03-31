@@ -1,8 +1,8 @@
-import { User } from '../domain/user.entity';
+import { UserDomain } from '../domain/user.entity-domain';
 
 export class UsersMapper {
-  static toDomain(row: any): User {
-    return new User(
+  static toDomain(row: any): UserDomain {
+    return new UserDomain(
       row.id,
       row.login,
       row.email,
@@ -23,7 +23,7 @@ export class UsersMapper {
     );
   }
 
-  static toPersistence(user: User) {
+  static toPersistence(user: UserDomain) {
     return {
       id: user.id,
       login: user.login,

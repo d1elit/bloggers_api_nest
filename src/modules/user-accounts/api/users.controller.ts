@@ -20,7 +20,7 @@ import { BasicAuthGuard } from '../guards/basic/basic-auth.guard';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from '../application/usecases/create-user.usecase';
 import { DeleteUserCommand } from '../application/usecases/delete-user.usecase';
-import { buildDocumentBase } from '@nestjs/swagger/dist/fixtures/document.base';
+import { UsersRepository } from '../infrastructure/users.repository';
 
 @UseGuards(BasicAuthGuard)
 @Controller('sa/users')
@@ -28,6 +28,7 @@ export class UsersController {
   constructor(
     private usersQueryRepository: UsersQueryRepository,
     private commandBus: CommandBus,
+    private usersRepository: UsersRepository,
   ) {
     console.log('UsersController created');
   }
@@ -43,6 +44,7 @@ export class UsersController {
   async getAll(
     @Query() query: GetUsersQueryParams,
   ): Promise<PaginatedViewDto<UserViewDto[]>> {
+    console.log(await this.usersRepository.findUser());
     return this.usersQueryRepository.getAll(query);
   }
 

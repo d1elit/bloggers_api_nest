@@ -33,6 +33,8 @@ import { SessionsQueryRepository } from './infrastructure/query/sessions.query-r
 import { GetDeviceListQueryHandler } from './application/queries/get-device-list.query';
 import { DeleteDeviceUseCase } from './application/usecases/delete-device.usecase';
 import { DeleteDeviceExceptCurrentUseCase } from './application/usecases/delete-device-except-current.usecase';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './domain/user.entity';
 
 const useCases = [
   CreateUserUseCase,
@@ -53,6 +55,7 @@ const useCases = [
 @Module({
   imports: [
     CqrsModule,
+    TypeOrmModule.forFeature([User]),
     // MongooseModule.forFeature([{ name: UserMongo.name, schema: UserSchema }]),
     // MongooseModule.forFeature([
     //   { name: SessionMongo.name, schema: SessionSchema },

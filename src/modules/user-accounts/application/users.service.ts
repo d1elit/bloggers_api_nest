@@ -4,7 +4,7 @@ import { UsersRepository } from '../infrastructure/users.repository';
 import { CryptoService } from './crypto.service';
 import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
-import { User } from '../domain/user.entity';
+import { UserDomain } from '../domain/user.entity-domain';
 
 @Injectable()
 export class UsersService {
@@ -23,7 +23,7 @@ export class UsersService {
       dto.password,
     );
 
-    const user = User.createInstance({
+    const user = UserDomain.createInstance({
       email: dto.email,
       login: dto.login,
       passwordHash: passwordHash,

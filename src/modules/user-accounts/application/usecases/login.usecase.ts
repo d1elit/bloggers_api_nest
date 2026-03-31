@@ -11,7 +11,7 @@ import { JwtService } from '../jwt.service';
 import { SessionsRepository } from '../../infrastructure/sessions.repository';
 import { Session } from '../../domain/session.entity';
 import { randomUUID } from 'crypto';
-import { User } from '../../domain/user.entity';
+import { UserDomain } from '../../domain/user.entity-domain';
 
 export class LoginUserCommand {
   constructor(public inputDto: authInput) {}
@@ -61,7 +61,7 @@ export class LoginUserUseCase implements ICommandHandler<
 
     return [accessToken, refreshToken];
   }
-  async checkUserCredentials(loginDto: LoginInput): Promise<User> {
+  async checkUserCredentials(loginDto: LoginInput): Promise<UserDomain> {
     const user = await this.verifyLoginOrEmail(loginDto.loginOrEmail);
 
     const isPasswordVerified = await this.cryptoService.comparePassword({
@@ -83,7 +83,7 @@ export class LoginUserUseCase implements ICommandHandler<
     return user;
   }
 
-  async verifyLoginOrEmail(login: string): Promise<User> {
+  async verifyLoginOrEmail(login: string): Promise<UserDomain> {
     const user = await this.usersRepository.findByLoginOrEmail(login);
     console.log(user);
     if (!user) {

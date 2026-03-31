@@ -1,35 +1,38 @@
 import { UserViewDto } from '../../api/view-dto/users.view-dto';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PaginatedViewDto } from '../../../../core/dto/base.paginated.view-dto';
 import { GetUsersQueryParams } from '../../api/input-dto/users/get-users-query-params.input-dto';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { DomainException } from '../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from '../../domain/user.entity';
 
 @Injectable()
 export class UsersQueryRepository {
-  constructor(private dataSource: DataSource) {}
+  constructor(
+    private dataSource: DataSource,
+    @InjectRepository(User)
+    private userRepo: Repository<User>,
+  ) {}
 
   async getByIdOrNotFoundFail(id: string): Promise<UserViewDto> {
-    const user = await this.dataSource.query(
-      `SELECT * FROM users WHERE id = $1 and "deleted_at" is NULL`,
-      [id],
-    );
-    console.log('finded user');
-    console.log(user[0]);
-
-    if (!user[0]) {
+    const user = await this.userRepo.findOne({
+      where: { id },
+      select: ['id', 'login', 'email', 'createdAt'], // Выберет только эти колонки
+    });
+    if (!user) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
         extensions: [
           {
             field: 'user',
-            message: 'User not found',
+            message: 'UserEntity not found',
           },
         ],
       });
     }
-    return UserViewDto.mapToView(user[0]);
+    return user;
   }
 
   async getAll(

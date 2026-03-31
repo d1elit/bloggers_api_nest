@@ -1,6 +1,6 @@
 import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
-import { User } from '../domain/user.entity';
+import { UserDomain } from '../domain/user.entity-domain';
 import { UsersMapper } from './users-mapper';
 import { DataSource } from 'typeorm';
 import { Injectable } from '@nestjs/common';
@@ -20,9 +20,9 @@ export class UsersExternalRepository {
     return raw;
   }
 
-  async findOrNotFoundFail(id: string): Promise<User> {
+  async findOrNotFoundFail(id: string): Promise<UserDomain> {
     const raw = await this.findById(id);
-    console.log('User IN FIND to delete');
+    console.log('UserEntity IN FIND to delete');
 
     if (!raw.length) {
       throw new DomainException({
@@ -30,7 +30,7 @@ export class UsersExternalRepository {
         extensions: [
           {
             field: 'user',
-            message: 'User not found',
+            message: 'UserEntity not found',
           },
         ],
       });
