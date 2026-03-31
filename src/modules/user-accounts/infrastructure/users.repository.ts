@@ -28,6 +28,10 @@ export class UsersRepository {
     return raw;
   }
 
+  async saveOrm(user: User) {
+    return this.userRepo.save(user);
+  }
+
   async save(domainUser: UserDomain) {
     const user = UsersMapper.toPersistence(domainUser);
     await this.dataSource.query(

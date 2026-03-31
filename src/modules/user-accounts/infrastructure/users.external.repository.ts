@@ -1,30 +1,33 @@
 import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
 import { UserDomain } from '../domain/user.entity-domain';
-import { UsersMapper } from './users-mapper';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from '../domain/user.entity';
 
 @Injectable()
 export class UsersExternalRepository {
-  constructor(private dataSource: DataSource) {}
+  constructor(
+    private dataSource: DataSource,
+    @InjectRepository(User)
+    private userRepo: Repository<User>,
+  ) {}
 
   async findById(id: string): Promise<any | null> {
-    console.log('IM IN EXTERNAL USER FIND', [id]);
-    const raw = await this.dataSource.query(
-      `SELECT * FROM users
-                WHERE id = $1 and "deleted_at" IS NULL `,
-      [id],
-    );
-    console.log(raw);
-    return raw;
+    const user = await this.userRepo.findOne({
+      where: { id },
+      select: ['id', 'login', 'email', 'createdAt'], // Выберет только эти колонки
+    });
+
+    return user;
   }
 
   async findOrNotFoundFail(id: string): Promise<UserDomain> {
-    const raw = await this.findById(id);
+    const user = await this.findById(id);
     console.log('UserEntity IN FIND to delete');
 
-    if (!raw.length) {
+    if (user) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
         extensions: [
@@ -36,6 +39,6 @@ export class UsersExternalRepository {
       });
     }
 
-    return UsersMapper.toDomain(raw[0]);
+    return user;
   }
 }
