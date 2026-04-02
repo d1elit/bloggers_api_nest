@@ -24,7 +24,10 @@ export class AuthService {
     );
 
     const { exp, iat } = jwtDecode(refreshToken);
-    await this.sessionsRepository.update(iat!, exp!, oldVersion!);
+    const session = await this.sessionsRepository.findByIat(oldVersion!);
+    session?.update(iat!, exp!);
+    if (session !== null) await this.sessionsRepository.save(session);
+
     return [accessToken, refreshToken];
   }
 

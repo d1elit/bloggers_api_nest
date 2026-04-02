@@ -1,8 +1,8 @@
-import { Session } from '../domain/session.entity';
+import { SessionDomain } from '../domain/session.domain-entity';
 
 export class SessionsMapper {
-  static toDomain(row: any): Session {
-    return new Session(
+  static toDomain(row: any): SessionDomain {
+    return new SessionDomain(
       row.user_id,
       row.device_id,
       row.device_name,

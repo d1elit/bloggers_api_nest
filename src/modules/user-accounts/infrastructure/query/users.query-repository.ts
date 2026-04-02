@@ -45,13 +45,13 @@ export class UsersQueryRepository {
     ]);
 
     if (query.searchEmailTerm) {
-      queryBuilder.andWhere('u.email ILIKE :email', {
+      queryBuilder.orWhere('u.email ILIKE :email', {
         email: `%${query.searchEmailTerm}%`, // Добавляем проценты здесь
       });
     }
 
     if (query.searchLoginTerm) {
-      queryBuilder.andWhere('u.login ILIKE :login', {
+      queryBuilder.orWhere('u.login ILIKE :login', {
         login: `%${query.searchLoginTerm}%`,
       });
     }

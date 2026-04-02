@@ -44,7 +44,6 @@ export class UsersController {
   async getAll(
     @Query() query: GetUsersQueryParams,
   ): Promise<PaginatedViewDto<UserViewDto[]>> {
-    console.log(await this.usersRepository.findUser());
     return this.usersQueryRepository.getAll(query);
   }
 

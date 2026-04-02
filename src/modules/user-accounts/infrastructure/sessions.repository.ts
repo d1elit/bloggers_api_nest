@@ -1,58 +1,47 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
-import { Session } from '../domain/session.entity';
+import { DataSource, Not, Repository } from 'typeorm';
 import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Session } from '../domain/session.entity';
 
 @Injectable()
 export class SessionsRepository {
-  constructor(private dataSource: DataSource) {}
+  constructor(
+    private dataSource: DataSource,
+    @InjectRepository(Session)
+    private sessionRepo: Repository<Session>,
+  ) {}
 
-  async create(session: Session): Promise<void> {
-    await this.dataSource.query(
-      `
-      INSERT INTO sessions (
-        user_id,
-        device_id,
-        device_name,
-        ip,
-        iat,
-        exp
-      )
-      VALUES ($1,$2,$3,$4,$5,$6)
-      `,
-      [
-        session.userId,
-        session.deviceId,
-        session.deviceName,
-        session.ip,
-        session.iat,
-        session.exp,
-      ],
-    );
+  async save(session: Session) {
+    return this.sessionRepo.save(session);
   }
 
   async find(iat: number, deviceId: string): Promise<Session | null> {
-    const rows = await this.dataSource.query(
-      `
-      SELECT * FROM sessions
-      WHERE iat = $1 AND device_id = $2
-      `,
-      [iat, deviceId],
-    );
+    const session = await this.sessionRepo.findOneBy({
+      iat,
+      deviceId,
+    });
 
-    if (!rows.length) return null;
+    if (!session) return null;
 
-    return this.mapRowToDomain(rows[0]);
+    return session;
+  }
+
+  async findByIat(iat: number): Promise<Session | null> {
+    const session = await this.sessionRepo.findOneBy({
+      iat,
+    });
+
+    if (!session) return null;
+
+    return session;
   }
 
   async findByDeviceIdOrFail(deviceId: string): Promise<Session> {
-    const rows = await this.dataSource.query(
-      `SELECT * FROM sessions WHERE device_id = $1`,
-      [deviceId],
-    );
+    const session = await this.sessionRepo.findOneBy({ deviceId });
 
-    if (!rows.length) {
+    if (!session) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
         extensions: [
@@ -64,61 +53,33 @@ export class SessionsRepository {
       });
     }
 
-    return this.mapRowToDomain(rows[0]);
-  }
-
-  async update(iat: number, exp: number, oldVersion: number): Promise<void> {
-    await this.dataSource.query(
-      `
-      UPDATE sessions
-      SET iat = $1,
-          exp = $2
-      WHERE iat = $3
-      `,
-      [iat, exp, oldVersion],
-    );
+    return session;
   }
 
   async delete(iat: number): Promise<void> {
-    await this.dataSource.query(`DELETE FROM sessions WHERE iat = $1`, [iat]);
+    // DELETE FROM sessions WHERE iat = $1
+    await this.sessionRepo.delete({ iat });
   }
 
-  async deleteExceptCurrent(deviceId: string) {
-    await this.dataSource.query(
-      `
-      DELETE FROM sessions
-      WHERE device_id <> $1
-      `,
-      [deviceId],
-    );
-  }
-  async deleteByDevice(deviceId: string) {
-    await this.dataSource.query(
-      `
-        DELETE FROM sessions
-        WHERE device_id = $1
-      `,
-      [deviceId],
-    );
+  async deleteExceptCurrent(deviceId: string): Promise<void> {
+    // DELETE FROM sessions WHERE device_id <> $1
+    // Для оператора "не равно" (<>) в TypeORM используется Not
+    await this.sessionRepo.delete({
+      deviceId: Not(deviceId),
+    });
   }
 
-  async findAll(userId: string): Promise<Session[]> {
-    const rows = await this.dataSource.query(
-      `SELECT * FROM sessions WHERE user_id = $1`,
-      [userId],
-    );
-
-    return rows.map(this.mapRowToDomain);
+  async deleteByDevice(deviceId: string): Promise<void> {
+    // DELETE FROM sessions WHERE device_id = $1
+    await this.sessionRepo.delete({ deviceId });
   }
-
-  private mapRowToDomain(row: any): Session {
-    return new Session(
-      row.user_id,
-      row.device_id,
-      row.device_name,
-      row.ip,
-      row.iat,
-      row.exp,
-    );
-  }
+  //
+  // async findAll(userId: string): Promise<SessionDomain[]> {
+  //   const rows = await this.dataSource.query(
+  //     `SELECT * FROM sessions WHERE user_id = $1`,
+  //     [userId],
+  //   );
+  //
+  //   return rows.map(this.mapRowToDomain);
+  // }
 }

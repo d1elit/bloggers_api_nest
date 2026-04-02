@@ -35,6 +35,7 @@ import { DeleteDeviceUseCase } from './application/usecases/delete-device.usecas
 import { DeleteDeviceExceptCurrentUseCase } from './application/usecases/delete-device-except-current.usecase';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './domain/user.entity';
+import { Session } from './domain/session.entity';
 
 const useCases = [
   CreateUserUseCase,
@@ -55,7 +56,7 @@ const useCases = [
 @Module({
   imports: [
     CqrsModule,
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Session]),
     // MongooseModule.forFeature([{ name: UserMongo.name, schema: UserSchema }]),
     // MongooseModule.forFeature([
     //   { name: SessionMongo.name, schema: SessionSchema },

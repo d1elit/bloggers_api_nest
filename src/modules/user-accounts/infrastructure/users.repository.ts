@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
-import { UserDomain } from '../domain/user.entity-domain';
 import { DataSource, Repository } from 'typeorm';
-import { UsersMapper } from './users-mapper';
 import { User } from '../domain/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -14,82 +12,19 @@ export class UsersRepository {
     @InjectRepository(User)
     private userRepo: Repository<User>,
   ) {}
-  async findUser() {
-    return await this.userRepo.find();
-  }
 
   async findById(id: string): Promise<any | null> {
-    console.log('IM IN FIND', [id]);
-    const raw = await this.dataSource.query(
-      `SELECT * FROM users
-                WHERE id = $1 and "deleted_at" IS NULL `,
-      [id],
-    );
-    return raw;
+    return await this.userRepo.findOneBy({ id });
   }
 
-  async saveOrm(user: User) {
+  async save(user: User) {
     return this.userRepo.save(user);
   }
 
-  async save(domainUser: UserDomain) {
-    const user = UsersMapper.toPersistence(domainUser);
-    await this.dataSource.query(
-      `
-        INSERT INTO users (
-          id, login, email, password_hash,
-          created_at, updated_at, deleted_at,
-          email_confirmation_code,
-          email_is_confirmed,
-          email_confirmation_expiration,
-          recovery_code,
-          recovery_is_used,
-          recovery_expiration
-        )
-        VALUES (
-                 $1,$2,$3,$4,
-                 $5,$6,$7,
-                 $8,$9,$10,
-                 $11,$12,$13
-               )
-          ON CONFLICT (id)
-    DO UPDATE SET
-          login = EXCLUDED.login,
-                   email = EXCLUDED.email,
-                   password_hash = EXCLUDED.password_hash,
-                   updated_at = EXCLUDED.updated_at,
-                   deleted_at = EXCLUDED.deleted_at,
-                   email_confirmation_code = EXCLUDED.email_confirmation_code,
-                   email_is_confirmed = EXCLUDED.email_is_confirmed,
-                   email_confirmation_expiration = EXCLUDED.email_confirmation_expiration,
-                   recovery_code = EXCLUDED.recovery_code,
-                   recovery_is_used = EXCLUDED.recovery_is_used,
-                   recovery_expiration = EXCLUDED.recovery_expiration
-      `,
-      [
-        user.id,
-        user.login,
-        user.email,
-        user.password_hash,
-        user.created_at,
-        user.updated_at,
-        user.deleted_at,
-        user.email_confirmation_code,
-        user.email_is_confirmed,
-        user.email_confirmation_expiration,
-        user.recovery_code,
-        user.recovery_is_used,
-        user.recovery_expiration,
-      ],
-    );
-    return user;
-  }
+  async findOrNotFoundFail(id: string): Promise<User> {
+    const user = await this.findById(id);
 
-  async findOrNotFoundFail(id: string): Promise<UserDomain> {
-    const raw = await this.findById(id);
-    console.log('UserEntity IN FIND to delete');
-
-    if (!raw.length) {
+    if (!user) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
         extensions: [
@@ -101,16 +36,12 @@ export class UsersRepository {
       });
     }
 
-    return UsersMapper.toDomain(raw[0]);
+    return user;
   }
 
-  async findByEmailOrError(email: string): Promise<UserDomain> {
-    const row = await this.dataSource.query(
-      `Select * from users 
-        WHERE email = $1`,
-      [email],
-    );
-    if (!row.length)
+  async findByEmailOrError(email: string): Promise<User> {
+    const user = await this.userRepo.findOneBy({ email });
+    if (!user)
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
         extensions: [
@@ -120,16 +51,15 @@ export class UsersRepository {
           },
         ],
       });
-    return UsersMapper.toDomain(row[0]);
+    return user;
   }
 
-  async findByLoginOrEmail(loginOrEmail: string): Promise<UserDomain | null> {
-    const row = await this.dataSource.query(
-      `Select * from users 
-        WHERE email = $1 or login = $1`,
-      [loginOrEmail],
-    );
-    if (!row.length)
+  async findByLoginOrEmail(loginOrEmail: string): Promise<User | null> {
+    const user = await this.userRepo.findOneBy([
+      { login: loginOrEmail },
+      { email: loginOrEmail },
+    ]);
+    if (!user)
       throw new DomainException({
         code: DomainExceptionCode.Unauthorized,
         extensions: [
@@ -139,46 +69,40 @@ export class UsersRepository {
           },
         ],
       });
-    return UsersMapper.toDomain(row[0]);
+    return user;
   }
 
   async findFieldWithValue(
     fieldName: string,
     fieldValue: string,
-  ): Promise<UserDomain | null> {
-    const allowedFields = ['login', 'email'];
+  ): Promise<User | null> {
+    const allowedFields = ['login', 'email', 'id'];
     if (!allowedFields.includes(fieldName)) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
-        extensions: [
-          {
-            field: fieldName,
-            message: 'Field not exists',
-          },
-        ],
+        extensions: [{ field: fieldName, message: 'Invalid field name' }],
       });
     }
-    const user = await this.dataSource.query(
-      `SELECT * from users 
-         WHERE  ${fieldName} = $1 and deleted_at is null `,
-      [fieldValue],
-    );
-    console.log('FINDED USER');
-    console.log(user);
-    if (user.length === 0) return null;
-    return user;
-    // return this.UserModel.findOne({ [fieldName]: fieldValue, deletedAt: null });
+
+    // 2. Используем QueryBuilder
+    const user = await this.userRepo
+      .createQueryBuilder('u')
+      .where(`u.${fieldName} = :value`, { value: fieldValue })
+      .andWhere('u.deletedAt IS NULL')
+      .getOne();
+
+    return user; // Вернет объект сущности или null
   }
 
-  async findByCodeOrError(code: string): Promise<UserDomain> {
+  async findByCodeOrError(code: string): Promise<User> {
     console.log('findByCode: ', code);
-    const result = await this.dataSource.query(
-      `SELECT * FROM USERS WHERE email_confirmation_code = $1`,
-      [code],
-    );
-    console.log('result', result);
+    const user = await this.userRepo.findOneBy({
+      confirmationEmail: {
+        emailConfirmationCode: code,
+      },
+    });
 
-    if (!result || result.length === 0) {
+    if (!user) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
         extensions: [
@@ -189,20 +113,15 @@ export class UsersRepository {
         ],
       });
     }
-    return UsersMapper.toDomain(result[0]);
+    return user;
   }
-  async findByRecoveryCodeOrError(code: string): Promise<UserDomain> {
-    console.log('findByCode: ', code);
-    // const result = await this.UserModel.findOne({
-    //   'passwordRecovery.confirmationCode': code,
-    // });
-    const result = await this.dataSource.query(
-      `
-    SELECT * FROM USERS WHERE recovery_code = $1`,
-      [code],
-    );
-
-    if (!result || result[0].lenght === 0) {
+  async findByRecoveryCodeOrError(code: string): Promise<User> {
+    const user = await this.userRepo.findOneBy({
+      passwordRecovery: {
+        recoveryCode: code,
+      },
+    });
+    if (!user) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
         extensions: [
@@ -214,6 +133,6 @@ export class UsersRepository {
       });
     }
 
-    return UsersMapper.toDomain(result[0]);
+    return user;
   }
 }

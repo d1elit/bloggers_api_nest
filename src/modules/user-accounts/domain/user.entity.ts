@@ -1,4 +1,9 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  DeleteDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { randomUUID } from 'crypto';
 import { add } from 'date-fns';
 
@@ -37,21 +42,21 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   public id: string;
 
-  @Column({ type: 'varchar', length: 10 })
+  @Column({ type: 'varchar', length: 10, collation: 'C' })
   public login: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, collation: 'C' })
   public email: string;
 
   @Column({ name: 'password_hash' })
   public passwordHash: string;
 
-  @Column({
+  @DeleteDateColumn({
     type: 'timestamp without time zone',
     nullable: true,
     name: 'deleted_at',
   })
-  public deletedAt: string | null;
+  public deletedAt: Date | null;
 
   @Column({ type: 'timestamp without time zone', name: 'created_at' })
   public createdAt: Date;
@@ -98,5 +103,88 @@ export class User {
 
     // Даты createdAt и updatedAt TypeORM проставит сам благодаря @CreateDateColumn
     return user;
+  }
+
+  public softDelete(): void {
+    console.log('IN SOFT DELETE ENTITY');
+    if (this.deletedAt) {
+      throw new Error('Entity already deleted');
+    }
+    this.deletedAt = new Date();
+  }
+  confirmEmail(): void {
+    this.confirmationEmail.emailIsConfirmed = true;
+  }
+
+  isEmailConfirmed(): boolean {
+    return this.confirmationEmail.emailIsConfirmed;
+  }
+
+  isEmailConfirmationExpired(): boolean {
+    return (
+      new Date() > new Date(this.confirmationEmail.emailConfirmationExpiration)
+    );
+  }
+
+  updateEmailConfirmationCode(newCode: string): void {
+    this.confirmationEmail.emailConfirmationCode = newCode;
+    this.confirmationEmail.emailConfirmationExpiration = add(new Date(), {
+      hours: 1,
+      minutes: 3,
+    });
+  }
+
+  canConfirmEmail(code: string): { isValid: boolean; error?: string } {
+    if (this.isEmailConfirmed()) {
+      return { isValid: false, error: 'Email already confirmed' };
+    }
+    if (code !== this.confirmationEmail.emailConfirmationCode) {
+      return { isValid: false, error: 'Wrong confirmation code' };
+    }
+    if (this.isEmailConfirmationExpired()) {
+      return { isValid: false, error: 'Confirmation code expired' };
+    }
+    return { isValid: true };
+  }
+
+  // ============= Password Recovery Methods =============
+
+  updatePasswordRecoveryCode(newCode: string): void {
+    if (!this.passwordRecovery) {
+      // this.passwordRecovery = {};
+    }
+    this.passwordRecovery.recoveryCode = newCode;
+    this.passwordRecovery.recoveryIsUsed = false;
+    this.passwordRecovery.recoveryExpiration = add(new Date(), {
+      hours: 1,
+    });
+  }
+
+  isPasswordRecoveryExpired(): boolean {
+    if (!this.passwordRecovery?.recoveryExpiration) return true;
+    return new Date() > new Date(this.passwordRecovery.recoveryExpiration);
+  }
+
+  canRecoverPassword(code: string): { isValid: boolean; error?: string } {
+    if (!this.passwordRecovery) {
+      return { isValid: false, error: 'Recovery not initiated' };
+    }
+    if (this.passwordRecovery.recoveryIsUsed) {
+      return { isValid: false, error: 'Recovery code already used' };
+    }
+    if (code !== this.passwordRecovery.recoveryCode) {
+      return { isValid: false, error: 'Wrong recovery code' };
+    }
+    if (this.isPasswordRecoveryExpired()) {
+      return { isValid: false, error: 'Recovery code expired' };
+    }
+    return { isValid: true };
+  }
+
+  updatePassword(hashedPassword: string): void {
+    this.passwordHash = hashedPassword;
+    if (this.passwordRecovery) {
+      this.passwordRecovery.recoveryIsUsed = true;
+    }
   }
 }

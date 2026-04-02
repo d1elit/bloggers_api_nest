@@ -9,9 +9,9 @@ import { UsersRepository } from '../../infrastructure/users.repository';
 import { CryptoService } from '../crypto.service';
 import { JwtService } from '../jwt.service';
 import { SessionsRepository } from '../../infrastructure/sessions.repository';
-import { Session } from '../../domain/session.entity';
 import { randomUUID } from 'crypto';
-import { UserDomain } from '../../domain/user.entity-domain';
+import { User } from '../../domain/user.entity';
+import { Session } from '../../domain/session.entity';
 
 export class LoginUserCommand {
   constructor(public inputDto: authInput) {}
@@ -57,11 +57,11 @@ export class LoginUserUseCase implements ICommandHandler<
       exp: exp!,
     });
     console.log(session);
-    await this.sessionsRepository.create(session);
+    await this.sessionsRepository.save(session);
 
     return [accessToken, refreshToken];
   }
-  async checkUserCredentials(loginDto: LoginInput): Promise<UserDomain> {
+  async checkUserCredentials(loginDto: LoginInput): Promise<User> {
     const user = await this.verifyLoginOrEmail(loginDto.loginOrEmail);
 
     const isPasswordVerified = await this.cryptoService.comparePassword({
@@ -83,7 +83,7 @@ export class LoginUserUseCase implements ICommandHandler<
     return user;
   }
 
-  async verifyLoginOrEmail(login: string): Promise<UserDomain> {
+  async verifyLoginOrEmail(login: string): Promise<User> {
     const user = await this.usersRepository.findByLoginOrEmail(login);
     console.log(user);
     if (!user) {

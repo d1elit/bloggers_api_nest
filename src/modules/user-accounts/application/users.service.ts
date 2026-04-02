@@ -4,7 +4,7 @@ import { UsersRepository } from '../infrastructure/users.repository';
 import { CryptoService } from './crypto.service';
 import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
-import { UserDomain } from '../domain/user.entity-domain';
+import { User } from '../domain/user.entity';
 
 @Injectable()
 export class UsersService {
@@ -23,7 +23,7 @@ export class UsersService {
       dto.password,
     );
 
-    const user = UserDomain.createInstance({
+    const user = User.createInstance({
       email: dto.email,
       login: dto.login,
       passwordHash: passwordHash,
@@ -73,7 +73,7 @@ export class UsersService {
   async deleteUser(id: string) {
     const user = await this.usersRepository.findOrNotFoundFail(id);
 
-    user.makeDeleted();
+    user.softDelete();
 
     await this.usersRepository.save(user);
   }

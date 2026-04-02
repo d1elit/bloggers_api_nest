@@ -14,6 +14,7 @@ import { CoreConfig } from './core/core.config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './modules/user-accounts/domain/user.entity';
+import { Session } from './modules/user-accounts/domain/session.entity';
 
 console.log(CoreConfig);
 @Module({
@@ -34,7 +35,7 @@ console.log(CoreConfig);
       username: 'nodejs',
       password: '12345',
       database: 'nest-typeorm',
-      entities: [User],
+      entities: [User, Session],
       synchronize: true,
       logging: true,
     }),
