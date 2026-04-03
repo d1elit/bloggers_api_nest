@@ -1,73 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { DomainException } from '../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
-import { PostDomain } from '../domain/post.domain-entity';
-import { DataSource } from 'typeorm';
-import { PostsMapper } from './posts-mapper';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Post } from '../domain/post.entity';
 
 @Injectable()
 export class PostsRepository {
-  constructor(private dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(Post)
+    private postRepo: Repository<Post>,
+  ) {}
 
-  async save(domainPost: PostDomain) {
-    const post = PostsMapper.toPersistence(domainPost);
-
-    console.log(post);
-    await this.dataSource.query(
-      `
-        INSERT INTO posts (
-          id, title, short_description, content,
-          blog_id, blog_name, created_at, deleted_at,
-          likes_count, dislikes_count
-       
-        )
-        VALUES (
-                 $1,$2,$3,$4,
-                 $5,$6,$7,$8,
-                $9, $10
-              
-               )
-          ON CONFLICT (id)
-    DO UPDATE SET
-          title = EXCLUDED.title,
-          short_description = EXCLUDED.short_description,
-          content = EXCLUDED.content,
-          blog_id = EXCLUDED.blog_id,
-          blog_name = EXCLUDED.blog_name,
-          deleted_at = EXCLUDED.deleted_at,
-          likes_count = EXCLUDED.likes_count,
-          dislikes_count = EXCLUDED.dislikes_count
---           newest_likes = EXCLUDED.newest_likes
-      `,
-      [
-        post.id,
-        post.title,
-        post.short_description,
-        post.content,
-        post.blog_id,
-        post.blog_name,
-        post.created_at,
-        post.deleted_at,
-        post.likes_count,
-        post.dislikes_count,
-        // post.newest_likes,
-      ],
-    );
-    return post;
+  async save(domainPost: Post) {
+    return this.postRepo.save(domainPost);
   }
 
-  async findById(id: string): Promise<PostDomain | null> {
-    const raw = await this.dataSource.query(
-      `SELECT * FROM posts WHERE id = $1 AND deleted_at IS NULL`,
-      [id],
-    );
-    if (!raw[0]) {
-      return null;
-    }
-    return PostsMapper.toDomain(raw[0]);
+  async findById(id: string): Promise<Post | null> {
+    return await this.postRepo.findOneBy({ id });
   }
 
-  async findOrNotFoundFail(id: string): Promise<PostDomain> {
+  async findOrNotFoundFail(id: string): Promise<Post> {
     const post = await this.findById(id);
     if (!post) {
       throw new DomainException({

@@ -1,4 +1,4 @@
-import { CommentsMapper } from '../../infrastructure/comments-mapper';
+import { Comment } from '../../domain/comment.entity';
 
 export class CommentViewDto {
   id: string;
@@ -7,26 +7,29 @@ export class CommentViewDto {
     userId: string;
     userLogin: string;
   };
-  createdAt: string;
+  createdAt: Date;
   likesInfo: {
     likesCount: number;
     dislikesCount: number;
     myStatus: string;
   };
 
-  static mapToView(commentRow: any, myStatus: string = 'None'): CommentViewDto {
-    const commentDomain = CommentsMapper.toDomain(commentRow);
+  static mapToView(
+    comment: Comment,
+    myStatus: string = 'None',
+  ): CommentViewDto {
+    // const commentDomain = CommentsMapper.toDomain(commentRow);
     const dto = new CommentViewDto();
-    dto.id = commentDomain.id;
-    dto.content = commentDomain.content;
+    dto.id = comment.id;
+    dto.content = comment.content;
     dto.commentatorInfo = {
-      userId: commentDomain.commentatorInfo.userId,
-      userLogin: commentDomain.commentatorInfo.userLogin,
+      userId: comment.user.id,
+      userLogin: comment.user.login,
     };
-    dto.createdAt = commentDomain.createdAt;
+    dto.createdAt = comment.createdAt;
     dto.likesInfo = {
-      likesCount: commentDomain.likesInfo.likesCount,
-      dislikesCount: commentDomain.likesInfo.dislikesCount,
+      likesCount: comment.likesInfo.likesCount,
+      dislikesCount: comment.likesInfo.dislikesCount,
       myStatus,
     };
     return dto;

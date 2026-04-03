@@ -1,8 +1,12 @@
-import { Comment, CommentatorInfo, LikesInfo } from '../domain/comment.entity';
+import {
+  CommentatorInfo,
+  CommentDomain,
+  LikesInfo,
+} from '../domain/comment.entity-domain';
 
 export class CommentsMapper {
-  static toDomain(row: any): Comment {
-    return new Comment(
+  static toDomain(row: any): CommentDomain {
+    return new CommentDomain(
       row.id,
       row.content,
       new CommentatorInfo(row.user_id, row.user_login),
@@ -13,7 +17,7 @@ export class CommentsMapper {
     );
   }
 
-  static toPersistence(comment: Comment) {
+  static toPersistence(comment: CommentDomain) {
     return {
       id: comment.id,
       content: comment.content,

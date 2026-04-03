@@ -1,15 +1,25 @@
 import { Injectable } from '@nestjs/common';
-import { Comment, CommentDocument } from '../domain/comment.entity';
+import { CommentDomain } from '../domain/comment.entity-domain';
 import { DomainException } from '../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CommentsMapper } from './comments-mapper';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Comment } from '../domain/comment.entity';
 
 @Injectable()
 export class CommentsRepository {
-  constructor(private dataSource: DataSource) {}
+  constructor(
+    private dataSource: DataSource,
+    @InjectRepository(Comment)
+    private commentRepo: Repository<Comment>,
+  ) {}
 
-  async save(domainComment: Comment) {
+  async saveOrm(domainComment: Comment) {
+    return await this.commentRepo.save(domainComment);
+  }
+
+  async save(domainComment: CommentDomain) {
     const comment = CommentsMapper.toPersistence(domainComment);
 
     await this.dataSource.query(
@@ -40,18 +50,11 @@ export class CommentsRepository {
     return comment;
   }
 
-  async findById(id: string): Promise<CommentDocument | null> {
-    const raw = await this.dataSource.query(
-      `SELECT * FROM comments WHERE id = $1 AND deleted_at IS NULL`,
-      [id],
-    );
-    if (!raw[0]) {
-      return null;
-    }
-    return CommentsMapper.toDomain(raw[0]);
+  async findById(id: string): Promise<Comment | null> {
+    return await this.commentRepo.findOneBy({ id });
   }
 
-  async findOrNotFoundFail(id: string): Promise<CommentDocument> {
+  async findOrNotFoundFail(id: string): Promise<Comment> {
     const comment = await this.findById(id);
     if (!comment) {
       throw new DomainException({

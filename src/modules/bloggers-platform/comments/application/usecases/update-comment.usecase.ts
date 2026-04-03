@@ -25,7 +25,7 @@ export class UpdateCommentUseCase implements ICommandHandler<
   }: UpdateCommentCommand): Promise<void> {
     const comment = await this.commentsRepository.findOrNotFoundFail(commentId);
 
-    if (comment.commentatorInfo.userId !== userId) {
+    if (comment.userId !== userId) {
       throw new DomainException({
         code: DomainExceptionCode.Forbidden,
         message: 'Access denied',
@@ -33,6 +33,6 @@ export class UpdateCommentUseCase implements ICommandHandler<
     }
 
     comment.update(content);
-    await this.commentsRepository.save(comment);
+    await this.commentsRepository.saveOrm(comment);
   }
 }

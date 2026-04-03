@@ -4,19 +4,21 @@ import { GetPostsQueryParams } from '../../api/input-dto/get-posts-query-params.
 import { PaginatedViewDto } from '../../../../../core/dto/base.paginated.view-dto';
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
-import { DataSource } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Post } from '../../domain/post.entity';
 
 @Injectable()
 export class PostsExternalQueryRepository {
-  constructor(private dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(Post)
+    private postRepo: Repository<Post>,
+  ) {}
 
-  async getByIdOrNotFoundFail(id: string) {
-    const raw = await this.dataSource.query(
-      `SELECT * FROM posts WHERE id = $1 AND deleted_at IS NULL`,
-      [id],
-    );
+  async getByIdOrNotFoundFail(id: string): Promise<PostViewDto> {
+    const post = await this.postRepo.findOneBy({ id });
 
-    if (!raw[0]) {
+    if (!post) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
         extensions: [
@@ -28,19 +30,30 @@ export class PostsExternalQueryRepository {
       });
     }
 
-    return PostViewDto.mapToView(raw[0]);
+    return PostViewDto.mapToView(post);
   }
 
   async getAll(
     query: GetPostsQueryParams,
     blogId: string,
   ): Promise<PaginatedViewDto<PostViewDto[]>> {
-    const values: any[] = [];
-    let where = `WHERE deleted_at IS NULL`;
+    const queryBuilder = this.postRepo.createQueryBuilder('p');
+
+    queryBuilder.select([
+      'p.id as id',
+      'p.title as title',
+      'p.short_description as "shortDescription"',
+      'p.content as content',
+      'p.blog_id as "blogId"',
+      'p.blog_name as "blogName"',
+      'p.created_at as "createdAt"',
+      'p.likes_count as "likesCount"',
+      'p.dislikes_count as "dislikesCount"',
+      'p.newest_likes as "newestLikes"'
+    ]);
 
     if (blogId) {
-      values.push(blogId);
-      where += ` AND blog_id = $${values.length}`;
+      queryBuilder.andWhere('p.blog_id = :blogId', { blogId });
     }
 
     if (
@@ -49,78 +62,71 @@ export class PostsExternalQueryRepository {
       query.content ||
       query.blogName
     ) {
-      where += ` AND (`;
-      const conditions: string[] = [];
+      queryBuilder.andWhere((qb) => {
+        let hasCondition = false;
 
-      if (query.title) {
-        values.push(`%${query.title}%`);
-        conditions.push(`title ILIKE $${values.length}`);
-      }
+        if (query.title) {
+          qb.orWhere('p.title ILIKE :title', { title: `%${query.title}%` });
+          hasCondition = true;
+        }
 
-      if (query.shortDescription) {
-        values.push(`%${query.shortDescription}%`);
-        conditions.push(`short_description ILIKE $${values.length}`);
-      }
+        if (query.shortDescription) {
+          const condition = 'p.short_description ILIKE :shortDesc';
+          if (hasCondition) qb.orWhere(condition, { shortDesc: `%${query.shortDescription}%` });
+          else qb.where(condition, { shortDesc: `%${query.shortDescription}%` });
+          hasCondition = true;
+        }
 
-      if (query.content) {
-        values.push(`%${query.content}%`);
-        conditions.push(`content ILIKE $${values.length}`);
-      }
+        if (query.content) {
+          const condition = 'p.content ILIKE :content';
+          if (hasCondition) qb.orWhere(condition, { content: `%${query.content}%` });
+          else qb.where(condition, { content: `%${query.content}%` });
+          hasCondition = true;
+        }
 
-      if (query.blogName) {
-        values.push(`%${query.blogName}%`);
-        conditions.push(`blog_name ILIKE $${values.length}`);
-      }
-
-      where += conditions.join(` OR `) + `)`;
+        if (query.blogName) {
+          const condition = 'p.blog_name ILIKE :blogName';
+          if (hasCondition) qb.orWhere(condition, { blogName: `%${query.blogName}%` });
+          else qb.where(condition, { blogName: `%${query.blogName}%` });
+        }
+      });
     }
 
-    const whereParamsCount = values.length;
+    queryBuilder.skip(query.calculateSkip()).take(query.pageSize);
 
-    // Mapping sorting
-    const sortMap: Record<string, string> = {
-      title: `title COLLATE "C"`,
-      shortDescription: `short_description COLLATE "C"`,
-      content: `content COLLATE "C"`,
-      blogName: `blog_name COLLATE "C"`,
-      createdAt: `created_at`,
-    };
+    const sortField = query.sortBy || 'createdAt';
+    const sortDirection = query.sortDirection?.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
-    const sortColumn = sortMap[query.sortBy] ?? `created_at`;
-    const sortDirection =
-      query.sortDirection?.toLowerCase() === `asc` ? `ASC` : `DESC`;
+    // To handle mapping from DTO keys to database columns/aliases in OrderBy
+    let orderByColumn = `p.${sortField}`;
+    if (sortField === 'shortDescription') orderByColumn = 'p.short_description';
+    if (sortField === 'blogName') orderByColumn = 'p.blog_name';
+    if (sortField === 'createdAt') orderByColumn = 'p.created_at';
 
-    values.push(query.pageSize);
-    const limitIndex = values.length;
+    queryBuilder.orderBy(orderByColumn, sortDirection);
 
-    values.push(query.calculateSkip());
-    const offsetIndex = values.length;
+    const itemsRaw = await queryBuilder.getRawMany();
+    const totalCount = await queryBuilder.getCount();
 
-    const dataQuery = `
-      SELECT
-        id, title, short_description, content,
-        blog_id, blog_name, created_at, deleted_at,
-        likes_count, dislikes_count, newest_likes
-      FROM posts
-      ${where}
-      ORDER BY ${sortColumn} ${sortDirection}
-      LIMIT $${limitIndex}
-      OFFSET $${offsetIndex}
-    `;
+    const items = itemsRaw.map((postRaw: any) => {
+      const mappedEntity = new Post();
+      mappedEntity.id = postRaw.id;
+      mappedEntity.title = postRaw.title;
+      mappedEntity.shortDescription = postRaw.shortDescription;
+      mappedEntity.content = postRaw.content;
+      mappedEntity.blogId = postRaw.blogId;
+      mappedEntity.blogName = postRaw.blogName;
+      mappedEntity.createdAt = postRaw.createdAt;
+      
+      mappedEntity.extendedLikesInfo = {
+         likesCount: postRaw.likesCount || 0,
+         dislikesCount: postRaw.dislikesCount || 0,
+         myStatus: 'None',
+         newestLikes: postRaw.newestLikes || []
+      };
 
-    const countQuery = `
-      SELECT COUNT(*) FROM posts ${where}
-    `;
-
-    const postsResult = await this.dataSource.query(dataQuery, values);
-    const countResult = await this.dataSource.query(
-      countQuery,
-      values.slice(0, whereParamsCount),
-    );
-
-    const totalCount = Number(countResult[0].count);
-
-    const items = postsResult.map((post: any) => PostViewDto.mapToView(post));
+      return PostViewDto.mapToView(mappedEntity);
+    });
 
     return PaginatedViewDto.mapToView({
       items,

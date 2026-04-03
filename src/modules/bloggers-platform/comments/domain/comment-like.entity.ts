@@ -1,19 +1,34 @@
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { randomUUID } from 'crypto';
+
+@Entity('comment_likes')
 export class CommentLike {
-  constructor(
-    public userId: string,
-    public commentId: string,
-    public myStatus: string,
-    public addedAt: Date,
-  ) {}
+  @PrimaryGeneratedColumn('uuid')
+  public id: string;
+
+  @Column({ name: 'user_id', type: 'uuid' })
+  public userId: string;
+
+  @Column({ name: 'comment_id', type: 'uuid' })
+  public commentId: string;
+
+  @Column({ name: 'my_status' })
+  public myStatus: string;
+
+  @Column({ type: 'timestamp without time zone', name: 'added_at' })
+  public addedAt: Date;
 
   static createInstance(
     userId: string,
     commentId: string,
     myStatus: string,
   ): CommentLike {
-    return new CommentLike(userId, commentId, myStatus, new Date());
+    const commentLike = new CommentLike();
+    commentLike.id = randomUUID();
+    commentLike.userId = userId;
+    commentLike.commentId = commentId;
+    commentLike.myStatus = myStatus;
+    commentLike.addedAt = new Date();
+    return commentLike;
   }
 }
-
-export type CommentLikeDocument = CommentLike;
-export type CommentLikeModelType = never;

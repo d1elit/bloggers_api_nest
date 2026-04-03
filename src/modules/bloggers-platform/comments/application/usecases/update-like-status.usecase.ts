@@ -42,6 +42,6 @@ export class UpdateLikeStatusUseCase implements ICommandHandler<
       comment.updateLikeCount(likeStatus, oldStatus);
       await this.likesRepository.update(like);
     }
-    await this.commentsRepository.save(comment);
+    await this.commentsRepository.saveOrm(comment);
   }
 }

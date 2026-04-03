@@ -2,7 +2,6 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { CommentsQueryRepository } from '../../infrastructure/query/comments.query-repository';
 import { PaginatedViewDto } from '../../../../../core/dto/base.paginated.view-dto';
 import { CommentViewDto } from '../../api/view-dto/comment.view-dto';
-import { BaseQueryParams } from '../../../../../core/dto/base.query-params.input-dto';
 import { GetCommentsQueryParamsInputDto } from '../../api/input-dto/get-comments-query-params.input.dto';
 
 export class GetPostsCommentQuery {
@@ -22,7 +21,7 @@ export class GetPostsCommentQueryHandler implements IQueryHandler<
     private readonly commentsQueryRepository: CommentsQueryRepository,
   ) {}
   async execute(query: GetPostsCommentQuery) {
-    return this.commentsQueryRepository.getAllForPost(
+    return this.commentsQueryRepository.getAll(
       query.queryParams,
       query.postId,
       query.userId,

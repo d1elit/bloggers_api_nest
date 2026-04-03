@@ -1,69 +1,60 @@
 import { Injectable } from '@nestjs/common';
 import { CommentLike } from '../domain/comment-like.entity';
-import { DataSource } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class CommentLikesRepository {
-  constructor(private dataSource: DataSource) {}
+  constructor(
+    private dataSource: DataSource,
+    @InjectRepository(CommentLike)
+    private commentLikeRepo: Repository<CommentLike>,
+  ) {}
 
-  private mapToDomain(row: any): CommentLike {
-    return new CommentLike(
-      row.user_id,
-      row.comment_id,
-      row.my_status,
-      row.added_at,
-    );
-  }
+  // private mapToDomain(row: any): CommentLike {
+  //   return new CommentLike(
+  //     row.user_id,
+  //     row.comment_id,
+  //     row.my_status,
+  //     row.added_at,
+  //   );
+  // }
 
   async find(
     userId: string | undefined,
     commentId: string,
   ): Promise<CommentLike | null> {
     if (!userId) return null;
-    const raw = await this.dataSource.query(
-      `SELECT * FROM comment_likes WHERE user_id = $1 AND comment_id = $2`,
-      [userId, commentId],
-    );
-    if (!raw[0]) return null;
-    return this.mapToDomain(raw[0]);
+
+    return await this.commentLikeRepo.findOneBy({ commentId });
   }
 
-  async create(like: CommentLike): Promise<void> {
-    await this.dataSource.query(
-      `
-      INSERT INTO comment_likes (user_id, comment_id, my_status, added_at)
-      VALUES ($1, $2, $3, $4)
-      `,
-      [like.userId, like.commentId, like.myStatus, like.addedAt],
-    );
+  async create(like: CommentLike): Promise<CommentLike> {
+    return await this.commentLikeRepo.save(like);
   }
 
-  async update(like: CommentLike): Promise<void> {
-    await this.dataSource.query(
-      `
-      UPDATE comment_likes
-      SET my_status = $1, added_at = $2
-      WHERE user_id = $3 AND comment_id = $4
-      `,
-      [like.myStatus, like.addedAt, like.userId, like.commentId],
-    );
+  async update(like: CommentLike): Promise<CommentLike> {
+    return await this.commentLikeRepo.save(like);
   }
 
   async findByAllId(
     ids: string[],
     userId: string | undefined,
   ): Promise<CommentLike[]> {
+    // 1. Быстрая проверка
     if (!userId || !ids.length) return [];
 
-    const params = ids.map((_, i) => `$${i + 2}`).join(', ');
+    // 2. Используем метод find с оператором In
+    const likes = await this.commentLikeRepo.find({
+      where: {
+        userId: userId,
+        commentId: In(ids), // Автоматически превращается в WHERE comment_id IN (...)
+      },
+    });
 
-    const raw = await this.dataSource.query(
-      `
-      SELECT * FROM comment_likes
-      WHERE user_id = $1 AND comment_id IN (${params})
-      `,
-      [userId, ...ids],
-    );
-    return raw.map((r) => this.mapToDomain(r));
+    // 3. Мапим в домен (если это необходимо)
+    // Если commentLikeRepo возвращает сущности, которые и есть домен,
+    // можно просто вернуть 'likes'
+    return likes;
   }
 }

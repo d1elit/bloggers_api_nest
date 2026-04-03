@@ -5,7 +5,9 @@ import { GetPostsQueryParams } from '../../api/input-dto/get-posts-query-params.
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
 import { PostLikesRepository } from '../post-likes.repository';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Post } from '../../domain/post.entity';
 
 // Тип для маппинга последних лайков (можно вынести в отдельный файл)
 export type NewestLikeView = {
@@ -19,15 +21,14 @@ export class PostsQueryRepository {
   constructor(
     private dataSource: DataSource,
     private postLikesRepository: PostLikesRepository,
+    @InjectRepository(Post)
+    private postRepo: Repository<Post>,
   ) {}
 
   async getByIdOrNotFoundFail(id: string, likeStatus?: string) {
-    const raw = await this.dataSource.query(
-      `SELECT * FROM posts WHERE id = $1 AND deleted_at IS NULL`,
-      [id],
-    );
+    const post = await this.postRepo.findOneBy({ id });
 
-    if (!raw[0]) {
+    if (!post) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
         extensions: [
@@ -49,16 +50,14 @@ export class PostsQueryRepository {
       `,
       [id],
     );
-    console.log('NEWET LIEKS');
 
     const newestLikes: NewestLikeView[] = newestLikesRaw.map((like: any) => ({
       addedAt: like.addedAt.toISOString(),
       userId: like.userId,
       login: like.userLogin,
     }));
-    console.log(newestLikes);
 
-    return PostViewDto.mapToView(raw[0], likeStatus, newestLikes);
+    return PostViewDto.mapToView(post, likeStatus, newestLikes);
   }
 
   async getAll(
@@ -66,91 +65,73 @@ export class PostsQueryRepository {
     blogId?: string,
     userId?: string,
   ): Promise<PaginatedViewDto<PostViewDto[]>> {
-    const values: any[] = [];
-    let where = `WHERE deleted_at IS NULL`;
+    const queryBuilder = this.postRepo.createQueryBuilder('p');
+
+    // Selecting individual fields since we return raw entities for performance in pagination
+    queryBuilder.select([
+      'p.id as "id"',
+      'p.title as "title"',
+      'p.short_description as "shortDescription"',
+      'p.content as "content"',
+      'p.blog_id as "blogId"',
+      'p.blog_name as "blogName"',
+      'p.created_at as "createdAt"',
+      'p.likes_count as "likesCount"',
+      'p.dislikes_count as "dislikesCount"',
+      'p.newest_likes as "newestLikes"'
+    ]);
 
     if (blogId) {
-      values.push(blogId);
-      where += ` AND blog_id = $${values.length}`;
+      queryBuilder.andWhere('p.blog_id = :blogId', { blogId });
     }
 
-    if (
-      query.title ||
-      query.shortDescription ||
-      query.content ||
-      query.blogName
-    ) {
-      where += ` AND (`;
-      const conditions: string[] = [];
+    if (query.title || query.shortDescription || query.content || query.blogName) {
+      queryBuilder.andWhere((qb) => {
+        const conditions: string[] = [];
+        const params: Record<string, string> = {};
 
-      if (query.title) {
-        values.push(`%${query.title}%`);
-        conditions.push(`title ILIKE $${values.length}`);
-      }
+        if (query.title) {
+          conditions.push('p.title ILIKE :title');
+          params.title = `%${query.title}%`;
+        }
+        if (query.shortDescription) {
+          conditions.push('p.short_description ILIKE :shortDesc');
+          params.shortDesc = `%${query.shortDescription}%`;
+        }
+        if (query.content) {
+          conditions.push('p.content ILIKE :content');
+          params.content = `%${query.content}%`;
+        }
+        if (query.blogName) {
+          conditions.push('p.blog_name ILIKE :blogName');
+          params.blogName = `%${query.blogName}%`;
+        }
 
-      if (query.shortDescription) {
-        values.push(`%${query.shortDescription}%`);
-        conditions.push(`short_description ILIKE $${values.length}`);
-      }
-
-      if (query.content) {
-        values.push(`%${query.content}%`);
-        conditions.push(`content ILIKE $${values.length}`);
-      }
-
-      if (query.blogName) {
-        values.push(`%${query.blogName}%`);
-        conditions.push(`blog_name ILIKE $${values.length}`);
-      }
-
-      where += conditions.join(` OR `) + `)`;
+        qb.where(conditions.join(' OR '), params);
+      });
     }
 
-    const whereParamsCount = values.length;
+    queryBuilder.skip(query.calculateSkip()).take(query.pageSize);
 
-    // Mapping sorting
-    const sortMap: Record<string, string> = {
-      title: `title COLLATE "C"`,
-      shortDescription: `short_description COLLATE "C"`,
-      content: `content COLLATE "C"`,
-      blogName: `blog_name COLLATE "C"`,
-      createdAt: `created_at`,
+    // Sorting
+    const sortFieldMap: Record<string, string> = {
+      title: 'p.title COLLATE "C"',
+      shortDescription: 'p.short_description COLLATE "C"',
+      content: 'p.content COLLATE "C"',
+      blogName: 'p.blog_name COLLATE "C"',
+      createdAt: 'p.created_at',
     };
 
-    const sortColumn = sortMap[query.sortBy] ?? `created_at`;
-    const sortDirection =
-      query.sortDirection?.toLowerCase() === `asc` ? `ASC` : `DESC`;
+    const sortColumn = sortFieldMap[query.sortBy] ?? 'p.created_at';
+    const sortDirection = query.sortDirection?.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
-    values.push(query.pageSize);
-    const limitIndex = values.length;
+    // To prevent SQL injection in ORDER BY, we use explicit mapping and passing as literal
+    queryBuilder.orderBy(sortColumn, sortDirection);
 
-    values.push(query.calculateSkip());
-    const offsetIndex = values.length;
+    const postsResultRaw = await queryBuilder.getRawMany();
+    const totalCount = await queryBuilder.getCount();
 
-    const dataQuery = `
-      SELECT
-        id, title, short_description, content,
-        blog_id, blog_name, created_at, deleted_at,
-        likes_count, dislikes_count
-      FROM posts
-      ${where}
-      ORDER BY ${sortColumn} ${sortDirection}
-      LIMIT $${limitIndex}
-      OFFSET $${offsetIndex}
-    `;
-
-    const countQuery = `
-      SELECT COUNT(*) FROM posts ${where}
-    `;
-
-    const postsResult = await this.dataSource.query(dataQuery, values);
-    const countResult = await this.dataSource.query(
-      countQuery,
-      values.slice(0, whereParamsCount),
-    );
-
-    const totalCount = Number(countResult[0].count);
-    const postIds = postsResult.map((c: any) => c.id);
+    const postIds = postsResultRaw.map((c: any) => c.id);
 
     const likesInfo: Record<string, string> = {};
     const newestLikesInfo: Record<string, NewestLikeView[]> = {};
@@ -182,7 +163,6 @@ export class PostsQueryRepository {
         postIds,
       ]);
 
-      // Группируем лайки по post_id
       newestLikesRaw.forEach((like: any) => {
         if (!newestLikesInfo[like.post_id]) {
           newestLikesInfo[like.post_id] = [];
@@ -195,13 +175,27 @@ export class PostsQueryRepository {
       });
     }
 
-    // Собираем итоговые DTO
-    const items = postsResult.map((post: any) => {
-      const myStatus = likesInfo[post.id] || 'None';
-      const newestLikes = newestLikesInfo[post.id] || [];
+    const items = postsResultRaw.map((postRaw: any) => {
+      const myStatus = likesInfo[postRaw.id] || 'None';
+      const newestLikes = newestLikesInfo[postRaw.id] || [];
 
-      // Передаем newestLikes в mapToView
-      return PostViewDto.mapToView(post, myStatus, newestLikes);
+      const mappedEntity = new Post();
+      mappedEntity.id = postRaw.id;
+      mappedEntity.title = postRaw.title;
+      mappedEntity.shortDescription = postRaw.shortDescription;
+      mappedEntity.content = postRaw.content;
+      mappedEntity.blogId = postRaw.blogId;
+      mappedEntity.blogName = postRaw.blogName;
+      mappedEntity.createdAt = postRaw.createdAt;
+      
+      mappedEntity.extendedLikesInfo = {
+         likesCount: postRaw.likesCount || 0,
+         dislikesCount: postRaw.dislikesCount || 0,
+         myStatus: myStatus,
+         newestLikes: postRaw.newestLikes || []
+      };
+
+      return PostViewDto.mapToView(mappedEntity, myStatus, newestLikes);
     });
 
     return PaginatedViewDto.mapToView({

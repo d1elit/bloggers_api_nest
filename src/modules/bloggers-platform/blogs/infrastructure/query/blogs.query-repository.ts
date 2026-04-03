@@ -42,9 +42,9 @@ export class BlogsQueryRepository {
       'id',
       'name',
       'description',
-      'website_url as websiteUrl',
-      'created_at as createdAt ',
-      'is_membership  as isMembership',
+      'website_url as "websiteUrl"',
+      'created_at as "createdAt" ',
+      'is_membership  as "isMembership"',
     ]);
 
     if (query.searchNameTerm) {

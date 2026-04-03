@@ -40,12 +40,15 @@ import { PostsController } from './posts/api/posts.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Blog } from './blogs/domain/blog.entity';
 import { Post } from './posts/domain/post.entity';
+import { PostLike } from './posts/domain/post-like.entity';
+import { Comment } from './comments/domain/comment.entity';
+import { CommentLike } from './comments/domain/comment-like.entity';
 
 @Module({
   imports: [
     CqrsModule,
     UserAccountsModule,
-    TypeOrmModule.forFeature([Blog, Post]),
+    TypeOrmModule.forFeature([Blog, Post, PostLike, Comment, CommentLike]),
   ],
   controllers: [
     AdminBlogsController,

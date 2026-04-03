@@ -6,17 +6,20 @@ import { BloggersPlatformModule } from './modules/bloggers-platform/bloggers-pla
 import { TestingModule } from './modules/testing/testing.module';
 import { CoreModule } from './core/core.module';
 import { UserAccountsModule } from './modules/user-accounts/user-accounts.module';
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { APP_FILTER } from '@nestjs/core';
 import { AllHttpExceptionsFilter } from './core/exceptions/filters/base-exception.filter';
 import { DomainHttpExceptionsFilter } from './core/exceptions/filters/domain-exception.filter';
 
 import { CoreConfig } from './core/core.config';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './modules/user-accounts/domain/user.entity';
 import { Session } from './modules/user-accounts/domain/session.entity';
 import { Blog } from './modules/bloggers-platform/blogs/domain/blog.entity';
 import { Post } from './modules/bloggers-platform/posts/domain/post.entity';
+import { PostLike } from './modules/bloggers-platform/posts/domain/post-like.entity';
+import { Comment } from './modules/bloggers-platform/comments/domain/comment.entity';
+import { CommentLike } from './modules/bloggers-platform/comments/domain/comment-like.entity';
 
 console.log(CoreConfig);
 @Module({
@@ -37,7 +40,7 @@ console.log(CoreConfig);
       username: 'nodejs',
       password: '12345',
       database: 'nest-typeorm',
-      entities: [User, Session, Blog, Post],
+      entities: [User, Session, Blog, Post, PostLike, Comment, CommentLike],
       synchronize: true,
       logging: true,
     }),
@@ -50,10 +53,10 @@ console.log(CoreConfig);
   controllers: [AppController],
   providers: [
     AppService,
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: ThrottlerGuard,
+    // },
     {
       provide: APP_FILTER,
       useClass: AllHttpExceptionsFilter,

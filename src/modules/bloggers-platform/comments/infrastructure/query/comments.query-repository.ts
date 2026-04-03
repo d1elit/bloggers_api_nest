@@ -5,25 +5,32 @@ import { DomainException } from '../../../../../core/exceptions/domain-exception
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
 import { CommentLikesRepository } from '../comment-likes.repository';
 import { GetCommentsQueryParamsInputDto } from '../../api/input-dto/get-comments-query-params.input.dto';
-import { DataSource } from 'typeorm';
+import { DataSource, IsNull, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Comment } from '../../domain/comment.entity';
 
 @Injectable()
 export class CommentsQueryRepository {
   constructor(
     private dataSource: DataSource,
     private readonly commentLikesRepository: CommentLikesRepository,
+    @InjectRepository(Comment)
+    private commentRepo: Repository<Comment>,
   ) {}
 
   async getByIdOrNotFoundFail(
     id: string,
     userId?: string | null,
   ): Promise<CommentViewDto> {
-    const raw = await this.dataSource.query(
-      `SELECT * FROM comments WHERE id = $1 AND deleted_at IS NULL`,
-      [id],
-    );
-
-    if (!raw[0]) {
+    // const raw = await this.dataSource.query(
+    //   `SELECT * FROM comments WHERE id = $1 AND deleted_at IS NULL`,
+    //   [id],
+    // );
+    const comment = await this.commentRepo.findOne({
+      where: { id, deletedAt: IsNull() }, // Не забываем про deleted_at
+      relations: { user: true }, // Загружаем связанную сущность User
+    });
+    if (!comment) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
         extensions: [
@@ -44,75 +51,53 @@ export class CommentsQueryRepository {
       }
     }
 
-    return CommentViewDto.mapToView(raw[0], myStatus);
+    return CommentViewDto.mapToView(comment, myStatus);
   }
 
-  async getAllForPost(
+  async getAll(
     query: GetCommentsQueryParamsInputDto,
     postId: string,
     userId?: string | null,
   ): Promise<PaginatedViewDto<CommentViewDto[]>> {
-    const values: any[] = [postId];
-    const where = `WHERE post_id = $1 AND deleted_at IS NULL`;
+    const qb = this.commentRepo
+      .createQueryBuilder('c')
+      .leftJoinAndSelect('c.user', 'u')
+      .where('c.postId = :postId', { postId })
+      .andWhere('c.deletedAt IS NULL');
 
-    // Mapping sorting
-    const sortMap: Record<string, string> = {
-      content: `content COLLATE "C"`,
-      createdAt: `created_at`,
-    };
-
-    const sortColumn = sortMap[query.sortBy] ?? `created_at`;
+    const sortColumn =
+      query.sortBy === 'content'
+        ? 'c.content COLLATE "C"'
+        : `c.${query.sortBy || 'createdAt'}`;
     const sortDirection =
-      query.sortDirection?.toLowerCase() === `asc` ? `ASC` : `DESC`;
+      query.sortDirection?.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
-    values.push(query.pageSize);
-    const limitIndex = values.length;
+    qb.orderBy(sortColumn, sortDirection);
 
-    values.push(query.calculateSkip());
-    const offsetIndex = values.length;
+    qb.skip(query.calculateSkip()).take(query.pageSize);
 
-    const dataQuery = `
-      SELECT *
-      FROM comments
-      ${where}
-      ORDER BY ${sortColumn} ${sortDirection}
-      LIMIT $${limitIndex}
-      OFFSET $${offsetIndex}
-    `;
+    const comments = await qb.getMany();
+    const totalCount = await qb.getCount();
 
-    const countQuery = `
-      SELECT COUNT(*)
-      FROM comments
-      ${where}
-    `;
-
-    const commentsResult = await this.dataSource.query(dataQuery, values);
-    const countResult = await this.dataSource.query(
-      countQuery,
-      values.slice(0, 1),
-    );
-
-    const totalCount = Number(countResult[0].count);
-
-    const commentIds = commentsResult.map((c: any) => c.id);
     const likesInfo: Record<string, string> = {};
-
-    if (userId && commentIds.length > 0) {
+    if (userId && comments.length > 0) {
+      const commentIds = comments.map((c) => c.id);
       const likes = await this.commentLikesRepository.findByAllId(
         commentIds,
         userId,
       );
-
       likes.forEach((l) => {
         likesInfo[l.commentId] = l.myStatus;
       });
     }
+    console.log('I"AM IN QUERY REPO OF COMMMMMMMMMMMM');
 
-    const items = commentsResult.map((comment: any) => {
+    const items = comments.map((comment) => {
       const myStatus = likesInfo[comment.id] || 'None';
+
       return CommentViewDto.mapToView(comment, myStatus);
     });
-
+    console.log('I"AM IN QUERY REPO OF BEFORE MAPPPPPPPPPPPPPPPPPPING');
     return PaginatedViewDto.mapToView({
       items,
       totalCount,
