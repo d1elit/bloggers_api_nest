@@ -1,7 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CommentsRepository } from '../../infrastructure/comments.repository';
 import { PostsQueryRepository } from '../../../posts/infrastructure/query/posts.query-repository';
-import { UsersExternalRepository } from '../../../../user-accounts/infrastructure/users.external.repository';
 import { Comment } from '../../domain/comment.entity';
 
 export class CreateCommentCommand {
@@ -20,7 +19,6 @@ export class CreateCommentUseCase implements ICommandHandler<
   constructor(
     private commentsRepository: CommentsRepository,
     private postsQueryRepository: PostsQueryRepository,
-    private usersExternalRepository: UsersExternalRepository,
   ) {}
 
   async execute({

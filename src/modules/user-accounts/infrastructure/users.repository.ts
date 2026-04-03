@@ -85,13 +85,13 @@ export class UsersRepository {
     }
 
     // 2. Используем QueryBuilder
-    const user = await this.userRepo
+    return await this.userRepo
       .createQueryBuilder('u')
       .where(`u.${fieldName} = :value`, { value: fieldValue })
       .andWhere('u.deletedAt IS NULL')
       .getOne();
 
-    return user; // Вернет объект сущности или null
+    // Вернет объект сущности или null
   }
 
   async findByCodeOrError(code: string): Promise<User> {

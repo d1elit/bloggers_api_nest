@@ -20,7 +20,6 @@ import { BasicAuthGuard } from '../guards/basic/basic-auth.guard';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from '../application/usecases/create-user.usecase';
 import { DeleteUserCommand } from '../application/usecases/delete-user.usecase';
-import { UsersRepository } from '../infrastructure/users.repository';
 
 @UseGuards(BasicAuthGuard)
 @Controller('sa/users')
@@ -28,7 +27,6 @@ export class UsersController {
   constructor(
     private usersQueryRepository: UsersQueryRepository,
     private commandBus: CommandBus,
-    private usersRepository: UsersRepository,
   ) {
     console.log('UsersController created');
   }

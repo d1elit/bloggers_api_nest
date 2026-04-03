@@ -66,7 +66,7 @@ export class Post {
   @Column(() => ExtendedLikesInfo, { prefix: false })
   public extendedLikesInfo: ExtendedLikesInfo;
 
-  @ManyToOne((type) => Blog, (blog) => blog.posts)
+  @ManyToOne(() => Blog, (blog) => blog.posts)
   @JoinColumn({ name: 'blog_id' })
   public blog: Blog;
 

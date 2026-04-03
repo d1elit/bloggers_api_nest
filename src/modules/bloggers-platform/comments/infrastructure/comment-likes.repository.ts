@@ -45,7 +45,7 @@ export class CommentLikesRepository {
     if (!userId || !ids.length) return [];
 
     // 2. Используем метод find с оператором In
-    const likes = await this.commentLikeRepo.find({
+    return await this.commentLikeRepo.find({
       where: {
         userId: userId,
         commentId: In(ids), // Автоматически превращается в WHERE comment_id IN (...)
@@ -55,6 +55,5 @@ export class CommentLikesRepository {
     // 3. Мапим в домен (если это необходимо)
     // Если commentLikeRepo возвращает сущности, которые и есть домен,
     // можно просто вернуть 'likes'
-    return likes;
   }
 }

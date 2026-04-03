@@ -13,12 +13,10 @@ export class UsersExternalRepository {
   ) {}
 
   async findById(id: string): Promise<any | null> {
-    const user = await this.userRepo.findOne({
+    return await this.userRepo.findOne({
       where: { id },
       select: ['id', 'login', 'email', 'createdAt'], // Выберет только эти колонки
     });
-
-    return user;
   }
 
   async findOrNotFoundFail(id: string): Promise<User> {
