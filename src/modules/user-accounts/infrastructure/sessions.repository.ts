@@ -73,13 +73,4 @@ export class SessionsRepository {
     // DELETE FROM sessions WHERE device_id = $1
     await this.sessionRepo.delete({ deviceId });
   }
-  //
-  // async findAll(userId: string): Promise<SessionDomain[]> {
-  //   const rows = await this.dataSource.query(
-  //     `SELECT * FROM sessions WHERE user_id = $1`,
-  //     [userId],
-  //   );
-  //
-  //   return rows.map(this.mapRowToDomain);
-  // }
 }

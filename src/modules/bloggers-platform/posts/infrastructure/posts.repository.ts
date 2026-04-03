@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DomainException } from '../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
-import { Post } from '../domain/post-entity';
+import { PostDomain } from '../domain/post.domain-entity';
 import { DataSource } from 'typeorm';
 import { PostsMapper } from './posts-mapper';
 
@@ -9,7 +9,7 @@ import { PostsMapper } from './posts-mapper';
 export class PostsRepository {
   constructor(private dataSource: DataSource) {}
 
-  async save(domainPost: Post) {
+  async save(domainPost: PostDomain) {
     const post = PostsMapper.toPersistence(domainPost);
 
     console.log(post);
@@ -56,7 +56,7 @@ export class PostsRepository {
     return post;
   }
 
-  async findById(id: string): Promise<Post | null> {
+  async findById(id: string): Promise<PostDomain | null> {
     const raw = await this.dataSource.query(
       `SELECT * FROM posts WHERE id = $1 AND deleted_at IS NULL`,
       [id],
@@ -67,7 +67,7 @@ export class PostsRepository {
     return PostsMapper.toDomain(raw[0]);
   }
 
-  async findOrNotFoundFail(id: string): Promise<Post> {
+  async findOrNotFoundFail(id: string): Promise<PostDomain> {
     const post = await this.findById(id);
     if (!post) {
       throw new DomainException({

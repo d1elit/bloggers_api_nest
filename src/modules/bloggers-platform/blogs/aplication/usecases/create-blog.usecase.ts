@@ -1,4 +1,4 @@
-import { Blog } from '../../domain/blog.entity';
+import { BlogDomain } from '../../domain/blog.domain-entity';
 import { CreteBlogInputDto } from '../../api/input-dto/crete-blog.input-dto';
 import { BlogsRepository } from '../../infrastructure/blogs.repository';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
@@ -15,7 +15,7 @@ export class CreateBlogUseCase implements ICommandHandler<
   constructor(private readonly blogsRepository: BlogsRepository) {}
 
   async execute({ dto }: CreateBlogCommand) {
-    const entity = Blog.createInstance(dto);
+    const entity = BlogDomain.createInstance(dto);
     await this.blogsRepository.save(entity);
     return entity.id;
   }

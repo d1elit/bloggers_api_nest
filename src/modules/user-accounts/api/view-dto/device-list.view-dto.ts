@@ -1,5 +1,4 @@
-import { SessionsMapper } from '../../infrastructure/sessions-mapper';
-import { SessionDomain } from '../../domain/session.domain-entity';
+import { Session } from '../../domain/session.entity';
 
 export class DeviceListViewDto {
   ip: string;
@@ -7,14 +6,13 @@ export class DeviceListViewDto {
   lastActiveDate: string;
   deviceId: string;
 
-  static mapToView(deviceList: SessionDomain[]) {
+  static mapToView(deviceList: Session[]) {
     return deviceList.map((raw) => {
-      const session = SessionsMapper.toDomain(raw);
       return {
-        ip: session.ip,
-        title: session.deviceName,
-        lastActiveDate: new Date(Number(session.iat) * 1000).toISOString(),
-        deviceId: session.deviceId,
+        ip: raw.ip,
+        title: raw.deviceName,
+        lastActiveDate: new Date(Number(raw.iat) * 1000).toISOString(),
+        deviceId: raw.deviceId,
       };
     });
   }

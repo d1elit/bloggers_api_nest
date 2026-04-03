@@ -1,19 +1,24 @@
 import { DeviceListViewDto } from '../../api/view-dto/device-list.view-dto';
 import { Injectable } from '@nestjs/common';
 
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Session } from '../../domain/session.entity';
 
 @Injectable()
 export class SessionsQueryRepository {
-  constructor(private dataSource: DataSource) {}
+  constructor(
+    private dataSource: DataSource,
+    @InjectRepository(Session)
+    private sessionRepo: Repository<Session>,
+  ) {}
 
   async findAll(userId: string): Promise<DeviceListViewDto[]> {
-    const result = await this.dataSource.query(
-      `
-    SELECT * FROM SESSIONS where user_id = $1`,
-      [userId],
-    );
-
-    return DeviceListViewDto.mapToView(result);
+    const sessions = await this.sessionRepo.find({
+      where: {
+        userId,
+      },
+    });
+    return DeviceListViewDto.mapToView(sessions);
   }
 }

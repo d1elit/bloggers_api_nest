@@ -1,27 +1,55 @@
+import {
+  Column,
+  DeleteDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { CreateBlogDomainDto } from './dto/create-blog.domain.dto';
 import { randomUUID } from 'crypto';
+import { Post } from '../../posts/domain/post.entity';
 
+@Entity('blogs')
 export class Blog {
-  constructor(
-    public id: string,
-    public name: string,
-    public description: string,
-    public websiteUrl: string,
-    public createdAt: Date,
-    public isMembership: boolean,
-    public deletedAt: Date | null,
-  ) {}
+  @PrimaryGeneratedColumn('uuid')
+  public id: string;
+
+  @Column({ type: 'varchar', collation: 'C' })
+  public name: string;
+
+  @Column({ type: 'varchar', collation: 'C' })
+  public description: string;
+
+  @Column({ type: 'varchar', name: 'website_url', collation: 'C' })
+  public websiteUrl: string;
+
+  @Column({ type: 'timestamp without time zone', name: 'created_at' })
+  public createdAt: Date;
+
+  @Column({ type: 'boolean', name: 'is_membership', default: false })
+  public isMembership: boolean;
+
+  @DeleteDateColumn({
+    type: 'timestamp without time zone',
+    nullable: true,
+    name: 'deleted_at',
+  })
+  public deletedAt: Date | null;
+
+  @OneToMany((type) => Post, (post) => post.blogId)
+  public posts: Post[];
 
   static createInstance(dto: CreateBlogDomainDto): Blog {
-    return new Blog(
-      randomUUID(),
-      dto.name,
-      dto.description,
-      dto.websiteUrl,
-      new Date(),
-      false,
-      null,
-    );
+    const blog = new Blog();
+    blog.id = randomUUID();
+    blog.name = dto.name;
+    blog.description = dto.description;
+    blog.websiteUrl = dto.websiteUrl;
+    blog.createdAt = new Date();
+    blog.isMembership = false;
+    blog.deletedAt = null;
+
+    return blog;
   }
 
   update(dto: CreateBlogDomainDto): void {
@@ -30,13 +58,10 @@ export class Blog {
     this.websiteUrl = dto.websiteUrl;
   }
 
-  makeDeleted() {
+  makeDeleted(): void {
     if (this.deletedAt !== null) {
       throw new Error('Entity already deleted');
     }
     this.deletedAt = new Date();
   }
 }
-
-export type BlogDocument = Blog;
-export type BlogModelType = never;

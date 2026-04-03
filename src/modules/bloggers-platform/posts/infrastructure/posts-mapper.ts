@@ -1,8 +1,8 @@
-import { Post } from '../domain/post-entity';
+import { PostDomain } from '../domain/post.domain-entity';
 
 export class PostsMapper {
-  static toDomain(row: any): Post {
-    return new Post(
+  static toDomain(row: any): PostDomain {
+    return new PostDomain(
       row.id,
       row.title,
       row.short_description,
@@ -24,7 +24,7 @@ export class PostsMapper {
     );
   }
 
-  static toPersistence(post: Post) {
+  static toPersistence(post: PostDomain) {
     return {
       id: post.id,
       title: post.title,

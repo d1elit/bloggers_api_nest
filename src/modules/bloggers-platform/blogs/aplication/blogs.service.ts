@@ -1,8 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { BlogsRepository } from '../infrastructure/blogs.repository';
-import { Blog } from '../domain/blog.entity';
-import { UpdateBlogDto } from '../dto/create-blog.dto';
-import { CreteBlogInputDto } from '../api/input-dto/crete-blog.input-dto';
 
 @Injectable()
 export class BlogsService {

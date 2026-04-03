@@ -1,8 +1,8 @@
-import { Blog } from '../domain/blog.entity';
+import { BlogDomain } from '../domain/blog.domain-entity';
 
 export class BlogsMapper {
-  static toDomain(row: any): Blog {
-    return new Blog(
+  static toDomain(row: any): BlogDomain {
+    return new BlogDomain(
       row.id,
       row.name,
       row.description,
@@ -13,7 +13,7 @@ export class BlogsMapper {
     );
   }
 
-  static toPersistence(blog: Blog) {
+  static toPersistence(blog: BlogDomain) {
     return {
       id: blog.id,
       name: blog.name,

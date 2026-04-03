@@ -18,7 +18,7 @@ export type ExtendedLikesInfo = {
   newestLikes: NewestLike[];
 };
 
-export class Post {
+export class PostDomain {
   constructor(
     public id: string,
     public title: string,
@@ -31,8 +31,11 @@ export class Post {
     public extendedLikesInfo: ExtendedLikesInfo,
   ) {}
 
-  static createInstance(dto: CreatePostDomainDto, blog: BlogViewDto): Post {
-    return new Post(
+  static createInstance(
+    dto: CreatePostDomainDto,
+    blog: BlogViewDto,
+  ): PostDomain {
+    return new PostDomain(
       randomUUID(),
       dto.title,
       dto.shortDescription,

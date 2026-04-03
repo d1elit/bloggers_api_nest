@@ -37,9 +37,16 @@ import { PostLikesRepository } from './posts/infrastructure/post-likes.repositor
 import { PostLikeStatusUseCase } from './posts/aplication/usecases/post-like-status-use.case';
 import { BlogsController } from './blogs/api/blogs.controller';
 import { PostsController } from './posts/api/posts.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Blog } from './blogs/domain/blog.entity';
+import { Post } from './posts/domain/post.entity';
 
 @Module({
-  imports: [CqrsModule, UserAccountsModule],
+  imports: [
+    CqrsModule,
+    UserAccountsModule,
+    TypeOrmModule.forFeature([Blog, Post]),
+  ],
   controllers: [
     AdminBlogsController,
     AdminPostsController,

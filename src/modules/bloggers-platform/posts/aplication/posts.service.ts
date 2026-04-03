@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PostsRepository } from '../infrastructure/posts.repository';
-import { Post } from '../domain/post-entity';
+import { PostDomain } from '../domain/post.domain-entity';
 import { CreatePostDto, UpdatePostDto } from '../dto/create-post.dto';
 import { BlogsExternalQueryRepository } from '../../blogs/infrastructure/external-query/blogs.external-query-repository';
 import { PostLikesRepository } from '../infrastructure/post-likes.repository';
@@ -19,7 +19,7 @@ export class PostsService {
     const blogId = blogIdDto ? blogIdDto : postDto.blogId;
     const blog =
       await this.blogExternalQueryRepository.getByIdOrNotFoundFail(blogId);
-    const post = Post.createInstance(postDto, blog);
+    const post = PostDomain.createInstance(postDto, blog);
     console.log(post);
     await this.postsRepository.save(post);
     return post.id;
