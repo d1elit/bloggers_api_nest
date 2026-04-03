@@ -29,6 +29,8 @@ export class UpdateLikeStatusUseCase implements ICommandHandler<
     const comment = await this.commentsRepository.findOrNotFoundFail(commentId);
     const like = await this.likesRepository.find(userId, commentId);
 
+    console.log(comment);
+
     if (!like) {
       const newLike = CommentLike.createInstance(userId, commentId, likeStatus);
       comment.updateLikeCount(likeStatus);

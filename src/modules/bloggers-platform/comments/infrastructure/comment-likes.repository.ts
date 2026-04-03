@@ -26,7 +26,10 @@ export class CommentLikesRepository {
   ): Promise<CommentLike | null> {
     if (!userId) return null;
 
-    return await this.commentLikeRepo.findOneBy({ commentId });
+    return await this.commentLikeRepo.findOneBy({
+      userId, // Ищем лайк КОНКРЕТНОГО юзера
+      commentId,
+    });
   }
 
   async create(like: CommentLike): Promise<CommentLike> {
