@@ -15,6 +15,6 @@ export class GetBlogsQueryHandler implements IQueryHandler<
 > {
   constructor(private readonly blogsQueryRepository: BlogsQueryRepository) {}
   async execute(query: GetBlogsQuery) {
-    return this.blogsQueryRepository.getAll(query.queryParams);
+    return this.blogsQueryRepository.getAllOrm(query.queryParams);
   }
 }

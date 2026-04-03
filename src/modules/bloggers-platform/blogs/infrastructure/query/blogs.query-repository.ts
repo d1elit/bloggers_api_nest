@@ -4,19 +4,21 @@ import { GetBlogsQueryParams } from '../../api/input-dto/get-blogs-query-params.
 import { PaginatedViewDto } from '../../../../../core/dto/base.paginated.view-dto';
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
-import { DataSource } from 'typeorm';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Blog } from '../../domain/blog.entity';
 
 @Injectable()
 export class BlogsQueryRepository {
-  constructor(private dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(Blog)
+    private blogRepo: Repository<Blog>,
+  ) {}
 
-  async getByIdOrNotFoundFail(id: string) {
-    const raw = await this.dataSource.query(
-      `SELECT * FROM blogs WHERE id = $1 AND deleted_at IS NULL`,
-      [id],
-    );
+  async getByIdOrNotFoundFail(id: string): Promise<BlogViewDto> {
+    const blog = await this.blogRepo.findOneBy({ id });
 
-    if (!raw[0]) {
+    if (!blog) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
         extensions: [
@@ -27,85 +29,48 @@ export class BlogsQueryRepository {
         ],
       });
     }
-
-    return BlogViewDto.mapToView(raw[0]);
+    console.log(blog);
+    return BlogViewDto.mapToView(blog);
   }
 
-  async getAll(
+  async getAllOrm(
     query: GetBlogsQueryParams,
   ): Promise<PaginatedViewDto<BlogViewDto[]>> {
-    const values: any[] = [];
-    let where = `WHERE deleted_at IS NULL`;
+    const queryBuilder = this.blogRepo.createQueryBuilder('b');
 
-    if (query.searchNameTerm || query.searchDescriptionTerm) {
-      where += ` AND (`;
-      const conditions: string[] = [];
+    queryBuilder.select([
+      'id',
+      'name',
+      'description',
+      'website_url as websiteUrl',
+      'created_at as createdAt ',
+      'is_membership  as isMembership',
+    ]);
 
-      if (query.searchNameTerm) {
-        values.push(`%${query.searchNameTerm}%`);
-        conditions.push(`name ILIKE $${values.length}`);
-      }
-
-      if (query.searchDescriptionTerm) {
-        values.push(`%${query.searchDescriptionTerm}%`);
-        conditions.push(`description ILIKE $${values.length}`);
-      }
-
-      where += conditions.join(` OR `) + `)`;
+    if (query.searchNameTerm) {
+      queryBuilder.orWhere('b.name ILIKE :name', {
+        name: `%${query.searchNameTerm}%`, // Добавляем проценты здесь
+      });
     }
+    if (query.searchDescriptionTerm) {
+      queryBuilder.orWhere('b.description ILIKE :description', {
+        description: `%${query.searchDescriptionTerm}%`, // Добавляем проценты здесь
+      });
+    }
+    queryBuilder.skip(query.calculateSkip()).take(query.pageSize);
 
-    const whereParamsCount = values.length;
+    queryBuilder.orderBy('b.createdAt', 'DESC');
 
-    // Mapping sorting
-    const sortMap: Record<string, string> = {
-      name: `name COLLATE "C"`,
-      description: `description COLLATE "C"`,
-      websiteUrl: `website_url COLLATE "C"`,
-      createdAt: `created_at`,
-    };
-
-    const sortColumn = sortMap[query.sortBy] ?? `created_at`;
+    const sortField = query.sortBy || 'createdAt';
 
     const sortDirection =
-      query.sortDirection?.toLowerCase() === `asc` ? `ASC` : `DESC`;
+      query.sortDirection?.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
-    values.push(query.pageSize);
-    const limitIndex = values.length;
+    queryBuilder.orderBy(`b.${sortField}`, sortDirection);
 
-    values.push(query.calculateSkip());
-    const offsetIndex = values.length;
+    const items = await queryBuilder.getRawMany();
 
-    const dataQuery = `
-      SELECT
-        id,
-        name,
-        description,
-        website_url,
-        created_at,
-        is_membership,
-        deleted_at
-      FROM blogs
-      ${where}
-      ORDER BY ${sortColumn} ${sortDirection}
-      LIMIT $${limitIndex}
-      OFFSET $${offsetIndex}
-    `;
-
-    const countQuery = `
-      SELECT COUNT(*)
-      FROM blogs
-      ${where}
-    `;
-
-    const blogsResult = await this.dataSource.query(dataQuery, values);
-    const countResult = await this.dataSource.query(
-      countQuery,
-      values.slice(0, whereParamsCount),
-    );
-
-    const totalCount = Number(countResult[0].count);
-    const items = blogsResult.map((blog: any) => BlogViewDto.mapToView(blog));
-
+    const totalCount = await queryBuilder.getCount();
     return PaginatedViewDto.mapToView({
       items,
       totalCount,

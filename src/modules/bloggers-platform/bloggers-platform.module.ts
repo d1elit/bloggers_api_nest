@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AdminBlogsController } from './blogs/api/admin.blogs.controller';
-import { BlogsService } from './blogs/aplication/blogs.service';
+
 import { BlogsRepository } from './blogs/infrastructure/blogs.repository';
 // import { Blog, BlogSchema } from './blogs/domain/blog-mongo.entity';
 import { BlogsQueryRepository } from './blogs/infrastructure/query/blogs.query-repository';
@@ -55,7 +55,6 @@ import { Post } from './posts/domain/post.entity';
     PostsController,
   ],
   providers: [
-    BlogsService,
     BlogsRepository,
     BlogsQueryRepository,
     BlogsExternalQueryRepository,

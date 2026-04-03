@@ -36,7 +36,7 @@ export class Blog {
   })
   public deletedAt: Date | null;
 
-  @OneToMany((type) => Post, (post) => post.blogId)
+  @OneToMany(() => Post, (post) => post.blog)
   public posts: Post[];
 
   static createInstance(dto: CreateBlogDomainDto): Blog {
