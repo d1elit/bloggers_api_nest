@@ -29,7 +29,7 @@ export class BlogsQueryRepository {
         ],
       });
     }
-    console.log(blog);
+
     return BlogViewDto.mapToView(blog);
   }
 

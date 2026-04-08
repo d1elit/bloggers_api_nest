@@ -5,14 +5,13 @@ import { DomainException } from '../../../../../core/exceptions/domain-exception
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
 import { CommentLikesRepository } from '../comment-likes.repository';
 import { GetCommentsQueryParamsInputDto } from '../../api/input-dto/get-comments-query-params.input.dto';
-import { DataSource, IsNull, Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Comment } from '../../domain/comment.entity';
 
 @Injectable()
 export class CommentsQueryRepository {
   constructor(
-    private dataSource: DataSource,
     private readonly commentLikesRepository: CommentLikesRepository,
     @InjectRepository(Comment)
     private commentRepo: Repository<Comment>,
@@ -22,10 +21,6 @@ export class CommentsQueryRepository {
     id: string,
     userId?: string | null,
   ): Promise<CommentViewDto> {
-    // const raw = await this.dataSource.query(
-    //   `SELECT * FROM comments WHERE id = $1 AND deleted_at IS NULL`,
-    //   [id],
-    // );
     const comment = await this.commentRepo.findOne({
       where: { id, deletedAt: IsNull() }, // Не забываем про deleted_at
       relations: { user: true }, // Загружаем связанную сущность User
@@ -42,7 +37,6 @@ export class CommentsQueryRepository {
       });
     }
 
-    console.log('COMMMMMMMENTS USER ID', userId);
     let myStatus = 'None';
     if (userId) {
       const like = await this.commentLikesRepository.find(userId, id);
@@ -90,14 +84,13 @@ export class CommentsQueryRepository {
         likesInfo[l.commentId] = l.myStatus;
       });
     }
-    console.log('I"AM IN QUERY REPO OF COMMMMMMMMMMMM');
 
     const items = comments.map((comment) => {
       const myStatus = likesInfo[comment.id] || 'None';
 
       return CommentViewDto.mapToView(comment, myStatus);
     });
-    console.log('I"AM IN QUERY REPO OF BEFORE MAPPPPPPPPPPPPPPPPPPING');
+
     return PaginatedViewDto.mapToView({
       items,
       totalCount,

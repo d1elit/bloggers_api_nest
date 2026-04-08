@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Post } from '../../domain/post.entity';
 import { PostsRepository } from '../../infrastructure/posts.repository';
 import { CreatePostDto } from '../../dto/create-post.dto';
-import { BlogsExternalQueryRepository } from '../../../blogs/infrastructure/external-query/blogs.external-query-repository';
+import { BlogsExternalRepository } from '../../../blogs/infrastructure/external/blogs.external-repository';
 
 export class CreatePostCommand {
   constructor(
@@ -18,7 +18,7 @@ export class CreatePostUseCase implements ICommandHandler<
 > {
   constructor(
     private readonly postsRepository: PostsRepository,
-    private readonly blogExternalQueryRepository: BlogsExternalQueryRepository,
+    private readonly blogExternalQueryRepository: BlogsExternalRepository,
   ) {}
 
   async execute({ dto, blogIdDto }: CreatePostCommand) {

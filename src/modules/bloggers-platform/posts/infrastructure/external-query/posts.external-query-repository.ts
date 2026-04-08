@@ -49,7 +49,7 @@ export class PostsExternalQueryRepository {
       'p.created_at as "createdAt"',
       'p.likes_count as "likesCount"',
       'p.dislikes_count as "dislikesCount"',
-      'p.newest_likes as "newestLikes"'
+      'p.newest_likes as "newestLikes"',
     ]);
 
     if (blogId) {
@@ -72,21 +72,25 @@ export class PostsExternalQueryRepository {
 
         if (query.shortDescription) {
           const condition = 'p.short_description ILIKE :shortDesc';
-          if (hasCondition) qb.orWhere(condition, { shortDesc: `%${query.shortDescription}%` });
-          else qb.where(condition, { shortDesc: `%${query.shortDescription}%` });
+          if (hasCondition)
+            qb.orWhere(condition, { shortDesc: `%${query.shortDescription}%` });
+          else
+            qb.where(condition, { shortDesc: `%${query.shortDescription}%` });
           hasCondition = true;
         }
 
         if (query.content) {
           const condition = 'p.content ILIKE :content';
-          if (hasCondition) qb.orWhere(condition, { content: `%${query.content}%` });
+          if (hasCondition)
+            qb.orWhere(condition, { content: `%${query.content}%` });
           else qb.where(condition, { content: `%${query.content}%` });
           hasCondition = true;
         }
 
         if (query.blogName) {
           const condition = 'p.blog_name ILIKE :blogName';
-          if (hasCondition) qb.orWhere(condition, { blogName: `%${query.blogName}%` });
+          if (hasCondition)
+            qb.orWhere(condition, { blogName: `%${query.blogName}%` });
           else qb.where(condition, { blogName: `%${query.blogName}%` });
         }
       });
@@ -95,7 +99,8 @@ export class PostsExternalQueryRepository {
     queryBuilder.skip(query.calculateSkip()).take(query.pageSize);
 
     const sortField = query.sortBy || 'createdAt';
-    const sortDirection = query.sortDirection?.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+    const sortDirection =
+      query.sortDirection?.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
     // To handle mapping from DTO keys to database columns/aliases in OrderBy
     let orderByColumn = `p.${sortField}`;
@@ -117,12 +122,12 @@ export class PostsExternalQueryRepository {
       mappedEntity.blogId = postRaw.blogId;
       mappedEntity.blogName = postRaw.blogName;
       mappedEntity.createdAt = postRaw.createdAt;
-      
+
       mappedEntity.extendedLikesInfo = {
-         likesCount: postRaw.likesCount || 0,
-         dislikesCount: postRaw.dislikesCount || 0,
-         myStatus: 'None',
-         newestLikes: postRaw.newestLikes || []
+        likesCount: postRaw.likesCount || 0,
+        dislikesCount: postRaw.dislikesCount || 0,
+        myStatus: 'None',
+        newestLikes: postRaw.newestLikes || [],
       };
 
       return PostViewDto.mapToView(mappedEntity);

@@ -5,7 +5,7 @@ import { BlogsRepository } from './blogs/infrastructure/blogs.repository';
 // import { Blog, BlogSchema } from './blogs/domain/blog-mongo.entity';
 import { BlogsQueryRepository } from './blogs/infrastructure/query/blogs.query-repository';
 import { PostsRepository } from './posts/infrastructure/posts.repository';
-import { BlogsExternalQueryRepository } from './blogs/infrastructure/external-query/blogs.external-query-repository';
+import { BlogsExternalRepository } from './blogs/infrastructure/external/blogs.external-repository';
 import { AdminPostsController } from './posts/api/admin.posts.controller';
 import { PostsQueryRepository } from './posts/infrastructure/query/posts.query-repository';
 import { PostsExternalQueryRepository } from './posts/infrastructure/external-query/posts.external-query-repository';
@@ -60,7 +60,7 @@ import { CommentLike } from './comments/domain/comment-like.entity';
   providers: [
     BlogsRepository,
     BlogsQueryRepository,
-    BlogsExternalQueryRepository,
+    BlogsExternalRepository,
     PostsRepository,
     PostLikesRepository,
     PostsQueryRepository,

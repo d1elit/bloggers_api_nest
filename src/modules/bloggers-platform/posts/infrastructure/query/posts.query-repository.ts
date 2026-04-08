@@ -78,14 +78,19 @@ export class PostsQueryRepository {
       'p.created_at as "createdAt"',
       'p.likes_count as "likesCount"',
       'p.dislikes_count as "dislikesCount"',
-      'p.newest_likes as "newestLikes"'
+      'p.newest_likes as "newestLikes"',
     ]);
 
     if (blogId) {
       queryBuilder.andWhere('p.blog_id = :blogId', { blogId });
     }
 
-    if (query.title || query.shortDescription || query.content || query.blogName) {
+    if (
+      query.title ||
+      query.shortDescription ||
+      query.content ||
+      query.blogName
+    ) {
       queryBuilder.andWhere((qb) => {
         const conditions: string[] = [];
         const params: Record<string, string> = {};
@@ -123,7 +128,8 @@ export class PostsQueryRepository {
     };
 
     const sortColumn = sortFieldMap[query.sortBy] ?? 'p.created_at';
-    const sortDirection = query.sortDirection?.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+    const sortDirection =
+      query.sortDirection?.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
     // To prevent SQL injection in ORDER BY, we use explicit mapping and passing as literal
     queryBuilder.orderBy(sortColumn, sortDirection);
@@ -187,12 +193,12 @@ export class PostsQueryRepository {
       mappedEntity.blogId = postRaw.blogId;
       mappedEntity.blogName = postRaw.blogName;
       mappedEntity.createdAt = postRaw.createdAt;
-      
+
       mappedEntity.extendedLikesInfo = {
-         likesCount: postRaw.likesCount || 0,
-         dislikesCount: postRaw.dislikesCount || 0,
-         myStatus: myStatus,
-         newestLikes: postRaw.newestLikes || []
+        likesCount: postRaw.likesCount || 0,
+        dislikesCount: postRaw.dislikesCount || 0,
+        myStatus: myStatus,
+        newestLikes: postRaw.newestLikes || [],
       };
 
       return PostViewDto.mapToView(mappedEntity, myStatus, newestLikes);
