@@ -2,10 +2,13 @@ import {
   Column,
   DeleteDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { randomUUID } from 'crypto';
 import { add } from 'date-fns';
+import { Comment } from '../../bloggers-platform/comments/domain/comment.entity';
+import { PostLike } from '../../bloggers-platform/posts/domain/post-like.entity';
 
 export class EmailConfirmation {
   @Column({ name: 'email_confirmation_code', nullable: true, type: 'uuid' })
@@ -69,6 +72,12 @@ export class User {
 
   @Column(() => PasswordRecovery, { prefix: false })
   passwordRecovery: PasswordRecovery;
+
+  @OneToMany(() => Comment, (comment) => comment.user, { cascade: true })
+  comments: Comment[];
+
+  @OneToMany(() => PostLike, (postLike) => postLike.user, { cascade: true })
+  postLikes: PostLike[];
 
   static createInstance(dto: {
     login: string;

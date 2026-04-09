@@ -18,7 +18,7 @@ export class UsersQueryRepository {
   async getByIdOrNotFoundFail(id: string): Promise<UserViewDto> {
     const user = await this.userRepo.findOne({
       where: { id },
-      select: ['id', 'login', 'email', 'createdAt'], // Выберет только эти колонки
+      select: ['id', 'login', 'email', 'createdAt'],
     });
     if (!user) {
       throw new DomainException({

@@ -1,8 +1,7 @@
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
-import { BlogsQueryRepository } from '../infrastructure/query/blogs.query-repository';
 import { GetBlogsQueryParams } from './input-dto/get-blogs-query-params.input-dto';
 import { GetPostsQuery } from '../../posts/aplication/queries/get-posts.query-handler';
-import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { QueryBus } from '@nestjs/cqrs';
 import { GetBlogByIdQuery } from '../aplication/queries/get-blog-by-id.query-handler';
 import { GetBlogsQuery } from '../aplication/queries/get-blogs.query-handler';
 import { GetPostsQueryParams } from '../../posts/api/input-dto/get-posts-query-params.input-dto';
@@ -14,11 +13,7 @@ import { SkipThrottle } from '@nestjs/throttler';
 @SkipThrottle()
 @Controller('blogs')
 export class BlogsController {
-  constructor(
-    private readonly blogsQueryRepository: BlogsQueryRepository,
-    private readonly commandBus: CommandBus,
-    private readonly queryBus: QueryBus,
-  ) {}
+  constructor(private readonly queryBus: QueryBus) {}
 
   @Get(':id')
   async getBlog(@Param('id') id: string) {

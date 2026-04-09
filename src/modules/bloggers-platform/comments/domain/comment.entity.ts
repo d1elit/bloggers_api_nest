@@ -30,9 +30,6 @@ export class Comment {
   @Column()
   public content: string;
 
-  // @Column({ name: 'commentator_info' })
-  // public commentatorInfo: CommentatorInfo;
-
   @Column({ name: 'created_at' })
   public createdAt: Date;
 
@@ -63,7 +60,6 @@ export class Comment {
   static createInstance(
     content: string,
     userId: string,
-    // userLogin: string,
     postId: string,
   ): Comment {
     const comment = new Comment();
@@ -97,6 +93,3 @@ export class Comment {
     if (newStatus === 'Dislike') this.likesInfo.dislikesCount += 1;
   }
 }
-
-export type CommentDocument = Comment;
-export type CommentModelType = never;

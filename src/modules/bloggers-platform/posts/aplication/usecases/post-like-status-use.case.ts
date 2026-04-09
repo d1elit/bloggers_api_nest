@@ -23,7 +23,6 @@ export class PostLikeStatusUseCase implements ICommandHandler<PostLikeStatusComm
   ) {}
 
   async execute(command: PostLikeStatusCommand): Promise<void> {
-    console.log('POST LIKE CONTROLLER');
     const post = await this.postsRepository.findById(command.postId);
     if (!post) {
       throw new DomainException({
@@ -40,10 +39,6 @@ export class PostLikeStatusUseCase implements ICommandHandler<PostLikeStatusComm
       command.postId,
     );
 
-    // console.log('USER LIKE');
-    // console.log(user);
-    console.log('Post');
-    console.log(post);
     if (!like) {
       const newLike = PostLike.createNew({
         likeStatus: command.likeStatus,
@@ -60,12 +55,13 @@ export class PostLikeStatusUseCase implements ICommandHandler<PostLikeStatusComm
       const oldStatus = like.myStatus;
       like.updateLikeStatus(command.likeStatus);
       post.updateLikeCount(command.likeStatus, oldStatus);
-      console.log(post);
 
       await this.postLikesRepository.update(like);
     }
     const newestLikes = await this.getNewestLikes(command.postId);
+
     post.updateNewestLikes(newestLikes);
+
     await this.postsRepository.save(post);
     return;
   }
@@ -77,7 +73,7 @@ export class PostLikeStatusUseCase implements ICommandHandler<PostLikeStatusComm
       return {
         addedAt: like.addedAt.toISOString(),
         userId: like.userId,
-        login: like.userLogin,
+        login: like.user.login,
       };
     });
   }

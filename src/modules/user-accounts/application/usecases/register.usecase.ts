@@ -1,8 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import * as crypto from 'node:crypto';
 import { CreateUserInputDto } from '../../api/input-dto/users/users.input-dto';
-import { UsersRepository } from '../../infrastructure/users.repository';
-import { CryptoService } from '../crypto.service';
 import { emailExamples } from '../email-examples';
 import { NodemailerService } from '../nodemailer.service';
 import { UsersService } from '../users.service';
@@ -14,8 +12,6 @@ export class RegisterCommand {
 export class RegisterUseCase implements ICommandHandler<RegisterCommand, void> {
   constructor(
     private nodemailerService: NodemailerService,
-    private usersRepository: UsersRepository,
-    private cryptoService: CryptoService,
     private userService: UsersService,
   ) {}
 
@@ -25,7 +21,6 @@ export class RegisterUseCase implements ICommandHandler<RegisterCommand, void> {
 
     await this.userService.createUser(userDto, confirmationCode);
 
-    // Send email
     this.nodemailerService
       .sendEmail(
         userDto.email,

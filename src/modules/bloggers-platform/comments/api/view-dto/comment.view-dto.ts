@@ -18,7 +18,6 @@ export class CommentViewDto {
     comment: Comment,
     myStatus: string = 'None',
   ): CommentViewDto {
-    // const commentDomain = CommentsMapper.toDomain(commentRow);
     const dto = new CommentViewDto();
     dto.id = comment.id;
     dto.content = comment.content;

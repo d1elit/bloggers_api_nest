@@ -39,7 +39,7 @@ export class PostViewDto {
       likesCount: post.extendedLikesInfo.likesCount || 0,
       dislikesCount: post.extendedLikesInfo.dislikesCount || 0,
       myStatus: myStatus || 'None',
-      newestLikes: newestLikes || [],
+      newestLikes: post.extendedLikesInfo.newestLikes || newestLikes || [],
     };
 
     return dto;

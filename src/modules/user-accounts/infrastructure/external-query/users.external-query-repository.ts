@@ -2,21 +2,21 @@ import { Injectable } from '@nestjs/common';
 import { UserViewDto } from '../../api/view-dto/users.view-dto';
 import { DomainException } from '../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
-import { DataSource } from 'typeorm';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from '../../domain/user.entity';
 
 @Injectable()
 export class UsersExternalQueryRepository {
-  constructor(private dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(User)
+    private userRepo: Repository<User>,
+  ) {}
 
   async getByIdOrNotFoundFail(id: string): Promise<UserViewDto> {
-    const user = await this.dataSource.query(
-      `SELECT * FROM users WHERE id = $1 and "deleted_at" is NULL`,
-      [id],
-    );
-    console.log('finded user');
-    console.log(user[0]);
+    const user = await this.userRepo.findOneBy({ id });
 
-    if (!user[0]) {
+    if (!user) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
         extensions: [
@@ -27,6 +27,6 @@ export class UsersExternalQueryRepository {
         ],
       });
     }
-    return UserViewDto.mapToView(user[0]);
+    return UserViewDto.mapToView(user);
   }
 }

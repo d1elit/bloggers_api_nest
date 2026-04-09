@@ -47,10 +47,5 @@ export class EmailResendingUseCase implements ICommandHandler<
       .catch((error) => {
         console.log('Email sending failed', error);
       });
-
-    // await this.nodemailerService.sendEmail(
-    //   command.email,
-    //   emailExamples.registrationEmail(confirmationCode),
-    // );
   }
 }

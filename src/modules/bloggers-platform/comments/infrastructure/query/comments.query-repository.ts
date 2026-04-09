@@ -22,8 +22,8 @@ export class CommentsQueryRepository {
     userId?: string | null,
   ): Promise<CommentViewDto> {
     const comment = await this.commentRepo.findOne({
-      where: { id, deletedAt: IsNull() }, // Не забываем про deleted_at
-      relations: { user: true }, // Загружаем связанную сущность User
+      where: { id, deletedAt: IsNull() },
+      relations: { user: true },
     });
     if (!comment) {
       throw new DomainException({

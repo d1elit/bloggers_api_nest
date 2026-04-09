@@ -62,7 +62,6 @@ export class AccessOptionalGuard implements CanActivate {
 
       request.user = { userId, likeStatus } as OptionalUserContext;
     } catch (error) {
-      // If token is invalid or expired, we treat the user as anonymous.
       request.user = {
         likeStatus: 'None',
         userId: null,

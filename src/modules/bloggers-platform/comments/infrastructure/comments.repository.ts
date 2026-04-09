@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { DomainException } from '../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Comment } from '../domain/comment.entity';
 
 @Injectable()
 export class CommentsRepository {
   constructor(
-    private dataSource: DataSource,
     @InjectRepository(Comment)
     private commentRepo: Repository<Comment>,
   ) {}

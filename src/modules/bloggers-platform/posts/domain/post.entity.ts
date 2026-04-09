@@ -4,6 +4,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { BlogViewDto } from '../../blogs/api/view-dto/blogs.view-dto';
@@ -13,6 +14,7 @@ import {
 } from './dto/create-post.domain.dto';
 import { randomUUID } from 'crypto';
 import { Blog } from '../../blogs/domain/blog.entity';
+import { PostLike } from './post-like.entity';
 
 export class NewestLike {
   addedAt: string;
@@ -29,7 +31,11 @@ export class ExtendedLikesInfo {
 
   myStatus: string;
 
-  @Column({ type: 'json', name: 'newest_likes', default: [] })
+  @Column({
+    type: 'jsonb',
+    name: 'newest_likes',
+    default: () => "'[]'",
+  })
   newestLikes: NewestLike[];
 }
 
@@ -69,6 +75,9 @@ export class Post {
   @ManyToOne(() => Blog, (blog) => blog.posts)
   @JoinColumn({ name: 'blog_id' })
   public blog: Blog;
+
+  @OneToMany(() => PostLike, (postLike) => postLike.post, { cascade: true })
+  postLikes: PostLike[];
 
   static createInstance(dto: CreatePostDomainDto, blog: BlogViewDto): Post {
     const post = new Post();
@@ -112,6 +121,8 @@ export class Post {
   }
 
   updateNewestLikes(likes: NewestLike[]): void {
+    console.log(likes);
+
     this.extendedLikesInfo.newestLikes = likes;
   }
 }

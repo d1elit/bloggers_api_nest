@@ -1,5 +1,4 @@
-import { UserDomain } from '../../domain/user.entity-domain';
-import { UsersMapper } from '../../infrastructure/users-mapper';
+import { User } from '../../domain/user.entity';
 
 export class UserViewDto {
   id: string;
@@ -7,13 +6,12 @@ export class UserViewDto {
   email: string;
   createdAt: Date;
 
-  static mapToView(user: UserDomain): UserViewDto {
+  static mapToView(user: User): UserViewDto {
     const dto = new UserViewDto();
-    const mappedUser = UsersMapper.toDomain(user);
-    dto.login = mappedUser.login;
-    dto.id = mappedUser.id;
-    dto.email = mappedUser.email;
-    dto.createdAt = mappedUser.createdAt;
+    dto.login = user.login;
+    dto.id = user.id;
+    dto.email = user.email;
+    dto.createdAt = user.createdAt;
 
     return dto;
   }

@@ -18,12 +18,8 @@ import { RefreshTokenUseCase } from './application/usecases/refresh-token.usecas
 import { RegisterUseCase } from './application/usecases/register.usecase';
 import { RegistrationConfirmationUseCase } from './application/usecases/registration-confirmation.usecase';
 import { ValidateRefreshTokenUseCase } from './application/usecases/validate-refresh-token.usecase';
-
 import { UsersService } from './application/users.service';
 import { UsersExternalQueryRepository } from './infrastructure/external-query/users.external-query-repository';
-import { UsersExternalRepository } from './infrastructure/users.external.repository';
-import { AuthQueryRepository } from './infrastructure/query/auth.query-repository';
-import { SecurityDevicesQueryRepository } from './infrastructure/query/security-devices.query-repository';
 import { UsersQueryRepository } from './infrastructure/query/users.query-repository';
 import { SessionsRepository } from './infrastructure/sessions.repository';
 import { UsersRepository } from './infrastructure/users.repository';
@@ -71,8 +67,6 @@ const useCases = [
   providers: [
     UsersRepository,
     UsersQueryRepository,
-    SecurityDevicesQueryRepository,
-    AuthQueryRepository,
     UsersExternalQueryRepository,
     CryptoService,
     JwtService,
@@ -81,7 +75,6 @@ const useCases = [
     UsersService,
     AccessTokenGuard,
     RefreshTokenGuard,
-    UsersExternalRepository,
     AuthService,
     SessionsQueryRepository,
     GetDeviceListQueryHandler,
@@ -93,7 +86,6 @@ const useCases = [
     JwtService,
     UsersService,
     UsersQueryRepository,
-    UsersExternalRepository,
   ],
 })
 export class UserAccountsModule {}

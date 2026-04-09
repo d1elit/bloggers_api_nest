@@ -1,14 +1,13 @@
 import { DeviceListViewDto } from '../../api/view-dto/device-list.view-dto';
 import { Injectable } from '@nestjs/common';
 
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Session } from '../../domain/session.entity';
 
 @Injectable()
 export class SessionsQueryRepository {
   constructor(
-    private dataSource: DataSource,
     @InjectRepository(Session)
     private sessionRepo: Repository<Session>,
   ) {}

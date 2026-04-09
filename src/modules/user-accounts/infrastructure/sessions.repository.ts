@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, Not, Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -8,7 +8,6 @@ import { Session } from '../domain/session.entity';
 @Injectable()
 export class SessionsRepository {
   constructor(
-    private dataSource: DataSource,
     @InjectRepository(Session)
     private sessionRepo: Repository<Session>,
   ) {}
@@ -57,20 +56,16 @@ export class SessionsRepository {
   }
 
   async delete(iat: number): Promise<void> {
-    // DELETE FROM sessions WHERE iat = $1
     await this.sessionRepo.delete({ iat });
   }
 
   async deleteExceptCurrent(deviceId: string): Promise<void> {
-    // DELETE FROM sessions WHERE device_id <> $1
-    // Для оператора "не равно" (<>) в TypeORM используется Not
     await this.sessionRepo.delete({
       deviceId: Not(deviceId),
     });
   }
 
   async deleteByDevice(deviceId: string): Promise<void> {
-    // DELETE FROM sessions WHERE device_id = $1
     await this.sessionRepo.delete({ deviceId });
   }
 }

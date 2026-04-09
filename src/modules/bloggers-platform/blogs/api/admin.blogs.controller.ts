@@ -13,7 +13,6 @@ import {
 } from '@nestjs/common';
 
 import { CreteBlogInputDto } from './input-dto/crete-blog.input-dto';
-import { BlogsQueryRepository } from '../infrastructure/query/blogs.query-repository';
 import { UpdateBlogInputDto } from './input-dto/update-blog.input-dto';
 import { GetBlogsQueryParams } from './input-dto/get-blogs-query-params.input-dto';
 import { GetPostsQuery } from '../../posts/aplication/queries/get-posts.query-handler';
@@ -40,7 +39,6 @@ import { DeletePostCommand } from '../../posts/aplication/usecases/delete-post.u
 @Controller('sa/blogs')
 export class AdminBlogsController {
   constructor(
-    private readonly blogsQueryRepository: BlogsQueryRepository,
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
   ) {}

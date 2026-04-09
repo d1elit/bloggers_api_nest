@@ -19,7 +19,5 @@ export class TestingController {
       
       RESTART IDENTITY CASCADE
     `);
-
-    //    "comment_likes"
   }
 }

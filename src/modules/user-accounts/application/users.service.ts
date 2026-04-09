@@ -69,12 +69,4 @@ export class UsersService {
       });
     }
   }
-
-  async deleteUser(id: string) {
-    const user = await this.usersRepository.findOrNotFoundFail(id);
-
-    user.softDelete();
-
-    await this.usersRepository.save(user);
-  }
 }

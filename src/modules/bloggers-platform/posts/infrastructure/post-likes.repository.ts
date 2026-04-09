@@ -32,9 +32,13 @@ export class PostLikesRepository {
   async findLastLikes(postId: string): Promise<PostLike[] | null> {
     const likes = await this.postLikeRepo.find({
       where: { postId, myStatus: 'Like' },
+      relations: {
+        user: true, //
+      },
       order: { addedAt: 'DESC' },
       take: 3,
     });
+
     if (!likes.length) return null;
     return likes;
   }

@@ -5,11 +5,11 @@ import { GetPostsQueryParams } from '../../api/input-dto/get-posts-query-params.
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
 import { PostLikesRepository } from '../post-likes.repository';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from '../../domain/post.entity';
+import { PostLike } from '../../domain/post-like.entity';
 
-// Тип для маппинга последних лайков (можно вынести в отдельный файл)
 export type NewestLikeView = {
   addedAt: string;
   userId: string;
@@ -19,10 +19,11 @@ export type NewestLikeView = {
 @Injectable()
 export class PostsQueryRepository {
   constructor(
-    private dataSource: DataSource,
     private postLikesRepository: PostLikesRepository,
     @InjectRepository(Post)
     private postRepo: Repository<Post>,
+    @InjectRepository(PostLike)
+    private postLikeRepo: Repository<PostLike>,
   ) {}
 
   async getByIdOrNotFoundFail(id: string, likeStatus?: string) {
@@ -40,21 +41,19 @@ export class PostsQueryRepository {
       });
     }
 
-    const newestLikesRaw = await this.dataSource.query(
-      `
-      SELECT added_at as "addedAt", user_id as "userId", user_login as "userLogin"
-      FROM post_likes
-      WHERE post_id = $1 AND my_status = 'Like'
-      ORDER BY added_at DESC
-      LIMIT 3
-      `,
-      [id],
-    );
+    const likes = await this.postLikeRepo.find({
+      where: { postId: id, myStatus: 'Like' },
+      relations: {
+        user: true, //
+      },
+      order: { addedAt: 'DESC' },
+      take: 3,
+    });
 
-    const newestLikes: NewestLikeView[] = newestLikesRaw.map((like: any) => ({
+    const newestLikes: NewestLikeView[] = likes.map((like: any) => ({
       addedAt: like.addedAt.toISOString(),
       userId: like.userId,
-      login: like.userLogin,
+      login: like.user.login,
     }));
 
     return PostViewDto.mapToView(post, likeStatus, newestLikes);
@@ -67,7 +66,6 @@ export class PostsQueryRepository {
   ): Promise<PaginatedViewDto<PostViewDto[]>> {
     const queryBuilder = this.postRepo.createQueryBuilder('p');
 
-    // Selecting individual fields since we return raw entities for performance in pagination
     queryBuilder.select([
       'p.id as "id"',
       'p.title as "title"',
@@ -118,7 +116,6 @@ export class PostsQueryRepository {
 
     queryBuilder.skip(query.calculateSkip()).take(query.pageSize);
 
-    // Sorting
     const sortFieldMap: Record<string, string> = {
       title: 'p.title COLLATE "C"',
       shortDescription: 'p.short_description COLLATE "C"',
@@ -131,16 +128,14 @@ export class PostsQueryRepository {
     const sortDirection =
       query.sortDirection?.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
-    // To prevent SQL injection in ORDER BY, we use explicit mapping and passing as literal
     queryBuilder.orderBy(sortColumn, sortDirection);
 
-    const postsResultRaw = await queryBuilder.getRawMany();
+    const postsResult = await queryBuilder.getRawMany();
     const totalCount = await queryBuilder.getCount();
 
-    const postIds = postsResultRaw.map((c: any) => c.id);
+    const postIds = postsResult.map((c: any) => c.id);
 
     const likesInfo: Record<string, string> = {};
-    const newestLikesInfo: Record<string, NewestLikeView[]> = {};
 
     if (postIds.length > 0) {
       if (userId) {
@@ -149,41 +144,10 @@ export class PostsQueryRepository {
           likesInfo[l.postId] = l.myStatus;
         });
       }
-
-      const newestLikesQuery = `
-        SELECT post_id, added_at as "addedAt", user_id as "userId", user_login
-        FROM (
-          SELECT 
-            post_id, 
-            added_at, 
-            user_id, 
-            user_login,
-            ROW_NUMBER() OVER(PARTITION BY post_id ORDER BY added_at DESC) as rn
-          FROM post_likes
-          WHERE post_id = ANY($1) AND my_status = 'Like'
-        ) as ranked_likes
-        WHERE rn <= 3
-      `;
-
-      const newestLikesRaw = await this.dataSource.query(newestLikesQuery, [
-        postIds,
-      ]);
-
-      newestLikesRaw.forEach((like: any) => {
-        if (!newestLikesInfo[like.post_id]) {
-          newestLikesInfo[like.post_id] = [];
-        }
-        newestLikesInfo[like.post_id].push({
-          addedAt: like.addedAt.toISOString(),
-          userId: like.userId,
-          login: like.user_login,
-        });
-      });
     }
 
-    const items = postsResultRaw.map((postRaw: any) => {
+    const items = postsResult.map((postRaw: any) => {
       const myStatus = likesInfo[postRaw.id] || 'None';
-      const newestLikes = newestLikesInfo[postRaw.id] || [];
 
       const mappedEntity = new Post();
       mappedEntity.id = postRaw.id;
@@ -201,7 +165,7 @@ export class PostsQueryRepository {
         newestLikes: postRaw.newestLikes || [],
       };
 
-      return PostViewDto.mapToView(mappedEntity, myStatus, newestLikes);
+      return PostViewDto.mapToView(mappedEntity, myStatus);
     });
 
     return PaginatedViewDto.mapToView({
