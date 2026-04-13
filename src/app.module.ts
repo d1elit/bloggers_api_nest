@@ -13,13 +13,7 @@ import { DomainHttpExceptionsFilter } from './core/exceptions/filters/domain-exc
 import { CoreConfig } from './core/core.config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './modules/user-accounts/domain/user.entity';
-import { Session } from './modules/user-accounts/domain/session.entity';
-import { Blog } from './modules/bloggers-platform/blogs/domain/blog.entity';
-import { Post } from './modules/bloggers-platform/posts/domain/post.entity';
-import { PostLike } from './modules/bloggers-platform/posts/domain/post-like.entity';
-import { Comment } from './modules/bloggers-platform/comments/domain/comment.entity';
-import { CommentLike } from './modules/bloggers-platform/comments/domain/comment-like.entity';
+import { DatabaseConfig } from './core/db.config';
 
 console.log(CoreConfig);
 @Module({
@@ -33,18 +27,20 @@ console.log(CoreConfig);
       ],
     }),
     configModule,
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'nodejs',
-      password: '12345',
-      database: 'nest-typeorm',
-      entities: [User, Session, Blog, Post, PostLike, Comment, CommentLike],
-      synchronize: true,
-      logging: true,
+    TypeOrmModule.forRootAsync({
+      useFactory: (dbConfig: DatabaseConfig) => ({
+        type: 'postgres',
+        host: dbConfig.host,
+        port: dbConfig.port,
+        username: dbConfig.username,
+        password: dbConfig.password,
+        database: dbConfig.database,
+        autoLoadEntities: true,
+        synchronize: dbConfig.synchronize,
+        logging: true,
+      }),
+      inject: [DatabaseConfig],
     }),
-    // MongooseModule.forRoot('mongodb://localhost/nest-api'),
     CoreModule,
     UserAccountsModule,
     BloggersPlatformModule,
@@ -69,26 +65,9 @@ console.log(CoreConfig);
 })
 export class AppModule {
   static async forRoot(coreConfig: CoreConfig): Promise<DynamicModule> {
-    // такой мудрёный способ мы используем, чтобы добавить к основным модулям необязательный модуль.
-    // чтобы не обращаться в декораторе к переменной окружения через process.env в декораторе, потому что
-    // запуск декораторов происходит на этапе склейки всех модулей до старта жизненного цикла самого NestJS
-    const modules: any[] = [
-      // MongooseModule.forRootAsync({
-      //   // если CoreModule не глобальный, то явно импортируем в монгусовский модуль, иначе CoreConfig не заинджектится
-      //   imports: [CoreModule],
-      //   useFactory: (coreConfig: CoreConfig) => {
-      //     // используем DI чтобы достать mongoURI контролируемо
-      //     return {
-      //       uri: coreConfig.mongoURI,
-      //     };
-      //   },
-      //   inject: [CoreConfig],
-      // }),
-    ];
+    const modules: any[] = [];
     return {
       module: AppModule,
-
-      // imports: [...(coreConfig.includeTestingModule ? [TestingModule] : [])], // Add dynamic modules here
     };
   }
 }
