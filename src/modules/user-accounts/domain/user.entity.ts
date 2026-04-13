@@ -45,6 +45,10 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   public id: string;
 
+  //test
+  @Column({ type: 'varchar', length: 10, collation: 'C', nullable: true })
+  public name: string;
+
   @Column({ type: 'varchar', length: 10, collation: 'C' })
   public login: string;
 
