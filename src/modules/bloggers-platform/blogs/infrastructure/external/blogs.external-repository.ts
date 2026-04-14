@@ -13,7 +13,6 @@ export class BlogsExternalRepository {
   ) {}
   async getByIdOrNotFoundFail(id: string) {
     const blog = await this.blogRepo.findOneBy({ id });
-    console.log(blog);
     if (!blog) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,

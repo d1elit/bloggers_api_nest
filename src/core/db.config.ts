@@ -36,7 +36,7 @@ export class DatabaseConfig {
   }
 
   get synchronize(): boolean {
-    // return this.configService.get('NODE_ENV') !== 'production';
-    return false;
+    return this.configService.get('NODE_ENV') === 'testing';
+    // return false;
   }
 }

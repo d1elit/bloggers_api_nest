@@ -54,9 +54,9 @@ export function pipesSetup(app: INestApplication) {
       stopAtFirstError: true,
       //Для преобразования ошибок класс валидатора в необходимый вид
       exceptionFactory: (errors) => {
-        console.log('==========================================');
-        console.log('🔍 VALIDATION ERROR DETAILS:');
-        console.log('Raw errors:', JSON.stringify(errors, null, 2));
+        // console.log('==========================================');
+        // console.log('🔍 VALIDATION ERROR DETAILS:');
+        // console.log('Raw errors:', JSON.stringify(errors, null, 2));
         const formattedErrors = errorFormatter(errors);
 
         throw new DomainException({

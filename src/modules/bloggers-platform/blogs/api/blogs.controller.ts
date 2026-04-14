@@ -33,7 +33,6 @@ export class BlogsController {
     @ExtractUserFromRequest() user: UserContext,
   ) {
     const userId = user.userId;
-    console.log('USER ID IN BLOGERS POSTS: ', userId);
     await this.queryBus.execute(new GetBlogByIdQuery(id));
     return this.queryBus.execute(
       new GetPostsQuery(query, { blogId: id, userId }),

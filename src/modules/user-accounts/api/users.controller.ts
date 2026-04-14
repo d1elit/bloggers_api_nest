@@ -27,9 +27,7 @@ export class UsersController {
   constructor(
     private usersQueryRepository: UsersQueryRepository,
     private commandBus: CommandBus,
-  ) {
-    console.log('UsersController created');
-  }
+  ) {}
 
   @ApiParam({ name: 'id' })
   @Get(':id')

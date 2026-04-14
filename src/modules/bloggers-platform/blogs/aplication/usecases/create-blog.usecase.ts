@@ -16,7 +16,6 @@ export class CreateBlogUseCase implements ICommandHandler<
 
   async execute({ dto }: CreateBlogCommand) {
     const entity = Blog.createInstance(dto);
-    console.log('IM HA');
     await this.blogsRepository.save(entity);
     return entity.id;
   }

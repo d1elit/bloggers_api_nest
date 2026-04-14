@@ -26,14 +26,6 @@ export class CoreConfig {
     return Number(this.configService.get('PORT'));
   }
 
-  @IsNotEmpty({
-    message:
-      'Set Env variable MONGO_URI, example: mongodb://localhost:27017/my-app-local-db',
-  })
-  get mongoURI(): string {
-    return this.configService.get('MONGO_URI');
-  }
-
   @IsEnum(Environments, {
     message:
       'Set correct NODE_ENV value, available values: ' +

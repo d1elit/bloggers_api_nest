@@ -23,7 +23,6 @@ export class GetPostsQueryHandler implements IQueryHandler<
 > {
   constructor(private readonly postsQueryRepository: PostsQueryRepository) {}
   async execute(query: GetPostsQuery) {
-    console.log(query.options);
     const { blogId, userId } = query.options;
     return this.postsQueryRepository.getAll(query.queryParams, blogId, userId);
   }

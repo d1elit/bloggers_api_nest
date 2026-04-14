@@ -14,7 +14,6 @@ import { ErrorResponseBody } from './error-response-body.type';
 @Catch(DomainException)
 export class DomainHttpExceptionsFilter implements ExceptionFilter {
   catch(exception: DomainException, host: ArgumentsHost): void {
-    console.log('DOMAIN EXCEPTION WORK');
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
@@ -60,7 +59,7 @@ export class DomainHttpExceptionsFilter implements ExceptionFilter {
   // }
   private buildResponseBody(exception: DomainException): ErrorResponseBody {
     // Если есть extensions (поля с ошибками), возвращаем в формате errorsMessages
-    console.log(exception);
+    // console.log(exception);
     if (exception.extensions && exception.extensions.length > 0) {
       return {
         errorsMessages: exception.extensions,

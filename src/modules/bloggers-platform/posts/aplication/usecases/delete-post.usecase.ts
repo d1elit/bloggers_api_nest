@@ -22,7 +22,6 @@ export class DeletePostUseCase implements ICommandHandler<
   ) {}
   async execute({ postId, blogId }: DeletePostCommand): Promise<void> {
     const blog = await this.blogsRepository.findOrNotFoundFail(blogId);
-    console.log('blog', blog);
     const post = await this.postsRepository.findOrNotFoundFail(postId);
 
     if (post.blogId !== blogId) {
