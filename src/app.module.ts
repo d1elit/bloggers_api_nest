@@ -15,7 +15,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DatabaseConfig } from './core/db.config';
 
-console.log(CoreConfig);
+// console.log(CoreConfig);
 @Module({
   imports: [
     ThrottlerModule.forRoot({
@@ -37,7 +37,7 @@ console.log(CoreConfig);
         database: dbConfig.database,
         autoLoadEntities: true,
         synchronize: dbConfig.synchronize,
-        logging: true,
+        logging: !dbConfig.synchronize,
       }),
       inject: [DatabaseConfig],
     }),
