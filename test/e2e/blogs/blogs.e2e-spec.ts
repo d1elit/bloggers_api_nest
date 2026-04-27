@@ -31,11 +31,7 @@ describe('Blogs (e2e) public', () => {
 
   describe('Public Blogs Controller (/blogs)', () => {
     it('should get a blog by id publicly', async () => {
-      const response = await blogHelper.createBlog();
-      console.log('STATUS:', response.status);
-      console.log('BODY:', response.body);
-
-      const { body: blog } = response;
+      const { body: blog } = await blogHelper.createBlog();
 
       const res = await request(app.getHttpServer())
         .get(`/blogs/${blog.id}`)

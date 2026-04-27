@@ -1,12 +1,9 @@
 import { Module } from '@nestjs/common';
 import { AdminBlogsController } from './blogs/api/admin.blogs.controller';
-
 import { BlogsRepository } from './blogs/infrastructure/blogs.repository';
-// import { Blog, BlogSchema } from './blogs/domain/blog-mongo.entity';
 import { BlogsQueryRepository } from './blogs/infrastructure/query/blogs.query-repository';
 import { PostsRepository } from './posts/infrastructure/posts.repository';
 import { BlogsExternalRepository } from './blogs/infrastructure/external/blogs.external-repository';
-import { AdminPostsController } from './posts/api/admin.posts.controller';
 import { PostsQueryRepository } from './posts/infrastructure/query/posts.query-repository';
 import { PostsExternalQueryRepository } from './posts/infrastructure/external-query/posts.external-query-repository';
 import { CreateBlogUseCase } from './blogs/aplication/usecases/create-blog.usecase';
@@ -52,7 +49,6 @@ import { CommentLike } from './comments/domain/comment-like.entity';
   ],
   controllers: [
     AdminBlogsController,
-    AdminPostsController,
     PublicCommentsController,
     BlogsController,
     PostsController,

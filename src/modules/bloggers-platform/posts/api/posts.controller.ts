@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
   Put,
   Query,
@@ -44,7 +45,7 @@ export class PostsController {
   @UseGuards(AccessOptionalGuard)
   @Get(':id')
   async getPost(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @ExtractUserFromRequest() user: UserContextDto,
   ): Promise<PostViewDto> {
     const likeStatus = user.likeStatus;
@@ -67,7 +68,7 @@ export class PostsController {
   @UseGuards(AccessTokenGuard)
   @Post(':id/comments')
   async createComment(
-    @Param('id') postId: string,
+    @Param('id', new ParseUUIDPipe()) postId: string,
 
     @Body() body: CreateCommentInputDto,
 
@@ -83,7 +84,7 @@ export class PostsController {
   @UseGuards(AccessOptionalGuard)
   @Get(':id/comments')
   async getPostComments(
-    @Param('id') postId: string,
+    @Param('id', new ParseUUIDPipe()) postId: string,
     @Query() query: GetCommentsQueryParamsInputDto,
     @ExtractUserFromRequest() user: UserContextDto,
   ): Promise<PaginatedViewDto<CommentViewDto[]>> {

@@ -37,7 +37,6 @@ export class LoginUserUseCase implements ICommandHandler<
     const user = await this.checkUserCredentials(inputDto.loginDto);
 
     const deviceId = randomUUID();
-    console.log(deviceId);
 
     const accessToken = await this.jwtService.createAccessToken(
       user.id.toString(),
@@ -56,7 +55,6 @@ export class LoginUserUseCase implements ICommandHandler<
       iat: iat!,
       exp: exp!,
     });
-    console.log(session);
     await this.sessionsRepository.save(session);
 
     return [accessToken, refreshToken];
@@ -85,7 +83,6 @@ export class LoginUserUseCase implements ICommandHandler<
 
   async verifyLoginOrEmail(login: string): Promise<User> {
     const user = await this.usersRepository.findByLoginOrEmail(login);
-    console.log(user);
     if (!user) {
       throw new DomainException({
         code: DomainExceptionCode.Unauthorized,

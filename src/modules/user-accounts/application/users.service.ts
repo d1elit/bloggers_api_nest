@@ -18,7 +18,6 @@ export class UsersService {
     confirmationCode?: string,
   ): Promise<string> {
     await this.ensureIsUserUnique(dto.login, dto.email);
-    console.log(dto);
     const passwordHash = await this.cryptoService.createPasswordHash(
       dto.password,
     );
