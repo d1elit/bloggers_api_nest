@@ -14,6 +14,7 @@ import { CoreConfig } from './core/core.config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DatabaseConfig } from './core/db.config';
+import { QuizGameModule } from './modules/quiz-game/quiz-game.module';
 
 // console.log(CoreConfig);
 @Module({
@@ -44,7 +45,9 @@ import { DatabaseConfig } from './core/db.config';
     CoreModule,
     UserAccountsModule,
     BloggersPlatformModule,
+    QuizGameModule,
     TestingModule,
+    QuizGameModule,
   ],
   controllers: [AppController],
   providers: [
