@@ -6,6 +6,7 @@ import {
 } from 'typeorm';
 import { CreateQuestionDomainDto } from './dto/create-question.domain.dto';
 import { randomUUID } from 'crypto';
+import { UpdateQuestionInputDto } from '../api/input-dto/update-question.input-dto';
 
 @Entity('questions')
 export class Question {
@@ -45,9 +46,10 @@ export class Question {
     question.deletedAt = null;
     return question;
   }
-  update(dto: CreateQuestionDomainDto): void {
-    this.body = dto.body;
-    this.correctAnswers = dto.correctAnswers;
+  update(dto: UpdateQuestionInputDto): void {
+    this.body = dto.body || this.body;
+    this.correctAnswers = dto.correctAnswers || this.correctAnswers;
+    this.published = dto.published || this.published;
   }
 
   makeDeleted(): void {
@@ -55,5 +57,12 @@ export class Question {
       throw new Error('Entity already deleted');
     }
     this.deletedAt = new Date();
+  }
+
+  makePublished(): void {
+    if (this.published) {
+      throw new Error('Entity already published');
+    }
+    this.published = true;
   }
 }

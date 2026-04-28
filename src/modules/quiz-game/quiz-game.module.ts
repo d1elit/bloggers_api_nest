@@ -7,15 +7,19 @@ import { CreateQuestionUseCase } from './application/questions/usecases/create-q
 import { CqrsModule } from '@nestjs/cqrs';
 import { UpdateQuestionUseCase } from './application/questions/usecases/update-quest.usecase';
 import { DeleteQuestionUseCase } from './application/questions/usecases/delete-question.usecase';
+import { QuestionsQueryRepository } from './infrastructure/query/questions.query-repository';
+import { GetQuestionsQueryHandler } from './application/questions/query/get-questions.query-handler';
+
+const useCases = [
+  CreateQuestionUseCase,
+  UpdateQuestionUseCase,
+  DeleteQuestionUseCase,
+  GetQuestionsQueryHandler,
+];
 
 @Module({
   imports: [CqrsModule, TypeOrmModule.forFeature([Question])],
   controllers: [AdminQuizController],
-  providers: [
-    QuestionsRepository,
-    CreateQuestionUseCase,
-    UpdateQuestionUseCase,
-    DeleteQuestionUseCase,
-  ],
+  providers: [QuestionsRepository, QuestionsQueryRepository, ...useCases],
 })
 export class QuizGameModule {}

@@ -1,10 +1,10 @@
-import { QuestionInputDto } from '../../../api/input-dto/question.input-dto';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { QuestionsRepository } from '../../../infrastructure/questions.repository';
+import { UpdateQuestionInputDto } from '../../../api/input-dto/update-question.input-dto';
 
 export class UpdateQuestionCommand {
   constructor(
-    public dto: QuestionInputDto,
+    public dto: UpdateQuestionInputDto,
     public id: string,
   ) {}
 }
